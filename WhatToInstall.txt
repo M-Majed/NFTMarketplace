@@ -1,0 +1,4 @@
+SmartContract
+    npm init
+    npx hardhat init
+    npm install @openzeppelin/contracts
