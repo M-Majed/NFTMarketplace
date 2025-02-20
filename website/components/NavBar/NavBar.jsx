@@ -5,7 +5,7 @@ import { MdNotifications } from "react-icons/md";
 import { BsSearch } from "react-icons/bs";
 import { CgMenuLeft, CgMenuRight } from "react-icons/cg";
 
-import Style from "./NavBar.module.css";
+import style from "./NavBar.module.css";
 import { Discover, HelpCenter, Notification, Profile, SideBar } from "./index";
 import { Button } from "../index";
 import img from "../../img";
@@ -68,77 +68,83 @@ const NavBar = () => {
   };
 
   return (
-    <div className={Style.navbar}>
-      <div className={Style.navbar_container}>
+    <div className={style.navbar}>
+      <div className={style.navbar_container}>
 
           {/* //$ Left section */}
-          <div className={Style.navbar_container_left}>
-            <div className={Style.logo}>
-              <Image
-                className={Style.logo}
-                src={img.logo}
-                alt="NFT MARKET PLACE"
-              />
-            </div>
-            <div className={Style.navbar_container_left_box_input}>
-              <div className={Style.navbar_container_left_box_input_box}>
+          <div className={style.navbar_container_left}>
+            {/* //$ Logo */}
+            <Link href="/">
+              <div className={style.logo}>
+                <Image
+                  className={style.logo}
+                  src={img.logo}
+                  alt="NFT MARKET PLACE"
+                />
+              </div>
+            </Link>
+            {/* //$ Search */}
+            <div className={style.navbar_container_left_box_input}>
+              <div className={style.navbar_container_left_box_input_box}>
                 <input type="text" placeholder="Search NFT" />
-                <BsSearch onClick={() => {}} className={Style.search_icon} />
+                <BsSearch onClick={() => {}} className={style.search_icon} />
               </div>
             </div>
           </div>
 
           {/* //$ Right section */}
-          <div className={Style.navbar_container_right}>
+          <div className={style.navbar_container_right}>
             
             {/*//$ Discover  */}
-            <div className={Style.navbar_container_right_discover}>
+            <div className={style.navbar_container_right_discover}>
               <p onClick={(e) => openMenu(e)}>Discover</p>
               {/* //* Render Discover if discover is true */}
               {discover && (
-              <div className={Style.navbar_container_right_discover_box}>
+              <div className={style.navbar_container_right_discover_box}>
                 <Discover />
               </div>
               )}
             </div>
 
             {/* //$ HelpCenter */}
-            <div className={Style.navbar_container_right_help}>
+            <div className={style.navbar_container_right_help}>
               <p onClick={(e) => openMenu(e)}>Help Center</p>
               {help && (
-                <div className={Style.navbar_container_right_help_box}>
+                <div className={style.navbar_container_right_help_box}>
                   <HelpCenter />
                 </div>
               )}
             </div>
 
             {/* //$ Notification */}
-            <div className={Style.navbar_container_right_notify}>
-              <MdNotifications className={Style.notify} onClick={() => openNotification()}/>
-              {notification && <Notification />}
+            <div className={style.navbar_container_right_notify}>
+              <MdNotifications className={style.notify} onClick={() => openNotification()}/>
+              {notification && (
+                <div className={style.navbar_container_right_notification_box}>
+                  <Notification />
+                </div>
+              )}
             </div>
 
             {/* //$ Btn section*/}
-            <div className={Style.navbar_container_right_button}>
+            <div className={style.navbar_container_right_button}>
               <Button btnName="Create" handleClick={() => {}} />
             </div>
 
             {/* //$ Profile section */}
-            <div className={Style.navbar_container_right_profile_box}>
-              <div className={Style.navbar_container_right_profile}>
-                <Image
-                  src={img.user1}
-                  className={Style.profileImg}
-                  alt="Profile"
-                  onClick={() => openProfile()}
-                />
-                {profile && <Profile />}
-              </div>
+            <div className={style.navbar_container_right_profile_box}>
+              <Image
+                src={img.user1}
+                className={style.profileImg}
+                alt="Profile"
+                onClick={() => openProfile()}
+              />
+              {profile && <Profile />}
             </div>
 
             {/* //$ MENU BUTTON */}
-            <div className={Style.navbar_container_right_menuBtn}>
-              <CgMenuRight className={Style.menuIcon} onClick={() => openSideBar()}
+            <div className={style.navbar_container_right_menuBtn}>
+              <CgMenuRight onClick={() => openSideBar()}
               />
             </div>
 
@@ -147,7 +153,7 @@ const NavBar = () => {
 
       {/* //$ Sidebar */}
       {openSideMenu && (
-        <div className={Style.sideBar}>
+        <div className={style.sideBar}>
           {/* //$ setOpenSideMenu is passed so sidebar component can control state of openSideMenu */}
           <SideBar setOpenSideMenu={setOpenSideMenu} />
         </div>
