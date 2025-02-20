@@ -1,7 +1,6 @@
-// SPDX License Identifier: MIT
+// SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.28;
 
-//* keep track of number of nfts created, sold and etc
 //! counters is removed from openzeppelin. change it later
 import "./Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -14,7 +13,7 @@ contract NFTMarketplace is ERC721URIStorage(){
     using Counters for Counters.Counter;
 
     //$ create priavte counter for tokenId and itemsSold
-    Counters.Counter private _tokenIds;
+    uint256 private _tokenIds;
     Counters.Counter private _itesmSold;
 
     //$ listingPrice: price to list the nft
@@ -104,8 +103,8 @@ contract NFTMarketplace is ERC721URIStorage(){
 
         idMarketItem[tokenId].sold = false;
         idMarketItem[tokenId].price = price;
-        idMarketItem[tokenId].price = payable(address(this));
-        idMarketItem[tokenId].price = payable(msg.sender);
+        idMarketItem[tokenId].owner = payable(address(this));
+        idMarketItem[tokenId].seller = payable(msg.sender);
 
         _itesmSold.decrement();
 
@@ -134,7 +133,7 @@ contract NFTMarketplace is ERC721URIStorage(){
         uint256 unSoldItemCount = _tokenIds.current() - _itesmSold.current();
         uint256 currentIndex = 0;
 
-        MarketItem[] memory items = new MarketItem[](itemCount);
+        MarketItem[] memory items = new MarketItem[](unSoldItemCount);
 
         for(uint256 i = 0; i < itemCount; i++){
             if(idMarketItem[i + 1].owner == address(this)){
