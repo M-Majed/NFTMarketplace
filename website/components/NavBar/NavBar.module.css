@@ -70,19 +70,22 @@
 .navbar_container_right_help,
 .navbar_container_right_notify,
 .navbar_container_right_button,
-.navbar_container_right_profile_box{
+.navbar_container_right_profile{
     position: relative;
     cursor: pointer;
+    text-align: center;
 }
 /*- profilePic */
 .profileImg{
     width: 50px;
     height: 50px;
+    border-radius: 10px;
 }
-/*- discover dropdown - help dropdown */
+/*- discover - help - notification dropdown */
 .navbar_container_right_discover_box,
 .navbar_container_right_help_box,
-.navbar_container_right_notification_box{
+.navbar_container_right_notification_box,
+.navbar_container_right_profile_box{
     position: absolute;
     padding: 10px 10px;
     box-shadow: white 0px 0px 10px;
@@ -93,6 +96,11 @@
     z-index: 10;
 }
 /*- notification */
+.navbar_container_right_notification_box,
+.navbar_container_right_profile_box{
+    width: 250px;
+    margin-top: 10px;
+}
 .notify{
     font-size: 20px;
 }
@@ -103,6 +111,7 @@
     display: none;
     font-size: 30px;
     cursor: pointer;
+    
 }
 /*$ Sidebar */
 .sideBar{
@@ -112,7 +121,6 @@
     background-color: black;
     box-shadow: white 0px 10px 10px;
     height: 100%;
-    overflow-y: auto;
     display: none;
     z-index: 10;
 }
@@ -141,5 +149,29 @@
     .navbar_container_right_help,
     .navbar_container_right_button{
         display: none;
+    }
+
+}
+
+@media (max-width: 520px) {
+    /*- notification box */
+    .navbar_container_right_notification_box{
+        position:fixed;
+        right: 5px;
+    }
+}
+@media (max-width: 821px) and (min-width: 767px) {
+    /*- notification box */
+    .navbar_container_right_notification_box{
+        position:fixed;
+        right: 15px;
+    }
+}
+
+@media (max-width: 1428px) {
+    /*- profile box */
+    .navbar_container_right_profile_box{
+        position:fixed;
+        right: 5px;
     }
 }

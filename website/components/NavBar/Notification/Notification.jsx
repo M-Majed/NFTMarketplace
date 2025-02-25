@@ -8,7 +8,6 @@ const Notification = () => {
   return (
   <div className={style.notification}>
     <div className={style.notification_box}>
-      {/* //! Why? */}
       <div className={style.notification_box_img}>
         <Image
           src={img.user1}
@@ -17,11 +16,10 @@ const Notification = () => {
         />
       </div>
       <div className={style.notification_box_info}>
-        <h4>MRMTFW</h4>
-        <p>Measure action your user...</p>
+        <h4 className={style.notification_box_h4}>MRMTFW</h4>
+        <p className={style.notification_box_paragraph}>Measure action your user...</p>
         <small>3 minutes ago</small>
       </div>
-      {/* //! ------------------------ */}
       {/* //$ to show new notification */}
       <span className={style.notification_box_new}></span>
     </div>

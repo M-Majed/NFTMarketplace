@@ -1,11 +1,12 @@
 import "@/styles/globals.css";
-import {NavBar} from "../components/index";
-
+import {Footer, NavBar} from "../components/index";
+//$ things in this file: show in every page
 const MyApp = ({ Component, pageProps }) => {
   return(
     <div>
       <NavBar/>
       <Component {...pageProps} />
+      <Footer/>
     </div>
   );
 }

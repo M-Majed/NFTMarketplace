@@ -1,0 +1,39 @@
+
+.sideBar_box{
+    padding: 20px;
+    border-bottom: 1px solid white;
+    background-color:  black;
+}
+
+.sideBar_closeBtn{
+    position: absolute;
+    top: 35px;
+    right: 25px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.sideBar_menu{
+    padding: 20px;
+    font-weight: 500;
+    border-bottom:  1px solid white;
+    margin-top: 50px;
+}
+
+.sideBar_menu_box{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    cursor: pointer;
+}
+
+.sideBar_discover,
+.sideBar_help{
+    padding-left: 20px;
+}
+
+.sideBar_button{
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+}

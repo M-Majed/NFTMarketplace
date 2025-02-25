@@ -1,9 +1,13 @@
 import React from 'react'
+import { HeroSection } from "../components/index";
+//$ things in this page: show specific page
 
-const index = () => {
+const Home = () => {
   return (
-    <div></div>
-  )
-}
+    <div>
+      <HeroSection />
+    </div>
+  );
+};
 
-export default index
+export default Home;
