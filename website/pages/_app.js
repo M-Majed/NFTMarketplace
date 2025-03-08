@@ -3,7 +3,7 @@ import {Footer, NavBar} from "../components/index";
 //$ things in this file: show in every page
 const MyApp = ({ Component, pageProps }) => {
   return(
-    <div>
+    <div >
       <NavBar/>
       <Component {...pageProps} />
       <Footer/>

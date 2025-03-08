@@ -28,6 +28,7 @@
     /** column1: 1 fraction of space - column2: 2 fraction of space */
     grid-template-columns: 1fr 2fr;
     align-items:  center;
+    gap: 10px;
 }
 /*- logo */
 .logo{
@@ -129,21 +130,17 @@
     display: none;
 }
 
-@media (max-width: 767px) {
-    /*$ icon */
+/* @media (max-width: 767px) {
     .navbar_container_left{
         grid-template-columns: 1fr;
     }
-    /*$ icon - notification - menuBtn */
     .navbar_container_right{
         grid-template-columns: 0.5fr 1fr 1fr;
     }
-    /*- MenuBtn - sideBar => show in phone */
     .navbar_container_right_menuBtn,
     .sideBar{
         display: block;
     }
-    /*- search - discover - help - btn => don't show in phone */
     .navbar_container_left_box_input_box,
     .navbar_container_right_discover,
     .navbar_container_right_help,
@@ -154,14 +151,12 @@
 }
 
 @media (max-width: 520px) {
-    /*- notification box */
     .navbar_container_right_notification_box{
         position:fixed;
         right: 5px;
     }
 }
 @media (max-width: 821px) and (min-width: 767px) {
-    /*- notification box */
     .navbar_container_right_notification_box{
         position:fixed;
         right: 15px;
@@ -169,9 +164,8 @@
 }
 
 @media (max-width: 1428px) {
-    /*- profile box */
     .navbar_container_right_profile_box{
         position:fixed;
         right: 5px;
     }
-}
+} */

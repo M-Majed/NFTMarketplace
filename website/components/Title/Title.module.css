@@ -1,0 +1,10 @@
+.title_box h1{
+    font-size: 45px;
+    line-height: 0;
+}
+
+/* @media (max-width: 767px) {
+    .title_box h1{
+        line-height: 1;
+    }
+} */

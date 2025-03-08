@@ -4,5 +4,10 @@ import Button from "./Button/Button";
 import Footer from "./Footer/Footer";
 import NavBar from "./NavBar/NavBar";
 import HeroSection from "./HeroSection/HeroSection";
+import Service from "./Service/Service";
+import BigNFTSilder from "./BigNFTSlider/BigNFTSlider";
+import Title from "./Title/Title";
+import Category from "./Category/Category";
+import Filter from "./Filter/Filter";
 
-export { Button, Footer, NavBar, HeroSection };
+export { Button, Footer, NavBar, HeroSection, Service, BigNFTSilder, Title, Category, Filter };

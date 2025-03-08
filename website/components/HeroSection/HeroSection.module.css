@@ -1,0 +1,14 @@
+
+.heroSection{
+    width: 80%;
+    margin:auto auto;
+}
+
+.heroSection h1{
+    font-size: 75px;
+    line-height: 1;
+}
+.heroSection p{
+    font-size: 25px;
+    line-height: 1;
+}
