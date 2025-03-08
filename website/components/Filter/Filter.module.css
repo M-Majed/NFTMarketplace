@@ -1,13 +1,11 @@
 
 .filter{
 margin-top: 50px;
-    width: 100%;
+width: 80%;
+margin: 0 auto;
 }
 
 .filter_box{
-    width: 80%;
-    margin: 0 auto;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -15,7 +13,7 @@ margin-top: 50px;
 
 .filter_box_left{
     display: flex;
-    gap: 30px;
+    gap: 10px;
 }
 
 .filter_box_right_box{

@@ -16,6 +16,7 @@ import { TiTick } from "react-icons/ti";
 //INTERNAL IMPORT
 import Style from "./Filter.module.css";
 import { Button } from "..";
+import { Title } from "..";
 
 const Filter = () => {
   const [filter, setFilter] = useState(false);
@@ -42,6 +43,7 @@ const Filter = () => {
 
   return (
     <div className={Style.filter}>
+            <Title heading="Browse by category" paragraph="Explore NFTs in the Category"/>
       <div className={Style.filter_box}>
         <div className={Style.filter_box_left}>
           <Button btnName="NFTs" onClick={() => {}}/>

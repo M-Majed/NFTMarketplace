@@ -1,5 +1,5 @@
 import React from 'react'
-import { HeroSection, Service, BigNFTSilder, Title, Category, Filter } from "../components/index";
+import { HeroSection, Service, BigNFTSilder, Title, Category, Filter, NFTCard } from "../components/index";
 //$ things in this page: show specific page
 
 const Home = () => {
@@ -8,8 +8,9 @@ const Home = () => {
       <HeroSection />
       <Service />
       <BigNFTSilder />
-      <Category/>
-      <Filter/>
+      <Filter />
+      <NFTCard />
+      <Category />
     </div>
   );
 };
