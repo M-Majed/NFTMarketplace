@@ -1,0 +1,28 @@
+
+.profile{
+    font-size: 13px;
+    line-height: 0.9;
+    transition: 0.2s;
+}
+
+.profile_info{
+    border-bottom: 1px solid white;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.profile_menu{
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
+}
+
+.profile_menu_item{
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.profile_menu_item:hover{
+    background-color: white;
+    color: black;
+}

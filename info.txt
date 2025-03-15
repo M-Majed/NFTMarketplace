@@ -1,0 +1,10 @@
+SmartContract
+    npm init
+    npx hardhat init
+    npm install @openzeppelin/contracts
+
+frontend:
+    npx create-next-app .
+    npm install react-icons
+
+ignored (collection - follower - auddiolive - slider -  brand) components

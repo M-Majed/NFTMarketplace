@@ -1,15 +1,12 @@
 import React from 'react'
-import { HeroSection, Service, BigNFTSilder, Title, Category, Filter, NFTCard } from "../components/index";
-//$ things in this page: show specific page
+import { Introduction, Service, BigNFTSilder,Category} from "../components/index";
 
 const Home = () => {
   return (
     <div>
-      <HeroSection />
+      <Introduction />
       <Service />
       <BigNFTSilder />
-      <Filter />
-      <NFTCard />
       <Category />
     </div>
   );
