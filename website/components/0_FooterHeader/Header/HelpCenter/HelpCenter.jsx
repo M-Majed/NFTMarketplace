@@ -14,11 +14,11 @@ const HelpCenter = () => {
   return (
     <div>
       {helpCenter.map((item, index) => (
-        <div key={index} className={style.helpCenter}>
-          <Link href={{ pathname: `${item.link}` }}>
+        <Link href={{ pathname: `${item.link}` }}>
+          <div key={index} className={style.helpCenter}>
             {item.name}
-          </Link>
-        </div>
+          </div>
+        </Link>
       ))}
     </div>
   );

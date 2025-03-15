@@ -6,19 +6,21 @@ import Filter from "./Filter/Filter";
 //INTERNAL IMPORT
 import Style from "./NFTCard.module.css";
 import images from "../../../img";
+import {Title} from "../../index";
 
 const NFTCard = () => {
   const featureArray = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-  const [like, setLike] = useState(true);
+  // const [like, setLike] = useState(true);
 
-  const likeNft = () => {
-    setLike(!like);
-  };
+  // const likeNft = () => {
+  //   setLike(!like);
+  // };
 
   return (
     <div className={Style.NFTCard}>
-                <Filter />
+      <Title heading="Discover NFTs" paragraph="Explore the latest and greatest NFTs" />
+      <Filter />
       {featureArray.map((item, index) => (
         <div className={Style.NFTCard_box} key={index + 1}>
           <div className={Style.NFTCard_box_img}>
@@ -31,12 +33,12 @@ const NFTCard = () => {
             />
             <div className={Style.NFTCard_box_overlay}>
               <div className={Style.NFTCard_box_overlay_update}>
-                <div className={Style.NFTCard_box_overlay_update_left}>
+                {/* <div className={Style.NFTCard_box_overlay_update_left}>
                   <div className={Style.NFTCard_box_overlay_update_left_like} onClick={() => likeNft()}>
                     {like ? (<AiOutlineHeart />) : (<AiFillHeart className={Style.NFTCard_box_overlay_update_left_like_icon}/>)}
                     {""} 22
                   </div>
-                </div>
+                </div> */}
 
                 {/* <div className={Style.NFTCard_box_overlay_update_right}>
                   <p>Remaining time</p>

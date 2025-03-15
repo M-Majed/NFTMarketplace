@@ -187,10 +187,10 @@ const BigNFTSilder = () => {
             className={Style.bigNFTSlider_right_box_img}
           />
 
-          <div className={Style.bigNFTSlider_right_box_like}>
+          {/* <div className={Style.bigNFTSlider_right_box_like}>
             <AiFillHeart />
             <span>{sliderData[idNumber].like}</span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

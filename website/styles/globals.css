@@ -9,8 +9,6 @@ body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
   font-size: 14px;
-  background-color: var(--main-bg-color);
-  color: var(--icons-color);
 }
 
 a {
@@ -24,24 +22,18 @@ a {
 }
 
 ::selection{
-  color: var(--shadow-dark-color);
-  background: var(--icons-color);
+  color: cyan;
 }
 
 ::-webkit-scrollbar{
   width: 1rem;
-  border: 1px solid var(--main-bg-color);
-}
-
-::-webkit-scrollbar-track{
-  border-radius: 0;
-  background-color: var(--main-bg-color);
+  border: 1px solid white;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb{
-  border-radius: 2rem;
-  background:  var(--icons-color);
-  width: .5rem;
+  border-radius: 2px;
+  background:  white;
 }
 @media (prefers-color-scheme: dark) {
   html {
@@ -49,6 +41,7 @@ a {
   }
   body {
     color: white;
-    background: black;
+    background-image: url('../img/Background.jpg');
+    background-position:top
   }
 }

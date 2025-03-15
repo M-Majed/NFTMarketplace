@@ -70,6 +70,7 @@
     width: 300%;
     border-radius: 15px;
     background-color: black;
+    z-index: 20;
 }
 .header_container_right_help_box{
     width: 200%;

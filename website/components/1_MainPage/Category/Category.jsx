@@ -4,6 +4,7 @@ import { BsCircleFill } from "react-icons/bs";
 
 import Style from "./Category.module.css";
 import images from "../../../img";
+import { Title } from "../../index";
 
 const Category = () => {
   const CategoryArray = [1, 2, 3, 4, 5, 6];

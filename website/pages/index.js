@@ -1,5 +1,5 @@
 import React from 'react'
-import { Introduction, Service, BigNFTSilder,Category} from "../components/index";
+import { Introduction, Service, BigNFTSilder,Category, NFTCard} from "../components/index";
 
 const Home = () => {
   return (

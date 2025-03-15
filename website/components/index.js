@@ -1,4 +1,5 @@
 import {Introduction, Service, BigNFTSilder, Category} from "./1_MainPage";
 import {Footer, Header} from "./0_FooterHeader";
 import {NFTCard} from "./2_MarketPlace";
-export {Introduction, Service, BigNFTSilder, Category, Footer, Header, NFTCard};
+import {Title} from "./_Shared";
+export {Introduction, Service, BigNFTSilder, Category, Footer, Header, NFTCard, Title};
