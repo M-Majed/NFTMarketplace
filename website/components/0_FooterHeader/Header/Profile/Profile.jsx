@@ -17,7 +17,7 @@ const Profile = () => {
         <div className={style.profile_menu_item}>
           <FaUserAlt />
           <p>
-            <Link href={{ pathname: "/my-profile" }}>My Profile</Link>
+            <Link href={{ pathname: "/Profile" }}>My Profile</Link>
           </p>
         </div>
         <div className={style.profile_menu_item}>

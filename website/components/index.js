@@ -3,4 +3,7 @@ import {Footer, Header} from "./0_FooterHeader";
 import {NFTCard} from "./2_MarketPlace";
 import {Title} from "./_Shared";
 import { NFTDetailsPage } from "./3_NFTDetails";
-export {Introduction, Service, BigNFTSilder, Category, Footer, Header, NFTCard, Title, NFTDetailsPage};
+import {Profile} from "./4_Profile";
+import {UploadNFT} from "./5_UploadNFT";
+import { Button } from "./_Shared";
+export {Button, Introduction, Service, BigNFTSilder, Category, Footer, Header, NFTCard, Title, NFTDetailsPage, Profile,UploadNFT};

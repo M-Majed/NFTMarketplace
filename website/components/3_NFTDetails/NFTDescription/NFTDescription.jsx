@@ -43,7 +43,6 @@ const NFTDescription = () => {
             className={Style.NFTDescription_share_box_icon}
             onClick={() => openSocial()}
           />
-
           {social && (
             <div className={Style.NFTDescription_share_box_social}>
               <a href="#">
@@ -109,7 +108,13 @@ const NFTDescription = () => {
           </div>
 
           <div className={Style.NFTDescription_profile_biding_box_buttons}>
-            <button handleClick={() => {}} className={Style.NFTDescription_profile_biding_box_buttons_button}> Buy Now </button>
+            <button
+              handleClick={() => {}}
+              className={Style.NFTDescription_profile_biding_box_buttons_button}
+            >
+              {" "}
+              Buy Now{" "}
+            </button>
           </div>
         </div>
       </div>
