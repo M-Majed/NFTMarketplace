@@ -3,7 +3,7 @@ SmartContract
     npx hardhat init
     npm install @openzeppelin/contracts
 
-frontend:
+website:
     npx create-next-app .
     npm install react-icons
 

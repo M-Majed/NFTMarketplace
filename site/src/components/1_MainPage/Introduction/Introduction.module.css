@@ -1,0 +1,14 @@
+
+.introduction{
+    width: 80%;
+    margin:0 auto;
+}
+
+.introduction h1{
+    font-size: 75px;
+    line-height: 1;
+}
+.introduction p{
+    font-size: 25px;
+    line-height: 1;
+}

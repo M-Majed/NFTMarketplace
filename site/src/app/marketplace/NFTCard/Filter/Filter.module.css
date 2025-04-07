@@ -1,0 +1,201 @@
+
+.filter{
+margin-top: 50px;
+margin: 0 auto;
+width: 100%;
+}
+
+.filter_box{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.filter_box_left{
+    display: flex;
+    gap: 10px;
+}
+
+.filter_box_right_box{
+    border:  1px solid white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter_box_items{
+    margin:  0 auto;
+    display: flex;
+    margin-top: 30px;
+    border-top: 1px solid white;
+    align-items: center;
+    padding-top: 15px;
+}
+
+.filter_box_items_box{
+    border: 1px solid white;
+    padding-inline: 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter_box_items_box input{
+    border: none;
+    outline: none;
+    background-color: transparent;
+    color: white;
+    font-size: 15px;
+    min-width: 10px;
+    max-width: 40px;
+}
+
+.filter_box_items_box input[type="number"]::-webkit-outer-spin-button,
+.filter_box_items_box input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.filter_box_items_box input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+  
+.filter_box_left_button,
+.filter_box_items_button {
+    background-color: black;
+    border: 2px solid white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.filter_box_left_button:hover, 
+.filter_box_items_button:hover{
+    background-color: white;
+    border: 2px solid black;
+    color: black;
+}
+/* @media screen and (min-device-width: 320px) and (max-device-width: 375px) {
+    .filter_box{
+        width: 90%;
+        display: grid;
+        gap: 4rem;
+    }
+    .filter_box_left{
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: .5rem;
+    }
+
+    .filter_box_left button{
+        padding: .2rem;
+    }
+
+    .filter_box_items{
+        width: 90%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filter_box_right_box{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4rem;
+        padding-inline: 2rem ;
+    }
+
+    .filter_box_items_box_item{
+        justify-content: space-between;
+    }
+
+    .filter_box_items_box_item_trans{
+        justify-content: space-between;
+    }
+
+}
+
+@media screen and (min-device-width: 377px) and (max-device-width: 425px) {
+    .filter_box{
+        display: grid;
+        gap: 4rem;
+        width: 90%;
+    }
+    .filter_box_left{
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .filter_box_left button{
+        padding: 1rem;
+    }
+
+    .filter_box_items{
+        display: grid;
+        width: 90%;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filter_box_right_box{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4rem;
+        padding-inline: 2rem ;
+    }
+
+    .filter_box_items_box_item{
+        justify-content: space-between;
+    }
+
+    .filter_box_items_box_item_trans{
+        justify-content: space-between;
+    }
+
+}
+
+@media screen and (min-device-width: 427px) and (max-device-width: 786px) {
+    .filter_box{
+        display: grid;
+        gap: 4rem;
+        width: 90%;
+    }
+    .filter_box_left{
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .filter_box_left button{
+        padding: 1rem;
+    }
+
+    .filter_box_items{
+        display: grid;
+        width: 90%;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filter_box_right_box{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4rem;
+        padding-inline: 2rem ;
+    }
+
+    .filter_box_items_box_item{
+        justify-content: space-between;
+    }
+
+    .filter_box_items_box_item_trans{
+        justify-content: space-between;
+    }
+
+} */
