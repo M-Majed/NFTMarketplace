@@ -164,8 +164,8 @@ const BigNFTSilder = () => {
           </div> */}
 
           <div className={Style.bigNFTSlider_left_buttons}>
-            <button className={Style.bigNFTSlider_left_buttons_button} handleclick={() => {}}> Buy </button>
-            <button className={Style.bigNFTSlider_left_buttons_button} handleclick={() => {}}> View </button>
+            <button className={Style.bigNFTSlider_left_buttons_button} onClick={() => {}}> Buy </button>
+            <button className={Style.bigNFTSlider_left_buttons_button} onClick={() => {}}> View </button>
           </div>
         </div>
 

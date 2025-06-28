@@ -110,7 +110,7 @@ const NFTDescription = () => {
 
           <div className={Style.NFTDescription_profile_biding_box_buttons}>
             <button
-              handleClick={() => {}}
+              onClick={() => {}}
               className={Style.NFTDescription_profile_biding_box_buttons_button}
             >
               {" "}

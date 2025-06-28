@@ -28,16 +28,16 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <div class={Style.Profile_summery}>
-        <div class={Style.Profile_summery_card}>
+      <div className={Style.Profile_summery}>
+        <div className={Style.Profile_summery_card}>
           <h2>10</h2>
           <p>Owned NFTs</p>
         </div>
-        <div class={Style.Profile_summery_card}>
+        <div className={Style.Profile_summery_card}>
           <h2>3</h2>
           <p>Active Listings</p>
         </div>
-        <div class={Style.Profile_summery_card}>
+        <div className={Style.Profile_summery_card}>
           <h2>$15K</h2>
           <p>Portfolio Value</p>
         </div>

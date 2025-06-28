@@ -5,14 +5,14 @@ import style from "./Discover.module.css"
 const Discover = () => {
 
   const discover = [
-    { name: "All", link: "marketplace" },
-    { name: "Art", link: "marketplace" },
-    { name: "Game", link: "marketplace" },
-    { name: "Nature", link: "marketplace" },
-    { name: "Sport", link: "marketplace" },
-    { name: "Portrait", link: "marketplace" },
-    { name: "Animal", link: "marketplace" },
-    { name: "Memes", link: "marketplace" },
+    { id:1, name: "All", link: "marketplace" },
+    { id:2, name: "Art", link: "marketplace" },
+    { id:3, name: "Game", link: "marketplace" },
+    { id:4, name: "Nature", link: "marketplace" },
+    { id:5, name: "Sport", link: "marketplace" },
+    { id:6, name: "Portrait", link: "marketplace" },
+    { id:7, name: "Animal", link: "marketplace" },
+    { id:8, name: "Memes", link: "marketplace" }
   ]
 
   return (
