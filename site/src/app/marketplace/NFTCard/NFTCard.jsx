@@ -1,6 +1,5 @@
 "use client";
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { BsImages } from "react-icons/bs";
 import Image from "next/image";
@@ -11,39 +10,7 @@ import Title from "../../../components/_Shared/Title/Title";
 import img from "../../../../public/img";
 import Link from "next/link";
 
-export default function NFTCard({ items, initialCategory = null }) {
-  // lift the selected categories into this parent
-  const [selectedCats, setSelectedCats] = useState([]);
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
-  
-  useEffect(() => {
-    if (initialCategory) {
-      setSelectedCats([initialCategory]);
-    } else {
-      setSelectedCats([]);
-    }
-  }, [initialCategory]);
-  // callback passed to Filter
-  const handleCategoryToggle = (cat) => {
-    setSelectedCats((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    );
-  };
-  const handleApplyFilter = (min, max) => {
-    setPriceRange({ min, max });
-  };
-
-  // compute what to show
-  let filtered =
-    selectedCats.length > 0
-      ? items.filter((l) => selectedCats.includes(l.nft.category))
-      : [...items];
-
-  // then apply price filtering if min/max are valid numbers
-  const { min, max } = priceRange;
-  if (!isNaN(min) && !isNaN(max)) {
-    filtered = filtered.filter((l) => l.price >= min && l.price <= max);
-  }
+export default function NFTCard({ items = [] }) {
 
   // const [like, setLike] = useState(true);
 
@@ -58,13 +25,9 @@ export default function NFTCard({ items, initialCategory = null }) {
         paragraph="Explore the latest and greatest NFTs"
       />
       {/* tell Filter what’s selected and how to toggle */}
-      <Filter
-        selectedCategories={selectedCats}
-        onCategoryClick={handleCategoryToggle}
-        onApplyFilter={handleApplyFilter}
-      />
+      <Filter/>
 
-      {filtered.map((listing) => (
+      {items.map((listing) => (
         <div className={Style.NFTCard_box} key={listing.id}>
           <Link href={`/nftdetails/${listing.nft.id}`}>
             <div className={Style.NFTCard_box_img}>
