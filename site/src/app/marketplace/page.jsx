@@ -36,7 +36,6 @@ export default async function MarketplacePage({ searchParams }) {
   return (
     <NFTCard
       items={listings}
-      initialCategory={catParam  || null}
     />
   );
 };
