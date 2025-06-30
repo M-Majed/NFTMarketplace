@@ -61,7 +61,7 @@ const Profile = () => {
           onClick={() => setActiveTab("TransactionHistory")}
         >
           {" "}
-          Active Listings
+          Transaction history
         </button>
       </div>
 

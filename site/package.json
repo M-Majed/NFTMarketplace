@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "faker": "^6.6.6",
     "install": "^0.13.0",
     "next": "15.2.4",
     "npm": "^11.2.0",
@@ -19,7 +20,16 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@faker-js/faker": "^9.8.0",
+    "@prisma/client": "^6.10.1",
+    "@types/node": "^24.0.7",
     "eslint": "^9",
-    "eslint-config-next": "15.2.4"
+    "eslint-config-next": "15.2.4",
+    "prisma": "^6.10.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }

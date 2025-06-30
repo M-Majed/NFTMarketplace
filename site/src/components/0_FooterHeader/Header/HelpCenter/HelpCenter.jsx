@@ -14,10 +14,12 @@ const HelpCenter = () => {
   return (
     <div>
       {helpCenter.map((item, index) => (
-        <Link href={{ pathname: `${item.link}` }}>
-          <div key={index} className={style.helpCenter}>
-            {item.name}
-          </div>
+        <Link
+          key={item.name}                   // ← moved here
+          href={`/${item.link}`}
+          className={style.helpCenter}        // you can also put your class on the Link itself
+        >
+          {item.name}
         </Link>
       ))}
     </div>

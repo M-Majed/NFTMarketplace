@@ -1,0 +1,4 @@
+npx prisma migrate dev --name init
+to check
+    npx prisma studio
+npm run dev

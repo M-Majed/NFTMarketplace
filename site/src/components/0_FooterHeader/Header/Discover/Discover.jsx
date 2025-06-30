@@ -5,23 +5,28 @@ import style from "./Discover.module.css"
 const Discover = () => {
 
   const discover = [
-    { id:1, name: "All", link: "marketplace" },
-    { id:2, name: "Art", link: "marketplace" },
-    { id:3, name: "Game", link: "marketplace" },
-    { id:4, name: "Nature", link: "marketplace" },
-    { id:5, name: "Sport", link: "marketplace" },
-    { id:6, name: "Portrait", link: "marketplace" },
-    { id:7, name: "Animal", link: "marketplace" },
-    { id:8, name: "Memes", link: "marketplace" }
+    { name: "All", link: "marketplace", category: "" },
+    { name: "Art", link: "marketplace", category: "Art" },
+    { name: "Game", link: "marketplace", category: "Game" },
+    { name: "Nature", link: "marketplace", category: "Nature" },
+    { name: "Sport", link: "marketplace", category: "Sport" },
+    { name: "Portrait", link: "marketplace", category: "Portrait" },
+    { name: "Animal", link: "marketplace", category: "Animal" },
+    { name: "Memes", link: "marketplace", category: "Memes" }
   ]
 
   return (
     <div>
       {discover.map((item, index) => (
-        <Link href={{ pathname: `/${item.link}` }}>
-          <div key={index} className={style.discover} >
-            {item.name}
-          </div>
+       <Link
+         key={item.name}
+         href={{
+           pathname: `/${item.link}`,
+           query: item.category ? { category: item.category } : {}
+         }}
+         className={style.discover}
+       >
+          {item.name}
         </Link>
       ))}
     </div>

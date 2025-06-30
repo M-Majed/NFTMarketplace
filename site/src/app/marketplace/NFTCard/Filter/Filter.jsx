@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   FaFilter,
   FaAngleDown,
@@ -6,8 +7,24 @@ import {
 } from "react-icons/fa";
 import Style from "./Filter.module.css";
 
-const Filter = () => {
+const categories = [
+  "Art",
+  "Game",
+  "Nature",
+  "Sport",
+  "Portrait",
+  "Animal",
+  "Memes",
+];
+
+const Filter = ({
+  selectedCategories = [],
+  onCategoryClick = () => {},
+  onApplyFilter = (_min, _max) => {},
+}) => {
   const [filter, setFilter] = useState(false);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   //FUNCTION SECTION
   const openFilter = () => {
@@ -21,22 +38,35 @@ const Filter = () => {
     }
   };
 
+const handleCategoryClick = (cat) => {
+  setSelectedCategories(prev =>
+    prev.includes(cat)
+    ? prev.filter(c => c !== cat)
+    : [...prev, cat]
+  );
+};
+
   return (
     <div className={Style.filter}>
       <div className={Style.filter_box}>
         <div className={Style.filter_box_left}>
-          <button className={Style.filter_box_left_button} onClick={() => {}}> Art </button>
-          <button className={Style.filter_box_left_button} onClick={() => {}}> Game </button>
-          <button className={Style.filter_box_left_button} onClick={() => {}}> Nature </button>
-          <button className={Style.filter_box_left_button} onClick={() => {}}> Sport </button>
-          <button className={Style.filter_box_left_button} onClick={() => {}}> Portrait </button>
-          <button className={Style.filter_box_left_button} onClick={() => {}}> Animal </button>
-          <button className={Style.filter_box_left_button} onClick={() => {}}> Memes </button>
+         {categories.map(cat => (
+           <button
+             key={cat}
+             onClick={() => onCategoryClick(cat)}
+             className={[
+               Style.filter_box_left_button,
+               selectedCategories.includes(cat) ? Style.selected : ""
+             ].join(" ")}
+           >
+             {cat}
+           </button>
+         ))}
         </div>
         <div className={Style.filter_box_right}>
           <div className={Style.filter_box_right_box} onClick={() => openFilter()}>
             <FaFilter />
-            <span>Filter</span> {filter ? <FaAngleDown /> : <FaAngleUp />}
+            <span>Filter</span> {filter ? <FaAngleUp /> : <FaAngleDown />}
           </div>
         </div>
       </div>
@@ -45,11 +75,32 @@ const Filter = () => {
         <div className={Style.filter_box_items}>
           <div className={Style.filter_box_items_box}>
             <p>Min price:</p>
-            <input type="number" placeholder="ETH" onChange={handleInputChange} />
+            <input
+              type="number"
+              placeholder="ETH"
+              value={minPrice}
+              onChange={e => {
+                handleInputChange(e);
+                setMinPrice(e.target.value);
+              }}
+            />
             <p>Max price:</p>
-            <input type="number" placeholder="ETH" onChange={handleInputChange}/>
+            <input
+              type="number"
+              placeholder="ETH"
+              value={maxPrice}
+              onChange={e => {
+                handleInputChange(e);
+                setMaxPrice(e.target.value);
+              }}
+            />
           </div>
-          <button className={Style.filter_box_items_button} onClick={() => {}}> Apply Filter </button>
+          <button
+            className={Style.filter_box_items_button}
+            onClick={() => onApplyFilter(Number(minPrice), Number(maxPrice))}
+          >
+            Apply Filter
+          </button>
         </div>
       )}
     </div>

@@ -1,4 +1,3 @@
-
 .filter{
 margin-top: 50px;
 margin: 0 auto;
@@ -78,6 +77,12 @@ width: 100%;
 
 .filter_box_left_button:hover, 
 .filter_box_items_button:hover{
+    background-color: white;
+    border: 2px solid black;
+    color: black;
+}
+
+.selected {
     background-color: white;
     border: 2px solid black;
     color: black;

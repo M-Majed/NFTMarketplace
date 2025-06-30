@@ -3,6 +3,8 @@
     padding: 3px 4px;
     transition: 0.2s;
     border-radius: 5px;
+    display: flex;
+    flex-direction: column;
 }
 
 .discover:hover{

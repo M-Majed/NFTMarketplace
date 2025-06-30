@@ -4,7 +4,7 @@ import Style from "./DropZone.module.css";
 import Image from "next/image";
 import img from "../../../../public/img";
 
-const ImageDropzone = () => {
+const DropZone = () => {
   const [image, setImage] = useState(null);
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -27,6 +27,7 @@ const ImageDropzone = () => {
         <img src={image.preview} alt="preview" className={Style.img} />
       ) : (
         <Image
+        alt="Upload Image"
         src={img.nft_image_1}
         className={Style.img}
       />
@@ -35,4 +36,4 @@ const ImageDropzone = () => {
   );
 };
 
-export default ImageDropzone;
+export default DropZone;

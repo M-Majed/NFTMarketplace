@@ -1,11 +1,28 @@
 import React from 'react'
 import NFTCard from './NFTCard/NFTCard';
-const marketplace = () => {
+import { prisma } from '@/lib/prisma';
+
+export default async function MarketplacePage({ searchParams }) {
+
+  const { category } = searchParams;
+  const listings = await prisma.listing.findMany({
+    where: {
+      status: 'ACTIVE',
+      // only filter by category if one was passed
+      ...(category && category !== 'All'
+         ? { nft: { category } }
+         : {}),
+    },
+    include: { 
+      nft: true,        // brings in tokenId, imageUrl, title, etc.
+      seller: true      // if you need seller.name or avatar
+    },
+  })
+
   return (
-    <div>
-      <NFTCard/>
-    </div>
+    <NFTCard
+      items={listings}
+      initialCategory={category || null}
+    />
   );
 };
-
-export default marketplace;
