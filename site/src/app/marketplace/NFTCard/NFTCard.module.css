@@ -18,6 +18,8 @@
     flex: 1 1 calc(25% - 30px); /* For 4 items per row with gap consideration */
     box-sizing: border-box;
     max-width: calc(25% - 30px);
+    min-width: 280px;
+    min-height: 280px;
 }
 
 .NFTCard_box_img_img {
@@ -33,6 +35,11 @@
 
 .NFTCard_box_img {
     position: relative;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+
 }
 
 .NFTCard_box_overlay {

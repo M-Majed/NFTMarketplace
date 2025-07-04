@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useState } from "react";
 import Image from "next/image";
 import {
@@ -18,13 +18,12 @@ import {
 
 //INTERNAL IMPORT
 import Style from "./NFTDescription.module.css";
-import img from "../../../../public/img";
+import img from "../../../../../public/img";
 
-const NFTDescription = () => {
+export default function NFTDescription({ nft, seller, price }) {
   const [social, setSocial] = useState(false);
   const [NFTMenu, setNFTMenu] = useState(false);
   const [owner, setOwner] = useState(false);
-
 
   const openSocial = () => {
     setSocial(!social);
@@ -83,11 +82,11 @@ const NFTDescription = () => {
       </div>
       {/* //Part TWO */}
       <div className={Style.NFTDescription_profile}>
-        <h1>BearX #23453</h1>
+        <h1>{nft.title}</h1>
         <div className={Style.NFTDescription_profile_box}>
           <Image
-            src={img.user1}
-            alt="profile"
+            src={seller.avatarUrl}
+            alt={seller.name}
             width={40}
             height={40}
             className={Style.NFTDescription_profile_box_img}
@@ -95,7 +94,7 @@ const NFTDescription = () => {
           <div className={Style.NFTDescription_profile_box_info}>
             <small>Creator</small> <br />
             <span>
-              Karli Costa <MdVerified />
+              {seller.name} <MdVerified />
             </span>
           </div>
         </div>
@@ -104,15 +103,16 @@ const NFTDescription = () => {
           <div className={Style.NFTDescription_profile_biding_box_price}>
             <small>Price</small>
             <p>
-              1.000 ETH <span>( ≈ $3,221.22)</span>
+              {price} ETH <span>( ≈ $3,221.22)</span>
             </p>
           </div>
 
           <div className={Style.NFTDescription_profile_biding_box_buttons}>
             <button
               onClick={() => {}}
-              className={Style.NFTDescription_profile_biding_box_buttons_button}
-            >
+              className={
+                Style.NFTDescription_profile_biding_box_buttons_button
+              }>
               {" "}
               Buy Now{" "}
             </button>
@@ -121,6 +121,4 @@ const NFTDescription = () => {
       </div>
     </div>
   );
-};
-
-export default NFTDescription;
+}

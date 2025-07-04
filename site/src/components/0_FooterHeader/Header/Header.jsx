@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -6,7 +6,7 @@ import Link from "next/link";
 import { MdNotifications } from "react-icons/md";
 import { BsSearch } from "react-icons/bs";
 import style from "./Header.module.css";
-import img from "../../../../public/img"
+import img from "../../../../public/img";
 import Discover from "./Discover/Discover";
 import HelpCenter from "./HelpCenter/HelpCenter";
 import Notification from "./Notification/Notification";
@@ -45,7 +45,7 @@ const Header = () => {
             <Image
               className={style.logo}
               src={img.logo}
-              alt="NFT MARKET PLACE"
+              alt="NFT MARKETPLACE"
             />
           </div>
         </Link>
@@ -58,12 +58,16 @@ const Header = () => {
       </div>
 
       <div className={style.header_container_right}>
+        <Link href={`/uploadnft`}>
+        <button
+          className={style.header_container_right_addnft}
+        > Add NFT </button>
+        </Link>
         <div
           ref={discoverRef}
           className={style.header_container_right_discover}
           onMouseEnter={() => setDiscover(true)}
-          onMouseLeave={() => setDiscover(false)}
-        >
+          onMouseLeave={() => setDiscover(false)}>
           <p>Discover</p>
           {discover && (
             <div className={style.header_container_right_discover_box}>
@@ -76,8 +80,7 @@ const Header = () => {
           ref={helpRef}
           className={style.header_container_right_help}
           onMouseEnter={() => setHelp(true)}
-          onMouseLeave={() => setHelp(false)}
-        >
+          onMouseLeave={() => setHelp(false)}>
           <p>Help Center</p>
           {help && (
             <div className={style.header_container_right_help_box}>
@@ -89,8 +92,7 @@ const Header = () => {
         <div
           ref={notificationRef}
           className={style.header_container_right_notification}
-          onClick={openNotification}
-        >
+          onClick={openNotification}>
           <MdNotifications
             className={style.header_container_right_notification_icon}
           />

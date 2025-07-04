@@ -44,6 +44,7 @@ async function main() {
         sellerId: nfts[i].ownerId,
         price: (i + 1) * 0.5,     // e.g. 0.5, 1.0, 1.5, 2.0
         status: 'ACTIVE',
+        description: `Listing for NFT #${i + 1}`,
       },
     })
     listings.push(listing)

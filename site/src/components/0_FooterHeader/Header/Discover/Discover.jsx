@@ -12,7 +12,6 @@ const Discover = () => {
     { name: "Sport", link: "marketplace", category: "Sport" },
     { name: "Portrait", link: "marketplace", category: "Portrait" },
     { name: "Animal", link: "marketplace", category: "Animal" },
-    { name: "Memes", link: "marketplace", category: "Memes" }
   ]
 
   return (

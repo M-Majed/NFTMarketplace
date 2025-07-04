@@ -1,13 +1,21 @@
 import React from "react";
 import Image from "next/image";
 import { BsCircleFill } from "react-icons/bs";
-
+import Link from 'next/link';
 import Style from "./Category.module.css";
 import img from "../../../../public/img";
 import Title from "../../_Shared/Title/Title";
 
-const Category = () => {
-  const CategoryArray = [1, 2, 3, 4, 5, 6];
+const categoryImages = {
+  Art:      '/img/categories/art.jpg',
+  Game:     '/img/categories/game.jpg',
+  Nature:   '/img/categories/nature.webp',
+  Sport:    '/img/categories/sport.jpg',
+  Portrait: '/img/categories/portrait.jpg',
+  Animal:   '/img/categories/animal.jpg',
+};
+
+export default function Category({ items }) {
   return (
     <div className={Style.category}>
       <div className={Style.category_title}>
@@ -15,28 +23,30 @@ const Category = () => {
         <p>Explore the categories</p>
       </div>
       <div className={Style.category_categories}>
-        {CategoryArray.map((item, index) => (
-          <div className={Style.category_categories_box} key={index}>
+        {items.map(({ name, count }) => (
+          <Link
+            key={name}
+            href={`/marketplace?category=${encodeURIComponent(name)}`}
+            className={Style.category_categories_box}
+          >
             <Image
-              src={img.creatorbackground1}
+              src={categoryImages[name] || '/img/categories/default.jpg'}
               className={Style.category_categories_box_img}
-              alt="Background image"
-              width={350}
-              height={150}
+              alt={`${name} background`}
+              width={300}
+              height={180}
               objectFit="cover"
             />
             <div className={Style.category_categories_box_title}>
               <span> <BsCircleFill /></span>
               <div className={Style.category_categories_box_title_info}>
-                <h4>Enterainment</h4>
-                <small>1995 NFTS</small>
+                <h4>{name}</h4>
+                <small>{count} NFTs</small>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
   );
 };
-
-export default Category;

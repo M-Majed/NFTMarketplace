@@ -14,7 +14,6 @@ const categories = [
   "Sport",
   "Portrait",
   "Animal",
-  "Memes",
 ];
 
 const Filter = ({}) => {

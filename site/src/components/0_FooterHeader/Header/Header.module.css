@@ -3,7 +3,6 @@
     width: 80%;
     margin:  0 auto;
     display: flex;
-    justify-content: space-between;
     font-size: 15px;
     font-weight: 600;
 }
@@ -17,7 +16,7 @@
 
 
 .header_container_left_box_input{
-    width: 40%;
+    width: 50%;
     border: 1px solid #ffffff;
     display: flex;
     padding-inline: 5px;
@@ -43,8 +42,27 @@
 .header_container_right{
     display: flex;
     align-items: center;
-    flex: 0.5;
+    flex: 0.8;
     justify-content: space-between;
+}
+
+.header_container_right_addnft{
+    background-color: transparent;
+    border: none;
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.header_container_right_addnft:hover{
+    border: none;
+    background-color: white;
+    color: black;
 }
 
 .header_container_right_discover,

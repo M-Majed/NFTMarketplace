@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useState } from "react";
 import { MdOutlineAttachFile } from "react-icons/md";
 import { FaPercent } from "react-icons/fa";
@@ -14,10 +14,33 @@ import Button from "@/components/_Shared/Button/Button";
 
 const UloadNFT = () => {
   const [active, setActive] = useState(0);
+  const [file, setFile] = useState(null);
   const [itemName, setItemName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(0);
   const [price, setPrice] = useState(0);
+
+  const handleUpload = async () => {
+    if (!file) return alert("Please choose an image first");
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("itemName", itemName);
+    formData.append("description", description);
+    formData.append("category", category);
+    formData.append("price", price);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      alert("Upload successful!");
+    } catch (err) {
+      alert("Upload failed: " + err.message);
+    }
+  };
 
   const categoryArry = [
     {
@@ -44,15 +67,12 @@ const UloadNFT = () => {
       image: img.nft_image_3,
       category: "Animal",
     },
-    {
-      image: img.nft_image_3,
-      category: "Memes",
-    },
   ];
 
   return (
     <div className={Style.upload}>
       <DropZone
+        onFileSelected={setFile}
         title="JPG, PNG, WEBM , MAX 100MB"
         heading="Drag & drop file"
         subHeading="or Browse media on your device"
@@ -114,7 +134,7 @@ const UloadNFT = () => {
 
         <div className={Style.upload_box_Price}>
           <div className={Style.upload_box_Price_left}>
-            <h2>You receive:</h2>
+            <h2>Buyer pays:</h2>
             <input
               type="text"
               className={Style.upload_box_Price_itemPrice}
@@ -122,13 +142,13 @@ const UloadNFT = () => {
             />
           </div>
           <div className={Style.upload_box_Price_right}>
-            <h2>Buyer pays:</h2>
-            <input type="text" className={Style.upload_box_Price_itemPrice} />
+            <h2>You receive:</h2>
+            <input type="text" className={Style.upload_box_Price_itemPrice} value={(price * 0.87).toFixed(5)} readOnly />
           </div>
         </div>
 
         <div className={Style.upload_box_btn}>
-          <Button btnName="Upload" />
+          <Button btnName="Upload" handleClick={handleUpload} />
           <Button btnName="Preview" />
         </div>
       </div>

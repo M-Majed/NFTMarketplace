@@ -2,3 +2,81 @@ npx prisma migrate dev --name init
 to check
     npx prisma studio
 npm run dev
+
+
+project-root
+├── prisma
+│   ├── dev.db
+│   └── schema.prisma
+│   └── seed.js
+├── public
+│   ├── img 
+│   └── Avatar
+│   └── nftImages
+└── src
+    ├── app
+    ├── components 
+    └── lib
+
+src/app/
+├── globals.css
+├── layout.js
+├── page.jsx
+│
+├── marketplace/
+│   ├── page.jsx
+│   └── NFTCard/
+│       ├── Filter/
+│       │   ├── Filter.jsx
+│       │   └── Filter.module.css
+│       ├── NFTCard.jsx
+│       └── NFTCard.module.css
+│
+├── nftdetails/
+│   ├── page.jsx
+│   ├── NFTDescription/
+│   │   ├── NFTDescription.jsx
+│   │   └── NFTDescription.module.css
+│   └── NFTDetailsImg/
+│       ├── NFTDetailsImg.jsx
+│       └── NFTDetailsImg.module.css
+│
+├── profile/
+│   ├── page.jsx
+│   └── page.module.css
+│
+└── uploadnft/
+    ├── page.jsx
+    ├── page.module.css
+    └── DropZone/
+        ├── DropZone.jsx
+        └── DropZone.module.css
+
+src/components/
+├── 0_FooterHeader/
+│   ├── Header/
+│   │   ├── Discover/
+│   │   ├── HelpCenter/
+│   │   ├── Notification/
+│   │   └── Profile/
+│   └── SideBar/
+│
+├── 1_MainPage/
+│   ├── Introduction/
+│   │   ├── Introduction.jsx
+│   │   └── Introduction.module.css
+│   └── Service/
+│       ├── Service.jsx
+│       └── Service.module.css
+│
+└── _Shared/
+    ├── Button/
+    │   ├── Button.jsx
+    │   └── Button.module.css
+    └── Title/
+        ├── Title.jsx
+        └── Title.module.css
+src/lib/
+└── prisma.js
+
+this is the layout

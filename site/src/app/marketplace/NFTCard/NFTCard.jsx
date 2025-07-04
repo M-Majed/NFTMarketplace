@@ -11,7 +11,6 @@ import img from "../../../../public/img";
 import Link from "next/link";
 
 export default function NFTCard({ items = [] }) {
-
   // const [like, setLike] = useState(true);
 
   // const likeNft = () => {
@@ -25,11 +24,11 @@ export default function NFTCard({ items = [] }) {
         paragraph="Explore the latest and greatest NFTs"
       />
       {/* tell Filter what’s selected and how to toggle */}
-      <Filter/>
+      <Filter />
 
       {items.map((listing) => (
         <div className={Style.NFTCard_box} key={listing.id}>
-          <Link href={`/nftdetails/${listing.nft.id}`}>
+          <Link href={`/nftdetails/${listing.nft.tokenId}`}>
             <div className={Style.NFTCard_box_img}>
               <Image
                 src={listing.nft.imageUrl}

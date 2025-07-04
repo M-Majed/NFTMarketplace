@@ -14,7 +14,6 @@ enum Category {
   Sport
   Portrait
   Animal
-  Memes
 }
 
 enum ListingStatus {
@@ -61,6 +60,7 @@ model Listing {
   nftId       String        @unique
   seller      User          @relation("UserListings", fields: [sellerId], references: [id])
   sellerId    String
+  description String?
   price       Float // Buy-Now price (e.g. 0.08 ETH)
   status      ListingStatus @default(ACTIVE)
   createdAt   DateTime      @default(now())
