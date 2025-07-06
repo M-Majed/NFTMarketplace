@@ -20,7 +20,7 @@ import {
 import Style from "./NFTDescription.module.css";
 import img from "../../../../../public/img";
 
-export default function NFTDescription({ nft, seller, price }) {
+export default function NFTDescription({ nft, seller, price, usdPrice  }) {
   const [social, setSocial] = useState(false);
   const [NFTMenu, setNFTMenu] = useState(false);
   const [owner, setOwner] = useState(false);
@@ -103,7 +103,7 @@ export default function NFTDescription({ nft, seller, price }) {
           <div className={Style.NFTDescription_profile_biding_box_price}>
             <small>Price</small>
             <p>
-              {price} ETH <span>( ≈ $3,221.22)</span>
+              {price} ETH &nbsp;<span>(${usdPrice})</span>
             </p>
           </div>
 

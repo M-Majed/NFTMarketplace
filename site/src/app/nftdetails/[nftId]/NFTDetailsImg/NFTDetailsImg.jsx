@@ -7,7 +7,7 @@ import Image from "next/image";
 import Style from "./NFTDetailsImg.module.css";
 import img from "../../../../../public/img";
 
-export default function NFTDetailsImg({ nft }) {
+export default function NFTDetailsImg({ nft, listing }) {
   return (
     <div className={Style.NFTDetailsImg}>
         <Image
@@ -20,7 +20,7 @@ export default function NFTDetailsImg({ nft }) {
         />
       <div className={Style.NFTDetailsImg_description}>
         <p>
-          {nft.description ? nft.description : "No description available."}
+          {listing.description ? listing.description : "No description available."}
         </p>
         <small>{nft.width} x {nft.height} px</small>
         <p>

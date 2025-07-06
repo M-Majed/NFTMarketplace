@@ -30,29 +30,36 @@ export default async function Home() {
     })
   );
 
-  // 1) grab all active IDs
+  // 1) fetch your 5 random listings (as before)
   const all = await prisma.listing.findMany({
-    where: { status: "ACTIVE" },
-    select: { id: true },
+    where: { status: 'ACTIVE' },
+    select: { id: true }
   });
-
-  // 2) shuffle & pick 5
-  const ids = all
-    .map((l) => l.id)
-    .sort(() => Math.random() - 0.5) // quick shuffle
-    .slice(0, 5);
-
-  // 3) fetch the full records
+  const ids = all.map(l => l.id).sort(() => Math.random() - .5).slice(0,5);
   const listings = await prisma.listing.findMany({
     where: { id: { in: ids } },
-    include: { nft: true, seller: true },
+    include: { nft: true, seller: true }
   });
+
+  // 2) fetch ETH→USD
+  const priceRes = await fetch(
+    'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
+    { next: { revalidate: 60 } }
+  );
+  const { ethereum } = await priceRes.json();
+  const ethUsd = ethereum.usd;
+
+  // 3) enrich listings with usdPrice
+  const enriched = listings.map(l => ({
+    ...l,
+    usdPrice: parseFloat((l.price * ethUsd).toFixed(2))
+  }));
 
   return (
     <div>
       <Introduction />
       <Service />
-      <BigNFTSilder listings={listings} />
+      <BigNFTSilder listings={enriched} />
       <Category items={categories}/>
     </div>
   );

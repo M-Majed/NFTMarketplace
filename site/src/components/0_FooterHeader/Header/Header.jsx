@@ -11,13 +11,16 @@ import Discover from "./Discover/Discover";
 import HelpCenter from "./HelpCenter/HelpCenter";
 import Notification from "./Notification/Notification";
 import Profile from "./Profile/Profile";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
   const [discover, setDiscover] = useState(false);
   const [help, setHelp] = useState(false);
   const [notification, setNotification] = useState(false);
   const [profile, setProfile] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
+  const router = useRouter();
   const discoverRef = useRef();
   const helpRef = useRef();
   const notificationRef = useRef();
@@ -37,6 +40,17 @@ const Header = () => {
     setNotification(false);
   };
 
+  const handleSearch = () => {
+    const term = searchTerm.trim();
+    if (term) {
+      // only add the query when non-empty
+      router.push(`/marketplace?search=${encodeURIComponent(term)}`);
+    } else {
+      // blank search → show all listings
+      router.push("/marketplace");
+    }
+  };
+
   return (
     <div className={style.header}>
       <div className={style.header_container_left}>
@@ -50,18 +64,27 @@ const Header = () => {
           </div>
         </Link>
         <div className={style.header_container_left_box_input}>
-          <input type="text" placeholder="Search NFT" />
-          <button className={style.header_container_left_searchbtn}>
-            <BsSearch onClick={() => {}} />
+          <input
+            type="text"
+            placeholder="Search NFT"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          />
+          <button
+            className={style.header_container_left_searchbtn}
+            onClick={handleSearch}>
+            <BsSearch />
           </button>
         </div>
       </div>
 
       <div className={style.header_container_right}>
-        <Link href={`/uploadnft`}>
-        <button
-          className={style.header_container_right_addnft}
-        > Add NFT </button>
+        <Link href={`/createnft`}>
+          <button className={style.header_container_right_createNFT}>
+            {" "}
+            Create NFT{" "}
+          </button>
         </Link>
         <div
           ref={discoverRef}

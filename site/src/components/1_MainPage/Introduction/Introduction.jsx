@@ -3,6 +3,7 @@ import React from "react";
 //INTERNAL IMPORT
 import Style from "./Introduction.module.css";
 import Button from "../../_Shared/Button/Button";
+import Link   from "next/link";
 
 const Introduction = () => {
   return (
@@ -12,7 +13,9 @@ const Introduction = () => {
         Discover the most outstanding NTFs in all topics of life. Creative
         your NTFs and sell them
       </p>
-      <Button btnName="Start your search"/>
+      <Link href="/marketplace">
+        <Button btnName="Start your journey" />
+      </Link>
     </div>
   );
 };

@@ -13,16 +13,17 @@ import img from "../../../../public/img";
 export default function BigNFTSilder({ listings }) {
   const [idx, setIdx] = useState(0);
 
-  const sliderData = listings.map(item => ({
-    title:    item.nft.title,
-    id:       item.id,
-    name:     item.seller.name,
-    Category: item.nft.category,
-    price:    `${item.price} ETH`,
-    image:    item.seller.avatarUrl,
-    nftImage: item.nft.imageUrl,
-    // you can add other fields if you stored timestamps, etc.
-  }));
+ // include both ETH and USD in each slide
+ const sliderData = listings.map(item => ({
+   title:    item.nft.title,
+   id:       item.id,
+   name:     item.seller.name,
+   Category: item.nft.category,
+   priceEth: item.price,
+   priceUsd: item.usdPrice,
+   image:    item.seller.avatarUrl,
+   nftImage: item.nft.imageUrl,
+ }));
 
   const inc = useCallback(() => {
     if (idx + 1 < sliderData.length) setIdx(idx + 1);
@@ -76,7 +77,7 @@ export default function BigNFTSilder({ listings }) {
           <div className={Style.bigNFTSlider_left_bidding_box}>
             <small>Price</small>
             <p>
-              {current.price} <span>$221,21</span>
+              {current.priceEth} ETH&nbsp; <span>≈ ${current.priceUsd}</span>
             </p>
           </div>
 

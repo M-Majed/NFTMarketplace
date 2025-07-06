@@ -12,7 +12,7 @@ import img from "../../../public/img";
 import DropZone from "./DropZone/DropZone";
 import Button from "@/components/_Shared/Button/Button";
 
-const UloadNFT = () => {
+const createnft = () => {
   const [active, setActive] = useState(0);
   const [file, setFile] = useState(null);
   const [itemName, setItemName] = useState("");
@@ -148,7 +148,7 @@ const UloadNFT = () => {
         </div>
 
         <div className={Style.upload_box_btn}>
-          <Button btnName="Upload" handleClick={handleUpload} />
+          <Button btnName="Create and list NFT" handleClick={handleUpload} />
           <Button btnName="Preview" />
         </div>
       </div>
@@ -156,4 +156,4 @@ const UloadNFT = () => {
   );
 };
 
-export default UloadNFT;
+export default createnft;

@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
 
-//INTERNAL IMPORT
+//INTERNAL IMPORT`
 import Style from "./Button.module.css";
 
-const Button = ({ btnName, handleClick, icon, classStyle }) => {
+export default function Button({ btnName, handleClick = () => {}, icon, classStyle }) {
   return (
     <div className={Style.box}>
       <button
@@ -16,5 +16,3 @@ const Button = ({ btnName, handleClick, icon, classStyle }) => {
     </div>
   );
 };
-
-export default Button;

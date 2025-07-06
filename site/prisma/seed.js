@@ -24,7 +24,6 @@ async function main() {
         tokenId: `${100 + i}`,
         contractAddress: '0x000000000000',
         title: `NFT #${i}`,
-        description: `This is description for NFT #${i}`,
         imageUrl: `/nftImages/nft-${i}.png`,
         ownerId: users[i - 1].id,
         category: 'Art',        // pick one of your enum values
