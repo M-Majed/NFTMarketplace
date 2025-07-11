@@ -13,9 +13,7 @@ const Introduction = () => {
         Discover the most outstanding NTFs in all topics of life. Creative
         your NTFs and sell them
       </p>
-      <Link href="/marketplace">
-        <Button btnName="Start your journey" />
-      </Link>
+        <Button btnName="Start your journey"/>
     </div>
   );
 };

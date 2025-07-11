@@ -79,3 +79,10 @@ model Transaction {
   price     Float // final sale price
   createdAt DateTime @default(now())
 }
+
+
+model Nonce {
+  id     String @id @default(cuid())
+  value  String @unique
+  createdAt DateTime @default(now())
+}
