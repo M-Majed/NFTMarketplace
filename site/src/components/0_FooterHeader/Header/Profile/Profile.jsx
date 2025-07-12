@@ -5,15 +5,12 @@ import { TbDownloadOff, TbDownload } from "react-icons/tb";
 import Link from "next/link";
 import style from "./Profile.module.css";
 
-const Profile = ({ address, onLogout }) => {
-  const short = address
-  ? `${address.slice(0, 6)}...${address.slice(-4)}`
-  : "";
+const Profile = () => {
   return (
     <div className={style.profile}>
       <div className={style.profile_info}>
-        <p>{short}</p>
-        <small>{address}</small>
+        <p>MRMTFW</p>
+        <small>X038499382920203...</small>
       </div>
 
       <div className={style.profile_menu}>
@@ -29,10 +26,11 @@ const Profile = ({ address, onLogout }) => {
             <p>My Items</p>
           </div>
         </Link>
-          <div className={style.profile_menu_item} onClick={onLogout}>
-            <TbDownload />
+        <Link href={{ pathname: "/logout" }}>
+          <div className={style.profile_menu_item}>            <TbDownload />
             <p>Logout</p>
           </div>
+        </Link>
       </div>
     </div>
   );

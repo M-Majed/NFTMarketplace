@@ -19,17 +19,14 @@ export default async function MarketplacePage({ searchParams }) {
   const take = 12;
   const skip = (currentPage - 1) * take;
 
-  // build your existing filters
   const categories = catParam
     ? Array.isArray(catParam)
       ? catParam
       : [catParam]
     : [];
-
   const priceFilter = {};
   if (minPrice) priceFilter.gte = parseFloat(minPrice);
   if (maxPrice) priceFilter.lte = parseFloat(maxPrice);
-
   const where = {
     status: "ACTIVE",
     ...(categories.length > 0

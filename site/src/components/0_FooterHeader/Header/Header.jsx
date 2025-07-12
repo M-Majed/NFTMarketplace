@@ -14,27 +14,18 @@ import Profile from "./Profile/Profile";
 import { useRouter } from "next/navigation";
 
 const Header = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [discover, setDiscover] = useState(false);
   const [help, setHelp] = useState(false);
   const [notification, setNotification] = useState(false);
   const [profile, setProfile] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [walletAddress, setWalletAddress] = useState(null);
 
   const router = useRouter();
   const discoverRef = useRef();
   const helpRef = useRef();
   const notificationRef = useRef();
   const profileRef = useRef();
-
-  // on mount, restore from localStorage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const addr = localStorage.getItem("walletAddress");
-      if (addr) setWalletAddress(addr);
-    }
-  }, []);
 
   const openNotification = () => {
     setNotification(!notification);
@@ -59,59 +50,6 @@ const Header = () => {
       // blank search → show all listings
       router.push("/marketplace");
     }
-  };
-
-  // sign-in with Ethereum: always prompt the user
-  const handleWalletLogin = async () => {
-    if (!window.ethereum) {
-      alert("Please install MetaMask");
-      return;
-    }
-
-    try {
-      // 1) ensure the site is connected and get the account
-      const [account] = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-
-      // 2) build a one-time challenge
-      const nonce = Math.random().toString(36).slice(2);
-      const msg   = `NFT Marketplace login\n\n` +
-                    `Address: ${account}\n` +
-                    `Nonce:   ${nonce}`;
-
-      // 3) ask for a signature — this WILL pop MetaMask every time
-      const signature = await window.ethereum.request({
-        method: "personal_sign",
-        params: [msg, account],
-      });
-
-      // 4) you _could_ verify the signature server-side,
-      //    but for now we just store the address locally
-      setWalletAddress(account);
-      localStorage.setItem("walletAddress", account);
-      localStorage.setItem("loginNonce", nonce);
-      localStorage.setItem("loginSig", signature);
-      // ─── Upsert the user in our database ──────────────────────────────
-      try {
-        await fetch("/api/users", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address: account }),
-        });
-      } catch (e) {
-        console.error("Failed to upsert user:", e);
-      }
-    } catch (err) {
-      console.error("Login failed:", err);
-    }
-  };
-
-  // simple logout: clear local state & storage
-  const handleWalletLogout = () => {
-    setWalletAddress(null);
-    localStorage.removeItem("walletAddress");
-    router.replace("/");   // ← navigate home immediately
   };
 
   return (
@@ -189,31 +127,31 @@ const Header = () => {
           )}
         </div>
 
-        {walletAddress ? (
-          <div
-            ref={profileRef}
-            className={style.header_container_right_profile}>
-            <Image
-              src={img.user1}
-              className={style.header_container_right_profileImg}
-              alt="Profile"
-              onClick={openProfile}
-            />
-            {profile && (
-              <div className={style.header_container_right_profile_box}>
-                <Profile
-                address={walletAddress}
-                onLogout={handleWalletLogout} />
-              </div>
-            )}
-          </div>
-        ) : (
-          <button
-            className={style.header_container_right_createNFT}
-            onClick={handleWalletLogin}>
-            Connect Wallet
-          </button>
-        )}
+       {isLoggedIn ? (
+         <div ref={profileRef} className={style.header_container_right_profile}>
+           <Image
+             src={img.user1}
+             className={style.header_container_right_profileImg}
+             alt="Profile"
+             onClick={openProfile}
+           />
+           {profile && (
+             <div className={style.header_container_right_profile_box}>
+               <Profile />
+             </div>
+           )}
+         </div>
+       ) : (
+         <button
+           className={style.header_container_right_createNFT}
+           onClick={() => {
+             /* future hook: open wallet modal */
+             console.log("Sign In clicked");
+           }}
+         >
+           Sign In
+         </button>
+       )}
       </div>
     </div>
   );
