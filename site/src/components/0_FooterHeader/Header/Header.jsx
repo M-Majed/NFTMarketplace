@@ -10,35 +10,26 @@ import img from "../../../../public/img";
 import Discover from "./Discover/Discover";
 import HelpCenter from "./HelpCenter/HelpCenter";
 import Notification from "./Notification/Notification";
-import Profile from "./Profile/Profile";
 import { useRouter } from "next/navigation";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
 
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { address, isConnected } = useAccount();
   const [discover, setDiscover] = useState(false);
   const [help, setHelp] = useState(false);
   const [notification, setNotification] = useState(false);
-  const [profile, setProfile] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const router = useRouter();
   const discoverRef = useRef();
   const helpRef = useRef();
   const notificationRef = useRef();
-  const profileRef = useRef();
 
   const openNotification = () => {
     setNotification(!notification);
     setDiscover(false);
     setHelp(false);
-    setProfile(false);
-  };
-
-  const openProfile = () => {
-    setProfile(!profile);
-    setDiscover(false);
-    setHelp(false);
-    setNotification(false);
   };
 
   const handleSearch = () => {
@@ -51,6 +42,16 @@ const Header = () => {
       router.push("/marketplace");
     }
   };
+
+  // when a wallet connects, ensure the user exists in our DB
+  useEffect(() => {
+    if (!isConnected || !address) return;
+    fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ walletAddress: address }),
+    }).catch(console.error);
+  }, [isConnected, address]);
 
   return (
     <div className={style.header}>
@@ -99,7 +100,6 @@ const Header = () => {
             </div>
           )}
         </div>
-
         <div
           ref={helpRef}
           className={style.header_container_right_help}
@@ -112,7 +112,6 @@ const Header = () => {
             </div>
           )}
         </div>
-
         <div
           ref={notificationRef}
           className={style.header_container_right_notification}
@@ -127,31 +126,53 @@ const Header = () => {
           )}
         </div>
 
-       {isLoggedIn ? (
-         <div ref={profileRef} className={style.header_container_right_profile}>
-           <Image
-             src={img.user1}
-             className={style.header_container_right_profileImg}
-             alt="Profile"
-             onClick={openProfile}
-           />
-           {profile && (
-             <div className={style.header_container_right_profile_box}>
-               <Profile />
-             </div>
-           )}
-         </div>
-       ) : (
-         <button
-           className={style.header_container_right_createNFT}
-           onClick={() => {
-             /* future hook: open wallet modal */
-             console.log("Sign In clicked");
-           }}
-         >
-           Sign In
-         </button>
-       )}
+        <ConnectButton.Custom>
+          {({
+            account,
+            chain,
+            openChainModal,
+            openConnectModal ,
+            openAccountModal,
+            authenticationStatus,
+            mounted,
+          }) => {
+            const ready = mounted && authenticationStatus !== "loading";
+            const connected =
+              ready &&
+              chain &&
+              (!authenticationStatus ||
+                authenticationStatus === "authenticated");
+            return (() => {
+              if (!connected) {
+                return (
+                  <button onClick={openConnectModal} type="button" className={style.header_container_right_createNFT}>
+                    Connect Wallet
+                  </button>
+                );
+              }
+              if (chain.unsupported) {
+                return (
+                  <button onClick={openChainModal} type="button">
+                    Wrong network
+                  </button>
+                );
+              }
+              return (
+                <button onClick={openAccountModal} type="button" className={style.header_container_right_createNFT}>
+                  {account.displayName}
+                </button>
+              );
+            })();
+          }}
+        </ConnectButton.Custom>
+        {isConnected && (
+          <Link href={`/profile`}>
+            <button className={style.header_container_right_createNFT}>
+              {" "}
+              Profile{" "}
+            </button>
+          </Link>
+        )}
       </div>
     </div>
   );

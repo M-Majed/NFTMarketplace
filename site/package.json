@@ -9,17 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.8",
+    "@tanstack/react-query": "^5.83.0",
     "faker": "^5.5.3",
     "image-size": "^2.0.2",
     "install": "^0.13.0",
     "next": "15.2.4",
-    "next-auth": "^4.24.11",
-    "npm": "^11.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
     "react-icons": "^5.5.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "viem": "^2.31.7",
+    "wagmi": "^2.15.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -28,6 +30,7 @@
     "@types/node": "^24.0.7",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
+    "npm": "^11.4.2",
     "prisma": "^6.10.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
