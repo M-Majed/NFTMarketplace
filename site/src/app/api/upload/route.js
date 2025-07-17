@@ -18,7 +18,14 @@ export async function POST(request) {
     const description = formData.get("description");
     const category = formData.get("category");
     const price = parseFloat(formData.get("price"));
+    const address     = formData.get("address");
 
+    if (!address) {
+      return NextResponse.json(
+        { error: "Missing wallet address" },
+        { status: 400 }
+      );
+    }
     if (!(file && itemName && description && category && price)) {
       return NextResponse.json(
         {
@@ -65,7 +72,7 @@ export async function POST(request) {
           contractAddress: "",
         },
         owner: {
-          connect: { id: "cmcrkq0mv0000fpe4dbktohgt" },
+          connect: { walletAddress: address },
         },
       },
     });
@@ -76,7 +83,7 @@ export async function POST(request) {
         price,
         status: "ACTIVE", // your enum ListingStatus
         nft: { connect: { id: nft.id } },
-        seller: { connect: { id: "cmcrkq0mv0000fpe4dbktohgt" } },
+        seller: { connect: { walletAddress: address } },
         description,
       },
     });

@@ -5,8 +5,7 @@ import { FaPercent } from "react-icons/fa";
 import { AiTwotonePropertySafety } from "react-icons/ai";
 import { TiTick } from "react-icons/ti";
 import Image from "next/image";
-
-//INTERNAL IMPORT
+import { useAccount } from "wagmi";
 import Style from "./page.module.css";
 import img from "../../../public/img";
 import DropZone from "./DropZone/DropZone";
@@ -19,15 +18,19 @@ const createnft = () => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(0);
   const [price, setPrice] = useState(0);
+  const { address, isConnected } = useAccount();
 
   const handleUpload = async () => {
+    if (!isConnected)  return alert("Connect your wallet first");
     if (!file) return alert("Please choose an image first");
+    
     const formData = new FormData();
     formData.append("file", file);
     formData.append("itemName", itemName);
     formData.append("description", description);
     formData.append("category", category);
     formData.append("price", price);
+    formData.append("address", address);
 
     try {
       const res = await fetch("/api/upload", {
