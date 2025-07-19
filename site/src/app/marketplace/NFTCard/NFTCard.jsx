@@ -7,7 +7,6 @@ import Filter from "./Filter/Filter";
 //INTERNAL IMPORT
 import Style from "./NFTCard.module.css";
 import Title from "../../../components/_Shared/Title/Title";
-import img from "../../../../public/img";
 import Link from "next/link";
 
 export default function NFTCard({ items = [] }) {

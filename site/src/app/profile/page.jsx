@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Style from "./page.module.css";
-import img from "../../../public/img";
+import img from '@/lib/img'
 import Image from "next/image";
 import { MdDeleteForever, MdEdit } from "react-icons/md";
 import { useAccount, useBalance } from "wagmi";

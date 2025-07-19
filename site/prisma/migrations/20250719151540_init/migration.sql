@@ -30,6 +30,7 @@ CREATE TABLE "Listing" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "nftId" TEXT NOT NULL,
     "sellerId" TEXT NOT NULL,
+    "description" TEXT,
     "price" REAL NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'ACTIVE',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

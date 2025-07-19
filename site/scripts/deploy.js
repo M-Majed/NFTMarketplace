@@ -5,10 +5,10 @@ const { ethers } = hre;  // pull ethers from Hardhat
 async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Deploying with:", deployer.address);
-
+  const mintPrice = ethers.utils.parseEther("0.05");
   // 1) Deploy MyNFT
   const MyNFT = await ethers.getContractFactory("MyNFT");
-  const myNft = await MyNFT.deploy("ipfs://your-base-uri/");
+  const myNft = await MyNFT.deploy("ipfs://your-base-uri/", mintPrice);
   await myNft.waitForDeployment();            // <-- v6 style
   console.log("MyNFT ➡", myNft.target || myNft.address);
 

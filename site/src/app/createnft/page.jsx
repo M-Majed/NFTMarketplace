@@ -7,9 +7,17 @@ import { TiTick } from "react-icons/ti";
 import Image from "next/image";
 import { useAccount } from "wagmi";
 import Style from "./page.module.css";
-import img from "../../../public/img";
+import img from '@/lib/img'
+
 import DropZone from "./DropZone/DropZone";
 import Button from "@/components/_Shared/Button/Button";
+import { ethers }             from "ethers";
+
+import MyNFTArtifact          from "../../../artifacts/contracts/Mint.sol/MyNFT.json";
+import MarketArtifact         from "../../../artifacts/contracts/Exchange.sol/NFTMarketplace.json";
+const NFT_CONTRACT_ADDRESS     = process.env.NEXT_PUBLIC_NFT_ADDRESS;
+const MARKETPLACE_ADDRESS      = process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS;
+
 
 const createnft = () => {
   const [active, setActive] = useState(0);
@@ -23,7 +31,34 @@ const createnft = () => {
   const handleUpload = async () => {
     if (!isConnected)  return alert("Connect your wallet first");
     if (!file) return alert("Please choose an image first");
-    
+    // grab a fresh signer from window.ethereum via Ethers v6
+    if (!window.ethereum) {
+      return alert("No Ethereum provider found");
+    }
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer   = await provider.getSigner();
+    // ─── mint on‑chain ─────────────────────────────────────────────────────
+    const nftContract = new ethers.Contract(
+      NFT_CONTRACT_ADDRESS,
+      MyNFTArtifact.abi,
+      signer
+    );
+    const mintTx  = await nftContract.mint(address);
+    const mintRc  = await mintTx.wait();
+    const evt     = mintRc.events.find(e => e.event === "Minted");
+    const tokenId = evt.args.tokenId.toString();
+
+    // ─── approve & list on‑chain ──────────────────────────────────────────
+    await nftContract.approve(MARKETPLACE_ADDRESS, tokenId);
+    const market  = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketArtifact.abi,
+      signer
+    );
+    const weiPrice = ethers.utils.parseEther(price.toString());
+    await market.listItem(NFT_CONTRACT_ADDRESS, tokenId, weiPrice);
+
+    // ─── now build your off‑chain payload ─────────────────────────────────
     const formData = new FormData();
     formData.append("file", file);
     formData.append("itemName", itemName);
@@ -31,6 +66,8 @@ const createnft = () => {
     formData.append("category", category);
     formData.append("price", price);
     formData.append("address", address);
+    formData.append("tokenId", tokenId);
+    formData.append("contractAddress", NFT_CONTRACT_ADDRESS);
 
     try {
       const res = await fetch("/api/upload", {
@@ -47,27 +84,27 @@ const createnft = () => {
 
   const categoryArry = [
     {
-      image: img.nft_image_1,
+      image: img.Art,
       category: "Art",
     },
     {
-      image: img.nft_image_2,
+      image: img.Game,
       category: "Game",
     },
     {
-      image: img.nft_image_3,
+      image: img.Nature,
       category: "Nature",
     },
     {
-      image: img.nft_image_1,
+      image: img.Sport,
       category: "Sport",
     },
     {
-      image: img.nft_image_2,
+      image: img.Portrait,
       category: "Portrait",
     },
     {
-      image: img.nft_image_3,
+      image: img.Animal,
       category: "Animal",
     },
   ];

@@ -2,7 +2,7 @@ import React from 'react'
 //$ better performance than default html img 
 import Image from 'next/image'
 import style from "./Notification.module.css"
-import img from "../../../../../public/img"
+import img from '@/lib/img'
 
 const Notification = () => {
   return (

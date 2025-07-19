@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Style from "./Service.module.css";
-import img from "../../../../public/img";
+import img from '@/lib/img'
 
 const Service = () => {
   return (
@@ -57,7 +57,7 @@ const Service = () => {
         </div>
         <div className={Style.service_box_item}>
           <Image
-            src={img.service1}
+            src={img.service4}
             alt="Filter & Discover"
             width={100}
             height={100}

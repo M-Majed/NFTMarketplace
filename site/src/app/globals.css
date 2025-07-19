@@ -41,7 +41,7 @@ a {
   }
   body {
     color: white;
-    background-image: url('/img/background.jpg');
+    background-image: url('/img/assets/background.jpg');
     background-position:top
   }
 }

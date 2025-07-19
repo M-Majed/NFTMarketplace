@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Style from "./DropZone.module.css";
 import Image from "next/image";
-import img from "../../../../public/img";
+import img from '@/lib/img'
 
 export default function DropZone({ onFileSelected }) {
   const [image, setImage] = useState(null);

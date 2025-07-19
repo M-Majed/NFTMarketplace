@@ -8,7 +8,6 @@ import { TbArrowBigLeftLines, TbArrowBigRightLine } from "react-icons/tb";
 
 //INTERNAL IMPORT
 import Style from "./BigNFTSilder.module.css";
-import img from "../../../../public/img";
 
 export default function BigNFTSilder({ listings }) {
   const [idx, setIdx] = useState(0);

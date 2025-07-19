@@ -10,7 +10,7 @@ import {
 import { RiSendPlaneFill } from "react-icons/ri";
 
 import style from "./Footer.module.css";
-import img from "../../../../public/img"
+import img from '@/lib/img'
 
 const Footer = () => {
   return (

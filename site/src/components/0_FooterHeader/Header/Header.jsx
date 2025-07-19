@@ -6,7 +6,7 @@ import Link from "next/link";
 import { MdNotifications } from "react-icons/md";
 import { BsSearch } from "react-icons/bs";
 import style from "./Header.module.css";
-import img from "../../../../public/img";
+import img from '@/lib/img'
 import Discover from "./Discover/Discover";
 import HelpCenter from "./HelpCenter/HelpCenter";
 import Notification from "./Notification/Notification";

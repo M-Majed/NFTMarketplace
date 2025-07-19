@@ -3,16 +3,16 @@ import Image from "next/image";
 import { BsCircleFill } from "react-icons/bs";
 import Link from 'next/link';
 import Style from "./Category.module.css";
-import img from "../../../../public/img";
+import img from '@/lib/img'
 import Title from "../../_Shared/Title/Title";
 
 const categoryImages = {
-  Art:      '/img/categories/art.jpg',
-  Game:     '/img/categories/game.jpg',
-  Nature:   '/img/categories/nature.webp',
-  Sport:    '/img/categories/sport.jpg',
-  Portrait: '/img/categories/portrait.jpg',
-  Animal:   '/img/categories/animal.jpg',
+  Art:      img.Art,
+  Game:     img.Game,
+  Nature:   img.Nature,
+  Sport:    img.Sport,
+  Portrait: img.Portrait,
+  Animal:   img.Animal,
 };
 
 export default function Category({ items }) {

@@ -10,9 +10,16 @@
 .header_container_left{
     display: flex;
     align-items:  center;
-    gap: 20px;
+    gap: 100px;
     flex: 1;
 }
+
+.header_container_left_logo{
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
+
 
 
 .header_container_left_box_input{

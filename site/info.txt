@@ -1,5 +1,13 @@
+npm run dev
+
 npx prisma migrate dev --name init
 npx prisma db seed
 to check
     npx prisma studio
-npm run dev
+
+run local blockchain: 
+    npx hardhat node
+deploy smartcontract in another terminal:
+    npx hardhat run scripts/deploy.js --network localhost
+add network to metamask: http://127.0.0.1:8545 - 31337 - ETH
+add account to metamask using private key
