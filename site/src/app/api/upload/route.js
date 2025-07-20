@@ -18,7 +18,7 @@ export async function POST(request) {
     const description = formData.get("description");
     const category = formData.get("category");
     const price = parseFloat(formData.get("price"));
-    const address     = formData.get("address");
+    const address = formData.get("address");
 
     if (!address) {
       return NextResponse.json(
@@ -53,16 +53,8 @@ export async function POST(request) {
       );
     }
     // ─── 1) Create the NFT, connecting it to user 1 as owner ──────────────
-   const tokenId        = formData.get("tokenId");
-   const contractAddress = formData.get("contractAddress");
-
-   if (!tokenId || !contractAddress) {
-     return NextResponse.json(
-       { error: "Missing on-chain tokenId or contractAddress" },
-       { status: 400 }
-     );
-   }
-   const nft = await prisma.nFT.create({
+    const tokenId = uuidv4();
+    const nft = await prisma.nFT.create({
       data: {
         title: itemName,
         description, // your user‐entered description
@@ -78,8 +70,6 @@ export async function POST(request) {
           height,
           tokenId,
           contractAddress: "",
-          tokenId,
-          contractAddress,
         },
         owner: {
           connect: { walletAddress: address },

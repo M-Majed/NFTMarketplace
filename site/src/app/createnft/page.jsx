@@ -5,19 +5,17 @@ import { FaPercent } from "react-icons/fa";
 import { AiTwotonePropertySafety } from "react-icons/ai";
 import { TiTick } from "react-icons/ti";
 import Image from "next/image";
-import { useAccount } from "wagmi";
+import { useAccount, useProvider  } from "wagmi";
 import Style from "./page.module.css";
 import img from '@/lib/img'
 
+
 import DropZone from "./DropZone/DropZone";
 import Button from "@/components/_Shared/Button/Button";
-import { ethers }             from "ethers";
+import { ethers } from "ethers";
+import MarketABI from "@/abis/NFTMarketplace.json";
 
-import MyNFTArtifact          from "../../../artifacts/contracts/Mint.sol/MyNFT.json";
-import MarketArtifact         from "../../../artifacts/contracts/Exchange.sol/NFTMarketplace.json";
-const NFT_CONTRACT_ADDRESS     = process.env.NEXT_PUBLIC_NFT_ADDRESS;
-const MARKETPLACE_ADDRESS      = process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS;
-
+const CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 
 const createnft = () => {
   const [active, setActive] = useState(0);
@@ -27,38 +25,13 @@ const createnft = () => {
   const [category, setCategory] = useState(0);
   const [price, setPrice] = useState(0);
   const { address, isConnected } = useAccount();
+  const provider = useProvider();
+  const signer = provider.getSigner();
 
   const handleUpload = async () => {
-    if (!isConnected)  return alert("Connect your wallet first");
+    if (!isConnected) return alert("Connect your wallet first");
     if (!file) return alert("Please choose an image first");
-    // grab a fresh signer from window.ethereum via Ethers v6
-    if (!window.ethereum) {
-      return alert("No Ethereum provider found");
-    }
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer   = await provider.getSigner();
-    // ─── mint on‑chain ─────────────────────────────────────────────────────
-    const nftContract = new ethers.Contract(
-      NFT_CONTRACT_ADDRESS,
-      MyNFTArtifact.abi,
-      signer
-    );
-    const mintTx  = await nftContract.mint(address);
-    const mintRc  = await mintTx.wait();
-    const evt     = mintRc.events.find(e => e.event === "Minted");
-    const tokenId = evt.args.tokenId.toString();
 
-    // ─── approve & list on‑chain ──────────────────────────────────────────
-    await nftContract.approve(MARKETPLACE_ADDRESS, tokenId);
-    const market  = new ethers.Contract(
-      MARKETPLACE_ADDRESS,
-      MarketArtifact.abi,
-      signer
-    );
-    const weiPrice = ethers.utils.parseEther(price.toString());
-    await market.listItem(NFT_CONTRACT_ADDRESS, tokenId, weiPrice);
-
-    // ─── now build your off‑chain payload ─────────────────────────────────
     const formData = new FormData();
     formData.append("file", file);
     formData.append("itemName", itemName);
@@ -66,8 +39,6 @@ const createnft = () => {
     formData.append("category", category);
     formData.append("price", price);
     formData.append("address", address);
-    formData.append("tokenId", tokenId);
-    formData.append("contractAddress", NFT_CONTRACT_ADDRESS);
 
     try {
       const res = await fetch("/api/upload", {
@@ -80,6 +51,33 @@ const createnft = () => {
     } catch (err) {
       alert("Upload failed: " + err.message);
     }
+   // 4. 2nd: mint on–chain
+   try {
+     if (!signer) throw new Error("No signer available");
+     const contract = new ethers.Contract(
+       CONTRACT_ADDRESS,
+       MarketABI,
+       signer
+     );
+
+     // price as BigNumber in wei
+     const priceWei = ethers.utils.parseUnits(price.toString(), "ether");
+
+     // call createToken(uri, price)
+     const tx = await contract.createToken(
+       uploadRes.nft.metadata.imageUrl, // or your tokenURI field
+       priceWei,
+       {
+         // if your contract requires a listing fee, include it here:
+         // value: ethers.utils.parseEther("0.025"),
+       }
+     );
+     await tx.wait();
+     alert("✅ Minted on-chain! Transaction: " + tx.hash);
+   } catch (err) {
+     console.error("Chain mint failed:", err);
+     alert("Chain mint failed: " + err.message);
+   }
   };
 
   const categoryArry = [
