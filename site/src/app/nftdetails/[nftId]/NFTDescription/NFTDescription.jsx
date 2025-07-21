@@ -18,7 +18,7 @@ import {
 
 //INTERNAL IMPORT
 import Style from "./NFTDescription.module.css";
-import img from "../../../../../public/img";
+import img from "@/lib/img";
 
 export default function NFTDescription({ nft, seller, price, usdPrice  }) {
   const [social, setSocial] = useState(false);

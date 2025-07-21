@@ -5,8 +5,7 @@ import Image from "next/image";
 
 //INTERNAL IMPORT
 import Style from "./NFTDetailsImg.module.css";
-import img from "../../../../../public/img";
-
+import img from "@/lib/img";
 export default function NFTDetailsImg({ nft, listing }) {
   return (
     <div className={Style.NFTDetailsImg}>
