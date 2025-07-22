@@ -1,3 +1,4 @@
+// src/app/profile/page.jsx
 "use client";
 import React, { useState, useEffect } from "react";
 import Style from "./page.module.css";

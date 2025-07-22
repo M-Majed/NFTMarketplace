@@ -1,3 +1,4 @@
+// src/app/marketplace/NFTCard/NFTCard.jsx
 "use client";
 import React from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";

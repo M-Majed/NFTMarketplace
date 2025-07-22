@@ -1,5 +1,5 @@
+// src/app/nftdetails/[nftId]/page.jsx
 import React from "react";
-
 //INTERNAL IMPORT
 import Style from "./page.module.css";
 import NFTDetailsImg from "./NFTDetailsImg/NFTDetailsImg";

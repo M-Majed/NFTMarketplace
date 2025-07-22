@@ -1,5 +1,5 @@
+// src/components/0_FooterHeader/Header/Header.jsx
 "use client";
-
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";

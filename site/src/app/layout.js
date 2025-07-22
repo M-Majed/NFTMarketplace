@@ -1,3 +1,4 @@
+// src/app/layout.js
 import "./globals.css";
 import Footer from "@/components/0_FooterHeader/Footer/Footer";
 import Header from "@/components/0_FooterHeader/Header/Header";

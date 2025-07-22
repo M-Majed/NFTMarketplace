@@ -1,3 +1,4 @@
+// src/app/page.jsx
 import React from "react";
 import Introduction from "@/components/1_MainPage/Introduction/Introduction";
 import Service from "@/components/1_MainPage/Service/Service";

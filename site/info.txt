@@ -9,5 +9,3 @@ run local blockchain:
     npx hardhat node
 deploy smartcontract in another terminal:
     npx hardhat run scripts/deploy.cjs --network localhost
-add network to metamask: http://127.0.0.1:8545 - 31337 - ETH
-add account to metamask using private key

@@ -1,3 +1,4 @@
+// src/components/1_MainPage/Service/Service.jsx
 import React from "react";
 import Image from "next/image";
 import Style from "./Service.module.css";

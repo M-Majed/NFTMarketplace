@@ -1,3 +1,4 @@
+// src/app/createnft/page.jsx
 "use client";
 import React, { useState } from "react";
 import { MdOutlineAttachFile } from "react-icons/md";

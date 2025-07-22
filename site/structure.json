@@ -1,0 +1,159 @@
+{
+  ".next": {},
+  "contracts": {
+    "SmartContract.sol": null
+  },
+  "ignition": {
+    "modules": {
+      "Lock.js": null
+    }
+  },
+  "node_modules": {},
+  "prisma": {
+    "migrations": {},
+    "dev.db": null,
+    "schema.prisma": null
+  },
+  "public": {
+    "img": {
+      "Assets": {},
+      "Categories": {},
+      "Logo": {},
+      "NFTs": {},
+      "Users": {}
+    },
+    "uploads": {}
+  },
+  "scripts": {
+    "deploy.cjs": null
+  },
+  "src": {
+    "app": {
+      "api": {
+        "profile": {
+          "route.js": null
+        },
+        "upload": {
+          "route.js": null
+        },
+        "users": {
+          "route.js": null
+        }
+      },
+      "createnft": {
+        "DropZone": {
+          "DropZone.jsx": null,
+          "DropZone.module.css": null
+        },
+        "page.jsx": null,
+        "page.module.css": null
+      },
+      "marketplace": {
+        "NFTCard": {
+          "Filter": {
+            "Filter.jsx": null,
+            "Filter.module.css": null
+          },
+          "NFTCard.jsx": null,
+          "NFTCard.module.css": null
+        },
+        "page.jsx": null,
+        "page.module.css": null
+      },
+      "nftdetails": {
+        " [nftId]": {
+          "NFTDescription": {
+            "NFTDescription.jsx": null,
+            "NFTDescription.module.css": null
+          },
+          "NFTDetailsImg": {
+            "NFTDetailsImg.jsx": null,
+            "NFTDetailsImg.module.css": null
+          },
+          "page.jsx": null,
+          "page.module.css": null
+        }
+      },
+      "profile": {
+        "page.jsx": null,
+        "page.module.css": null
+      },
+      "globals.css": null,
+      "layout.js": null,
+      "page.jsx": null
+    },
+    "components": {
+      "_Shared": {
+        "Button": {
+          "Button.jsx": null,
+          "Button.module.css": null
+        },
+        "Title": {
+          "Title.jsx": null,
+          "Title.module.css": null
+        },
+        "_FooterHeader": {
+          "Footer": {
+            "Footer.jsx": null,
+            "Footer.module.css": null
+          },
+          "Header": {
+            "Discover": {
+              "Discover.jsx": null,
+              "Discover.module.css": null
+            },
+            "HelpCenter": {
+              "HelpCenter.jsx": null,
+              "HelpCenter.module.css": null
+            },
+            "Notification": {
+              "Notification.jsx": null,
+              "Notification.module.css": null
+            },
+            "SideBar -- ignore for now": {},
+            "Header.jsx": null,
+            "Header.module.css": null
+          }
+        }
+      },
+      "1_MainPage": {
+        "BigNFTSlider": {
+          "BigNFTSlider.module.css": null,
+          "BigNFTSlider.jsx": null
+        },
+        "Category": {
+          "Category.jsx": null,
+          "Category.module.css": null
+        },
+        "Introduction": {
+          "Introduction.jsx": null,
+          "Introduction.module.css": null
+        },
+        "Service": {
+          "Service.jsx": null,
+          "Service.module.css": null
+        },
+        "2_Providers": {
+          "Providers.jsx": null
+        }
+      },
+      "lib": {
+        "img.js": null,
+        "prisma.js": null
+      }
+    }
+  },
+  "test": {
+    "Lock.js": null
+  },
+  ".env": null,
+  ".gitignore": null,
+  "eslint.config.mjs": null,
+  "hardhat.config.cjs": null,
+  "info.txt": null,
+  "jsconfig.json": null,
+  "next.config.mjs": null,
+  "package-lock.json": null,
+  "package.json": null,
+  "README.md": null
+}

@@ -1,3 +1,4 @@
+// src/components/1_MainPage/Category/Category.jsx
 import React from "react";
 import Image from "next/image";
 import { BsCircleFill } from "react-icons/bs";

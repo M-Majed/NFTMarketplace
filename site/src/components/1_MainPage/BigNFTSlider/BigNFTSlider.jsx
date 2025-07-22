@@ -1,5 +1,5 @@
+// src/components/1_MainPage/BigNFTSlider/BigNFTSlider.jsx
 'use client'
-
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { AiFillFire, AiFillHeart, AiOutlineHeart } from "react-icons/ai";

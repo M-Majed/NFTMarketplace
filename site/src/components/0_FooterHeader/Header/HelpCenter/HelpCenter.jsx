@@ -1,3 +1,4 @@
+// src/components/0_FooterHeader/Header/HelpCenter/HelpCenter.jsx
 import React from 'react'
 import Link from 'next/link'
 import style from "./HelpCenter.module.css"

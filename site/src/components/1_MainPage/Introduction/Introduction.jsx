@@ -1,3 +1,4 @@
+// src/components/1_MainPage/Introduction/Introduction.jsx
 import React from "react";
 
 //INTERNAL IMPORT

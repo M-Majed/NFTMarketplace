@@ -1,3 +1,4 @@
+// src/components/0_FooterHeader/Header/Notification/Notification.jsx
 import React from 'react'
 //$ better performance than default html img 
 import Image from 'next/image'
