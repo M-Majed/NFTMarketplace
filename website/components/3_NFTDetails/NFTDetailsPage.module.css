@@ -1,8 +1,0 @@
-.NFTDetailsPage{
-    margin-block: 5rem;
-    width: 80%;
-    margin:  0 auto;
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 5rem;
-}

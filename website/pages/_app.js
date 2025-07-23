@@ -1,14 +1,14 @@
-import "../styles/globals.css"; // or your CSS file path
-import {Footer, Header} from "../components/index";
+import "../styles/globals.css";
 
-const MyApp = ({ Component, pageProps }) => {
-  return(
-    <div >
-      <Header/>
-      <Component {...pageProps} />
-      <Footer/>
-    </div>
-  );
-}
+//INTRNAL IMPORT
+import { NavBar, Footer } from "../components/componentsindex";
+
+const MyApp = ({ Component, pageProps }) => (
+  <div>
+    <NavBar />
+    <Component {...pageProps} />
+    <Footer />
+  </div>
+);
 
 export default MyApp;
