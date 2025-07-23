@@ -1,0 +1,24 @@
+
+.service{
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+.service_box{
+    display: flex;
+    text-align: center;
+    gap: 25px;
+}
+
+.service_box_item_step{
+    margin-block: 20px;
+}
+
+.service_box_item_step span{
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color:  white;
+    color: black;
+}
+

@@ -1,0 +1,11 @@
+
+.discover{
+    padding: 3px 4px;
+    transition: 0.2s;
+    border-radius: 5px;
+}
+
+.discover:hover{
+    background-color: white;
+    color: black;
+}

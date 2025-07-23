@@ -1,0 +1,97 @@
+.header{
+    padding-block: 30px;
+    width: 80%;
+    margin:  0 auto;
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.header_container_left{
+    display: flex;
+    align-items:  center;
+    gap: 20px;
+    flex: 1;
+}
+
+
+.header_container_left_box_input{
+    width: 40%;
+    border: 1px solid #ffffff;
+    display: flex;
+    padding-inline: 5px;
+    border-radius: 15px;
+}
+
+.header_container_left_box_input input{
+    width: 90%;
+    border: none;
+    background-color: transparent;
+    font-size: 15px;
+    outline: none;
+}
+
+.header_container_left_searchbtn{
+    background-color: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.header_container_right{
+    display: flex;
+    align-items: center;
+    flex: 0.5;
+    justify-content: space-between;
+}
+
+.header_container_right_discover,
+.header_container_right_help,
+.header_container_right_notification,
+.header_container_right_button,
+.header_container_right_profile{
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+}
+
+.header_container_right_discover_box,
+.header_container_right_help_box,
+.header_container_right_notification_box,
+.header_container_right_profile_box{
+    position: absolute;
+    padding: 10px 10px;
+    box-shadow: white 0px 0px 5px;
+    font-size: 15px;
+    width: 300%;
+    border-radius: 15px;
+    background-color: black;
+    z-index: 20;
+}
+.header_container_right_help_box{
+    width: 200%;
+}
+.header_container_right_notification_box{
+    width: 1000%;
+    margin-top: 20px;
+}
+.header_container_right_profile_box{
+    width: 400%;
+}
+
+.header_container_right_notification_icon{
+    font-size: 25px;
+}
+
+.header_container_right_profileImg{
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+}
+
+
+
+
