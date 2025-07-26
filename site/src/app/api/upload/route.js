@@ -6,15 +6,15 @@ import imageSize from "image-size";
 import fs from "fs";
 import path from "path";
 
-export const runtime = "nodejs"; // ensure Node.js runtime for fs/image-size
+export const runtime = "nodejs";
 
 const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file");
-    const itemName = formData.get("itemName");
+    const imageField = formData.get("image");
+    const name = formData.get("name");
     const description = formData.get("description");
     const category = formData.get("category");
     const price = parseFloat(formData.get("price"));
@@ -26,62 +26,77 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    if (!(file && itemName && description && category && price)) {
+    if (!(imageField && name && description && category && price)) {
       return NextResponse.json(
-        {
-          error: "Missing one of: file, itemName, description, category, price",
-        },
+        { error: "Missing one of: image, name, description, category, price" },
         { status: 400 }
       );
     }
 
-    // ─── Save the uploaded image ────────────────────────────────────────────
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
-    const filename = `${Date.now()}-${file.name}`;
-    fs.writeFileSync(path.join(uploadsDir, filename), buffer);
+    let imageUrl;
+    let width;
+    let height;
 
-    // ─── Extract dimensions ────────────────────────────────────────────────
-    const { width, height } = imageSize(buffer);
+    // Handle either a Pinata IPFS URL or an uploaded file
+    if (typeof imageField === "string") {
+      // imageField is a URL
+      imageUrl = imageField;
+      // Fetch remote image to get dimensions
+      const response = await fetch(imageUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const dimensions = imageSize(buffer);
+      width = dimensions.width;
+      height = dimensions.height;
+    } else {
+      // imageField is a File upload
+      const buffer = Buffer.from(await imageField.arrayBuffer());
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+      const imagename = `${Date.now()}-${imageField.name}`;
+      fs.writeFileSync(path.join(uploadsDir, imagename), buffer);
+      const dimensions = imageSize(buffer);
+      width = dimensions.width;
+      height = dimensions.height;
+      imageUrl = `/uploads/${imagename}`;
+    }
 
-    // ─── Reject images outside 200×200–3500×3500 ─────────────────────────
+    // Validate dimensions
     if (width < 200 || height < 200 || width > 3500 || height > 3500) {
       return NextResponse.json(
         { error: "Image must be between 200×200 and 3500×3500 pixels." },
         { status: 400 }
       );
     }
-    // ─── 1) Create the NFT, connecting it to user 1 as owner ──────────────
+
+    // Create NFT record
     const tokenId = uuidv4();
     const nft = await prisma.nFT.create({
       data: {
-        title: itemName,
-        description, // your user‐entered description
-        imageUrl: `/uploads/${filename}`,
-        category, // must match your Category enum
+        title: name,
+        description,
+        imageUrl,
+        category,
         width,
         height,
-        tokenId, // unique on‐chain token ID
-        contractAddress: "", // blank for now
+        tokenId,
+        contractAddress: "",
         metadata: {
-          title: itemName,
+          title: name,
           width,
           height,
           tokenId,
           contractAddress: "",
         },
-        owner: {
-          connect: { walletAddress: address },
-        },
+        owner: { connect: { walletAddress: address } },
       },
     });
 
-    // ─── 2) Create the Listing for that same user ─────────────────────────
+    // Create listing
     const listing = await prisma.listing.create({
       data: {
         price,
-        status: "ACTIVE", // your enum ListingStatus
+        status: "ACTIVE",
         nft: { connect: { id: nft.id } },
         seller: { connect: { walletAddress: address } },
         description,

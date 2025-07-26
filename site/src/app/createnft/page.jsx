@@ -1,34 +1,37 @@
 // src/app/createnft/page.jsx
 "use client";
-import React, { useState } from "react";
-import { MdOutlineAttachFile } from "react-icons/md";
-import { FaPercent } from "react-icons/fa";
-import { AiTwotonePropertySafety } from "react-icons/ai";
+import React, { useState, useContext } from "react";
 import { TiTick } from "react-icons/ti";
 import Image from "next/image";
 import { useAccount } from "wagmi";
 import Style from "./page.module.css";
-import img from '@/lib/img'
+import img from "@/lib/img";
 import DropZone from "./DropZone/DropZone";
 import Button from "@/components/_Shared/Button/Button";
-
+import { useRouter } from "next/navigation";
+import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
+import { redirect } from "next/dist/server/api-utils";
 
 const createnft = () => {
   const [active, setActive] = useState(0);
-  const [file, setFile] = useState(null);
-  const [itemName, setItemName] = useState("");
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(0);
   const [price, setPrice] = useState(0);
+  const [image, setImage] = useState(null);
+
   const { address, isConnected } = useAccount();
+  const { uploadToIPFS, createNFT } = useContext(NFTMarketplaceContext);
+
+  const router = useRouter();
 
   const handleUpload = async () => {
     if (!isConnected) return alert("Connect your wallet first");
-    if (!file) return alert("Please choose an image first");
+    if (!image) return alert("Please choose an image first");
 
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("itemName", itemName);
+    formData.append("image", image);
+    formData.append("name", name);
     formData.append("description", description);
     formData.append("category", category);
     formData.append("price", price);
@@ -41,7 +44,19 @@ const createnft = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      alert("Upload successful!");
+      await createNFT(
+        name,
+        price,
+        image,
+        description,
+        router
+        // website,
+        // royalties,
+        // fileSize,
+        // category,
+        // properties
+      );
+      router.push("/");
     } catch (err) {
       alert("Upload failed: " + err.message);
     }
@@ -77,14 +92,11 @@ const createnft = () => {
   return (
     <div className={Style.upload}>
       <DropZone
-        onFileSelected={setFile}
-        title="JPG, PNG, WEBM , MAX 100MB"
-        heading="Drag & drop file"
-        subHeading="or Browse media on your device"
-        itemName={itemName}
+        name={name}
         description={description}
         category={category}
-        image={img.upload}
+        setImage={setImage}
+        uploadToIPFS={uploadToIPFS}
       />
 
       <div className={Style.upload_box}>
@@ -94,7 +106,7 @@ const createnft = () => {
             type="text"
             placeholder="shoaib bhai"
             className={Style.upload_box_input_itemName}
-            onChange={(e) => setItemName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
 
@@ -148,7 +160,12 @@ const createnft = () => {
           </div>
           <div className={Style.upload_box_Price_right}>
             <h2>You receive:</h2>
-            <input type="text" className={Style.upload_box_Price_itemPrice} value={(price * 0.87).toFixed(5)} readOnly />
+            <input
+              type="text"
+              className={Style.upload_box_Price_itemPrice}
+              value={(price * 0.87).toFixed(5)}
+              readOnly
+            />
           </div>
         </div>
 

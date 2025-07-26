@@ -1,9 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-      images: {
+  reactStrictMode: true,
+  swcMinify: true,
+  images: {
     domains: ["gateway.pinata.cloud"],
     formats: ["image/avif", "image/webp"],
   },
-};
+}
 
-export default nextConfig;
+module.exports = nextConfig
