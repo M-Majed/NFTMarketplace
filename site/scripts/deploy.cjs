@@ -2,26 +2,21 @@
 const hre = require("hardhat");
 
 async function main() {
-  // Compile if needed
   await hre.run("compile");
 
   // Get the factory and deploy
-  const Factory    = await hre.ethers.getContractFactory("NFTMarketplace");
+  const Factory    = await hre.ethers.getContractFactory("Marketplace");
   const contract   = await Factory.deploy();
+  await contract.waitForDeployment();
+  const deployedAddress = await contract.getAddress();
 
-  // Ethers v6: waitForDeployment, v5: deployed()
-  if (typeof contract.waitForDeployment === "function") {
-    await contract.waitForDeployment();
-  } else {
-    await contract.deployed();
-  }
+  const Factory2    = await hre.ethers.getContractFactory("NFT");
+  const contract2   = await Factory2.deploy();
+  await contract2.waitForDeployment();
+  const deployedAddress2 = await contract2.getAddress();
 
-  // Ethers v6: getAddress(), v5: address
-  const deployedAddress = typeof contract.getAddress === "function"
-    ? await contract.getAddress()
-    : contract.address;
-
-  console.log("NFTMarketplace deployed to:", deployedAddress);
+  console.log("Marketplace deployed to:", deployedAddress);
+  console.log("NFT deployed to:", deployedAddress2);
 }
 
 main()

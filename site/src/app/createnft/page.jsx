@@ -50,11 +50,6 @@ const createnft = () => {
         image,
         description,
         router
-        // website,
-        // royalties,
-        // fileSize,
-        // category,
-        // properties
       );
       router.push("/");
     } catch (err) {
