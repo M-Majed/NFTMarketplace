@@ -65,13 +65,19 @@ export default function MarketplacePage({ searchParams }) {
     const {fetchNFTs} = useContext(NFTMarketplaceContext);
     const [nfts, setNfts] = useState([]);
     const [nftscCopy, setNftscopy] = useState([]);
-    useEffect(() => {
-      fetchNFTs().then((item) => {
-        setNfts(item.reverse());
-        setNftscopy(item);
-        console.log("NFTs fetched:", nfts);
-      });
-    }, []);
+    
+      useEffect(() => {
+        (async () => {
+          try {
+            const items = await fetchNFTs();
+            setNfts(items.reverse());
+            setNftscopy(items);
+            console.log("fetched items:", items);
+          } catch (err) {
+            console.error("❌ fetchNFTs threw:", err);
+          }
+        })();
+      }, [fetchNFTs]);
 
   return (
     <div>

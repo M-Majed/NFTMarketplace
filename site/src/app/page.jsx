@@ -6,6 +6,7 @@ import BigNFTSilder from "@/components/1_MainPage/BigNFTSlider/BigNFTSlider";
 import Category from "@/components/1_MainPage/Category/Category";
 import { prisma } from "@/lib/prisma";
 export const revalidate = 60; // optional ISR
+import { fetchNFTs } from "@/context/NFTMarketplaceContext";
 
 export default async function Home() {
   // 1) Define your categories

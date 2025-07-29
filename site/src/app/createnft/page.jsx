@@ -1,6 +1,6 @@
 // src/app/createnft/page.jsx
 "use client";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { TiTick } from "react-icons/ti";
 import Image from "next/image";
 import { useAccount } from "wagmi";
@@ -10,9 +10,9 @@ import DropZone from "./DropZone/DropZone";
 import Button from "@/components/_Shared/Button/Button";
 import { useRouter } from "next/navigation";
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
-import { redirect } from "next/dist/server/api-utils";
 
 const createnft = () => {
+
   const [active, setActive] = useState(0);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -21,7 +21,7 @@ const createnft = () => {
   const [image, setImage] = useState(null);
 
   const { address, isConnected } = useAccount();
-  const { uploadToIPFS, createToken, createMarketplaceItem } = useContext(NFTMarketplaceContext);
+  const { uploadToIPFS, createNFT } = useContext(NFTMarketplaceContext);
 
   const router = useRouter();
 
@@ -44,9 +44,7 @@ const createnft = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      await createToken(
-        "asdasd"
-      );
+      await createNFT(name, price, image, description);
       router.push("/");
     } catch (err) {
       alert("Upload failed: " + err.message);

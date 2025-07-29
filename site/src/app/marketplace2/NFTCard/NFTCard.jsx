@@ -1,7 +1,6 @@
 // src/app/marketplace/NFTCard/NFTCard.jsx
 "use client";
 import React from "react";
-import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { BsImages } from "react-icons/bs";
 import Image from "next/image";
 import Filter from "./Filter/Filter";
@@ -11,11 +10,7 @@ import Title from "../../../components/_Shared/Title/Title";
 import Link from "next/link";
 
 export default function NFTCard({ items }) {
-  // const [like, setLike] = useState(true);
 
-  // const likeNft = () => {
-  //   setLike(!like);
-  // };
 
   return (
     <div className={Style.NFTCard}>
@@ -23,7 +18,6 @@ export default function NFTCard({ items }) {
         heading="Discover NFTs"
         paragraph="Explore the latest and greatest NFTs"
       />
-      {/* tell Filter what’s selected and how to toggle */}
       <Filter />
 
       {items.map((listing) => (
@@ -39,17 +33,6 @@ export default function NFTCard({ items }) {
               />
               <div className={Style.NFTCard_box_overlay}>
                 <div className={Style.NFTCard_box_overlay_update}>
-                  {/* <div className={Style.NFTCard_box_overlay_update_left}>
-                    <div className={Style.NFTCard_box_overlay_update_left_like} onClick={() => likeNft()}>
-                      {like ? (<AiOutlineHeart />) : (<AiFillHeart className={Style.NFTCard_box_overlay_update_left_like_icon}/>)}
-                      {""} 22
-                    </div>
-                  </div> */}
-
-                  {/* <div className={Style.NFTCard_box_overlay_update_right}>
-                    <p>Remaining time</p>
-                    <p>3h : 15m : 20s</p>
-                  </div> */}
                 </div>
 
                 <div className={Style.NFTCard_box_overlay_update_details}>
