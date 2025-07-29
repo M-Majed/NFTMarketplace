@@ -129,8 +129,7 @@ contract Marketplace is ReentrancyGuard {
         return items;
     }
     
-//!!!!!!!!!!!!!!!!!!!!!! till here
-    //$ returns only items that a user has purchased
+    //* returns only items that a user has purchased
     function fetchMyNFTs() public view returns (MarketplaceItem[] memory) {
         uint256 itemCount = 0;
         uint256 currentIndex = 0;
@@ -155,7 +154,7 @@ contract Marketplace is ReentrancyGuard {
         return items;
     }
 
-    //$ returns only items a user has created
+    //* returns only items a user has created
     function fetchItemsCreated()
         public
         view

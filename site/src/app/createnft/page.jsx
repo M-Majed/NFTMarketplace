@@ -21,7 +21,7 @@ const createnft = () => {
   const [image, setImage] = useState(null);
 
   const { address, isConnected } = useAccount();
-  const { uploadToIPFS, createNFT } = useContext(NFTMarketplaceContext);
+  const { uploadToIPFS, createToken, createMarketplaceItem } = useContext(NFTMarketplaceContext);
 
   const router = useRouter();
 
@@ -44,12 +44,8 @@ const createnft = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      await createNFT(
-        name,
-        price,
-        image,
-        description,
-        router
+      await createToken(
+        "asdasd"
       );
       router.push("/");
     } catch (err) {
