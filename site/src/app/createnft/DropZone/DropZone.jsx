@@ -6,18 +6,28 @@ import Image from "next/image";
 import img from "@/lib/img";
 
 export default function DropZone({
-  name,
-  description,
-  category,
   setImage,
-  uploadToIPFS,
+  // uploadToIPFS,
 }) {
   const [fileUrl, setFileUrl] = useState(null);
 
   const onDrop = useCallback(
     async (acceptedFiles) => {
-      const url = await uploadToIPFS(acceptedFiles[0]);
-      if (url) {
+      const file = acceptedFiles[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/api/upload-image", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Upload failed");
+
+        const url = data.url;
         const img = new window.Image();
         img.onload = () => {
           const { width, height } = img;
@@ -37,6 +47,9 @@ export default function DropZone({
           URL.revokeObjectURL(url);
         };
         img.src = url;
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Image upload failed: " + error.message);
       }
     },
     [setImage]

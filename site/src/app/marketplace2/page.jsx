@@ -59,25 +59,22 @@ export default function MarketplacePage({ searchParams }) {
   //   return `/marketplace?${params.toString()}`;
   // };
 
-
-
-
-    const {fetchNFTs} = useContext(NFTMarketplaceContext);
-    const [nfts, setNfts] = useState([]);
-    const [nftscCopy, setNftscopy] = useState([]);
-    
-      useEffect(() => {
-        (async () => {
-          try {
-            const items = await fetchNFTs();
-            setNfts(items.reverse());
-            setNftscopy(items);
-            console.log("fetched items:", items);
-          } catch (err) {
-            console.error("❌ fetchNFTs threw:", err);
-          }
-        })();
-      }, [fetchNFTs]);
+  const [nfts, setNfts] = useState([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/fetch-nfts");
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const items = await res.json();
+        setNfts(items.reverse());
+        console.log("fetched items:", items);
+      } catch (err) {
+        console.error("❌ fetchNFTs threw:", err);
+      }
+    })();
+  }, []);
 
   return (
     <div>

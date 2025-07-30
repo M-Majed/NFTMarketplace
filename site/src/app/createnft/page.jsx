@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
 
 const createnft = () => {
-
   const [active, setActive] = useState(0);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -21,30 +20,30 @@ const createnft = () => {
   const [image, setImage] = useState(null);
 
   const { address, isConnected } = useAccount();
-  const { uploadToIPFS, createNFT } = useContext(NFTMarketplaceContext);
-
+  const { createSale } = useContext(NFTMarketplaceContext);
   const router = useRouter();
 
   const handleUpload = async () => {
     if (!isConnected) return alert("Connect your wallet first");
     if (!image) return alert("Please choose an image first");
-
-    const formData = new FormData();
-    formData.append("image", image);
-    formData.append("name", name);
-    formData.append("description", description);
-    formData.append("category", category);
-    formData.append("price", price);
-    formData.append("address", address);
+    if (!name || !description || !price)
+      return alert("Please fill all required fields");
 
     try {
-      const res = await fetch("/api/upload", {
+      // Send to backend for metadata IPFS
+      const res = await fetch("/api/create-metadata", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, description, image }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      await createNFT(name, price, image, description);
+      if (!res.ok) throw new Error(data.error || "Metadata creation failed");
+
+      const metadataUrl = data.url;
+      console.log(metadataUrl);
+
+      // Now call createSale on frontend with metadata URL
+      await createSale(metadataUrl, price, false, null);
       router.push("/");
     } catch (err) {
       alert("Upload failed: " + err.message);
@@ -81,11 +80,8 @@ const createnft = () => {
   return (
     <div className={Style.upload}>
       <DropZone
-        name={name}
-        description={description}
-        category={category}
         setImage={setImage}
-        uploadToIPFS={uploadToIPFS}
+        // uploadToIPFS={uploadToIPFS}
       />
 
       <div className={Style.upload_box}>
