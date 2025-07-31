@@ -24,51 +24,51 @@ export default async function MarketplacePage({ searchParams }) {
       ? catParam
       : [catParam]
     : [];
-  const priceFilter = {};
-  if (minPrice) priceFilter.gte = parseFloat(minPrice);
-  if (maxPrice) priceFilter.lte = parseFloat(maxPrice);
   const where = {
-    status: "ACTIVE",
-    ...(categories.length > 0
-      ? { nft: { category: { in: categories } } }
-      : {}),
-    ...(Object.keys(priceFilter).length > 0
-      ? { price: priceFilter }
-      : {}),
+    active: true,
+    ...(categories.length > 0 ? { category: { in: categories } } : {}),
     ...(search
       ? {
           OR: [
-            { nft: { title:       { contains: search } } },
+            { nft: { name: { contains: search } } },
             { nft: { description: { contains: search } } },
           ],
         }
       : {}),
   };
 
-  // get total count for pagination
-  const totalCount = await prisma.listing.count({ where });
-
-  // fetch only the slice we need
-  const listings = await prisma.listing.findMany({
+  // fetch all matching non-price filters, sorted by createdAt desc (newest first)
+  const allListings = await prisma.listing.findMany({
     where,
     include: { nft: true, seller: true },
-    skip,
-    take,
+    orderBy: { createdAt: 'desc' },
   });
+
+  // parse min/max, default min to 0, max to Infinity
+  const min = minPrice ? parseFloat(minPrice) : 0;
+  const max = maxPrice ? parseFloat(maxPrice) : Infinity;
+
+  // filter numerically on price
+  const filtered = allListings.filter(l => {
+    const p = parseFloat(l.price);
+    return !isNaN(p) && p >= min && p <= max;
+  });
+
+  const totalCount = filtered.length;
+  const listings = filtered.slice(skip, skip + take);
 
   const totalPages = Math.ceil(totalCount / take);
 
   // helper to rebuild the querystring with a new page
   const buildHref = (page) => {
     const params = new URLSearchParams();
-    categories.forEach(cat => params.append("category", cat));
-    if (search)   params.set("search", search);
+    categories.forEach((cat) => params.append("category", cat));
+    if (search) params.set("search", search);
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     params.set("page", String(page));
     return `/marketplace?${params.toString()}`;
   };
-
   return (
     <div>
       <NFTCard items={listings} />
@@ -84,8 +84,9 @@ export default async function MarketplacePage({ searchParams }) {
             <Link
               key={pageNum}
               href={buildHref(pageNum)}
-              className={`${Style.pageLink} ${pageNum === currentPage ? Style.activePage : ""}`}
-            >
+              className={`${Style.pageLink} ${
+                pageNum === currentPage ? Style.activePage : ""
+              }`}>
               {pageNum}
             </Link>
           );

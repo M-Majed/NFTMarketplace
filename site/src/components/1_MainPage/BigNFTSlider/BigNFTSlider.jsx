@@ -14,14 +14,12 @@ export default function BigNFTSilder({ listings }) {
 
  // include both ETH and USD in each slide
  const sliderData = listings.map(item => ({
-   title:    item.nft.title,
-   id:       item.id,
-   name:     item.seller.name,
-   Category: item.nft.category,
+   title:    item.nft.name,
+   name:     item.seller.walletAddress,
+   Category: item.category,
    priceEth: item.price,
    priceUsd: item.usdPrice,
-   image:    item.seller.avatarUrl,
-   nftImage: item.nft.imageUrl,
+   image: item.nft.imageUrl,
  }));
 
   const inc = useCallback(() => {
@@ -45,13 +43,13 @@ export default function BigNFTSilder({ listings }) {
 
         <div className={Style.bigNFTSlider_left_creator}>
           <div className={Style.bigNFTSlider_left_creator_profile}>
-            <Image
+            {/* <Image
               className={Style.bigNFTSlider_left_creator_profile_img}
               src={current.image}
               alt="creator avatar"
               width={50}
               height={50}
-            />
+            /> */}
             <div className={Style.bigNFTSlider_left_creator_profile_info}>
               <p>Creator</p>
               <h4>
@@ -80,33 +78,6 @@ export default function BigNFTSilder({ listings }) {
             </p>
           </div>
 
-          {/* <p className={Style.bigNFTSlider_left_bidding_box_auction}>
-            <MdTimer className={Style.bigNFTSlider_left_bidding_box_icon} />
-            <span>Auction ending in</span>
-          </p>
-
-          <div className={Style.bigNFTSlider_left_bidding_box_timer}>
-            <div className={Style.bigNFTSlider_left_bidding_box_timer_item}>
-              <p>{sliderData[idNumber].time.days}</p>
-              <span>Days</span>
-            </div>
-
-            <div className={Style.bigNFTSlider_left_bidding_box_timer_item}>
-              <p>{sliderData[idNumber].time.hours}</p>
-              <span>Hours</span>
-            </div>
-
-            <div className={Style.bigNFTSlider_left_bidding_box_timer_item}>
-              <p>{sliderData[idNumber].time.minutes}</p>
-              <span>mins</span>
-            </div>
-
-            <div className={Style.bigNFTSlider_left_bidding_box_timer_item}>
-              <p>{sliderData[idNumber].time.seconds}</p>
-              <span>secs</span>
-            </div>
-          </div> */}
-
           <div className={Style.bigNFTSlider_left_buttons}>
             <button className={Style.bigNFTSlider_left_buttons_button} onClick={() => {}}> Buy </button>
             <button className={Style.bigNFTSlider_left_buttons_button} onClick={() => {}}> View </button>
@@ -128,17 +99,12 @@ export default function BigNFTSilder({ listings }) {
       <div className={Style.bigNFTSlider_right}>
         <div className={Style.bigNFTSlider_right_box}>
           <Image
-            src={current.nftImage}
-            alt={current.title}
+            src={current.image}
+            alt={current.name}
             width={400}
             height={400}
             className={Style.bigNFTSlider_right_box_img}
           />
-
-          {/* <div className={Style.bigNFTSlider_right_box_like}>
-            <AiFillHeart />
-            <span>{sliderData[idNumber].like}</span>
-          </div> */}
         </div>
       </div>
     </div>

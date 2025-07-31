@@ -1,3 +1,4 @@
+// src/context/NFTMarketplaceContext.js
 "use client";
 import React from "react";
 import Web3Modal from "web3modal";
@@ -31,7 +32,6 @@ const connectingWithSmartContract = async () => {
 export const NFTMarketplaceContext = React.createContext();
 
 export const NFTMarketplaceProvider = ({ children }) => {
-
   const createSale = async (url, formInputPrice, isReselling, tokenId) => {
     try {
       const price = ethers.parseUnits(formInputPrice, "ether");
@@ -39,16 +39,34 @@ export const NFTMarketplaceProvider = ({ children }) => {
         await connectingWithSmartContract();
       const listingPrice = await readContract.getListingPrice();
 
-    const tx = !isReselling
-      // mint & list
-      ? await writeContract.createToken(url, price, { value: listingPrice })
-      // resell existing token (use tokenId, not url!)
-      : await writeContract.resellToken(tokenId, price, { value: listingPrice });
-
-      await tx.wait();
-          const contractBalance = await readContract.getBalance();
-    console.log("Contract balance after sale:", ethers.formatEther(contractBalance));
-
+      const tx = !isReselling
+        ? // mint & list
+          await writeContract.createToken(url, price, { value: listingPrice })
+        : // resell existing token (use tokenId, not url!)
+          await writeContract.resellToken(tokenId, price, {
+            value: listingPrice,
+          });
+      const receipt = await tx.wait();
+      const contractBalance = await readContract.getBalance();
+      console.log(
+        "Contract balance after sale:",
+        ethers.formatEther(contractBalance)
+      );
+      if (!isReselling) {
+        const iface = writeContract.interface;
+        let parsedLog;
+        for (const log of receipt.logs) {
+          try {
+            parsedLog = iface.parseLog(log);
+            if (parsedLog.name === "MarketItemCreated") {
+              return parsedLog.args.tokenId;
+            }
+          } catch {}
+        }
+        if (!parsedLog) {
+          throw new Error("Failed to parse tokenId from event");
+        }
+      }
     } catch (error) {
       console.error("Error creating sale:", error);
     }
@@ -56,8 +74,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
 
   const fetchMyNFTsOrListedNFTs = async (type) => {
     try {
-      const { readContract } =
-        await connectingWithSmartContract();
+      const { readContract } = await connectingWithSmartContract();
       const data =
         type == "ListedNFTs"
           ? await readContract.fetchItemsListed()

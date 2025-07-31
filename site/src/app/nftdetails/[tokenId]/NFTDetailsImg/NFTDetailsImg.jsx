@@ -11,7 +11,7 @@ export default function NFTDetailsImg({ nft, listing }) {
     <div className={Style.NFTDetailsImg}>
         <Image
           src={nft.imageUrl}
-          alt={nft.title}
+          alt={nft.name}
           width={nft.width}
           height={nft.height}
           objectFit="cover"

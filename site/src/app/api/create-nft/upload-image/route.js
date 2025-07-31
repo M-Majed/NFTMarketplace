@@ -1,3 +1,4 @@
+// src/app/api/create-nft/upload-image/route.js
 import axios from 'axios';
 import FormData from 'form-data';
 

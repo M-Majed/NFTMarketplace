@@ -7,13 +7,13 @@ import NFTDescription from "./NFTDescription/NFTDescription";
 export const revalidate = 60;
 
 export default async function NFTDetailsPage({ params }){
-  const { nftId } = params;
+  const { tokenId } = params;
 
   // Find the active listing by the NFT’s tokenId
   const listing = await prisma.listing.findFirst({
     where: {
-      status: 'ACTIVE',
-      nft: { tokenId: nftId },
+      active: true,
+      nft: { tokenId: parseInt(tokenId) },
     },
     include: {
       nft: true,      // brings in title, description, imageUrl, tokenId, etc.

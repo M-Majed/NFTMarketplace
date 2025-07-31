@@ -1,23 +1,13 @@
 // src/app/marketplace/NFTCard/Filter/Filter.jsx
 import React, { useState } from "react";
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import {
-  FaFilter,
-  FaAngleDown,
-  FaAngleUp,
-} from "react-icons/fa";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { FaFilter, FaAngleDown, FaAngleUp } from "react-icons/fa";
 import Style from "./Filter.module.css";
 
-const categories = [
-  "Art",
-  "Game",
-  "Nature",
-  "Sport",
-  "Portrait",
-  "Animal",
-];
 
 const Filter = ({}) => {
+  const categories = ["Art", "Game", "Nature", "Sport", "Portrait", "Animal"];
+
   const [filterOpen, setFilterOpen] = useState(false);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -31,49 +21,60 @@ const Filter = ({}) => {
     setFilterOpen(!filterOpen);
   };
 
-  const handleInputChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    if (value > 1000) {
-      e.target.value = 1000;
+  const handleInputChange = (e, setter) => {
+    const value = e.target.value;
+    // allow empty or valid positive number with up to 18 decimals (for ETH precision)
+    if (value === '' || /^(\d+(\.\d{0,18})?|\.\d{0,18})$/.test(value)) {
+      setter(value);
     }
   };
 
-const handleCategoryClick = (cat) => {
+  const handleCategoryClick = (cat) => {
     // read all existing category params
-    const existing = params.getAll('category');
+    const existing = params.getAll("category");
     // compute next set: toggle this cat
     const next = existing.includes(cat)
-      ? existing.filter(c => c !== cat)
+      ? existing.filter((c) => c !== cat)
       : [...existing, cat];
     // rebuild URLSearchParams
     const sp = new URLSearchParams(params.toString());
-    sp.delete('category');
-    next.forEach(c => sp.append('category', c));
+    sp.delete("category");
+    next.forEach((c) => sp.append("category", c));
     router.push(`${path}?${sp.toString()}`);
-};
+  };
+
+  const handlePriceFilter = () => {
+    const sp = new URLSearchParams(params.toString());
+    if (minPrice) sp.set('minPrice', minPrice);
+    else sp.delete('minPrice');
+    if (maxPrice) sp.set('maxPrice', maxPrice);
+    else sp.delete('maxPrice');
+    router.push(`${path}?${sp.toString()}`);
+  };
 
   return (
     <div className={Style.filter}>
       <div className={Style.filter_box}>
-         <div className={Style.filter_box_left}>
-           {categories.map((cat) => {
-             const selected = params.getAll('category').includes(cat);
-             return (
-               <button
-                 key={cat}
+        <div className={Style.filter_box_left}>
+          {categories.map((cat) => {
+            const selected = params.getAll("category").includes(cat);
+            return (
+              <button
+                key={cat}
                 onClick={() => handleCategoryClick(cat)}
-                 className={[
-                   Style.filter_box_left_button,
-                   selected ? Style.selected : ""
-                 ].join(" ")}
-               >
-                 {cat}
-               </button>
-             );
-           })}
-         </div>
+                className={[
+                  Style.filter_box_left_button,
+                  selected ? Style.selected : "",
+                ].join(" ")}>
+                {cat}
+              </button>
+            );
+          })}
+        </div>
         <div className={Style.filter_box_right}>
-          <div className={Style.filter_box_right_box} onClick={() => openFilter()}>
+          <div
+            className={Style.filter_box_right_box}
+            onClick={() => openFilter()}>
             <FaFilter />
             <span>Filter</span> {filterOpen ? <FaAngleUp /> : <FaAngleDown />}
           </div>
@@ -85,36 +86,24 @@ const handleCategoryClick = (cat) => {
           <div className={Style.filter_box_items_box}>
             <p>Min price:</p>
             <input
-              type="number"
+              type="text"
               placeholder="ETH"
               value={minPrice}
-              onChange={e => {
-                handleInputChange(e);
-                setMinPrice(e.target.value);
-              }}
+              onChange={(e) => handleInputChange(e, setMinPrice)}
             />
             <p>Max price:</p>
             <input
-              type="number"
+              type="text"
               placeholder="ETH"
               value={maxPrice}
-              onChange={e => {
-                handleInputChange(e);
-                setMaxPrice(e.target.value);
-              }}
+              onChange={(e) => handleInputChange(e, setMaxPrice)}
             />
           </div>
           <button
             className={Style.filter_box_items_button}
             onClick={() => {
-              const sp = new URLSearchParams(params.toString());
-              if (minPrice) sp.set("minPrice", minPrice);
-              else sp.delete("minPrice");
-              if (maxPrice) sp.set("maxPrice", maxPrice);
-              else sp.delete("maxPrice");
-              router.push(`${path}?${sp.toString()}`);
-            }}
-           >
+              handlePriceFilter();
+            }}>
             Apply Filter
           </button>
         </div>

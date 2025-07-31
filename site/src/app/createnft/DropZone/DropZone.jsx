@@ -7,7 +7,6 @@ import img from "@/lib/img";
 
 export default function DropZone({
   setImage,
-  // uploadToIPFS,
 }) {
   const [fileUrl, setFileUrl] = useState(null);
 
@@ -16,11 +15,16 @@ export default function DropZone({
       const file = acceptedFiles[0];
       if (!file) return;
 
+      if (file.size > 50 * 1024 * 1024) {
+        alert("File too large. Maximum size is 50MB.");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", file);
 
       try {
-        const res = await fetch("/api/upload-image", {
+        const res = await fetch("/api/create-nft/upload-image", {
           method: "POST",
           body: formData,
         });
@@ -31,15 +35,15 @@ export default function DropZone({
         const img = new window.Image();
         img.onload = () => {
           const { width, height } = img;
-          // enforce your 200×200 to 3500×3500px rule
-          if (width < 200 || height < 200 || width > 3500 || height > 3500) {
-            alert("Image must be between 200×200 and 3500×3500 pixels.");
+          // enforce your 512×512 to 4000×4000px rule
+          if (width < 512 || height < 512 || width > 4000 || height > 4000) {
+            alert("Image must be between 512×512 and 4000×4000 pixels.");
             URL.revokeObjectURL(url);
             return;
           }
           // if OK, show preview and notify parent
           setFileUrl(url);
-          setImage(url);
+          setImage({ url, width, height, size: file.size });
           console.log(url);
         };
         img.onerror = () => {

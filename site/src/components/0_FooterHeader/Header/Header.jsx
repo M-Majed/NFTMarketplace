@@ -46,7 +46,7 @@ const Header = () => {
   // when a wallet connects, ensure the user exists in our DB
   useEffect(() => {
     if (!isConnected || !address) return;
-    fetch("/api/users", {
+    fetch("/api/add-user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ walletAddress: address }),

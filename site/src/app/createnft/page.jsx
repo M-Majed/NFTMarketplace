@@ -23,18 +23,18 @@ const createnft = () => {
   const { createSale } = useContext(NFTMarketplaceContext);
   const router = useRouter();
 
-  const handleUpload = async () => {
+const handleUpload = async () => {
     if (!isConnected) return alert("Connect your wallet first");
-    if (!image) return alert("Please choose an image first");
+    if (!image?.url) return alert("Please choose an image first"); // Updated check
     if (!name || !description || !price)
       return alert("Please fill all required fields");
 
     try {
       // Send to backend for metadata IPFS
-      const res = await fetch("/api/create-metadata", {
+      const res = await fetch("/api/create-nft/create-metadata", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, image }),
+        body: JSON.stringify({ name, description, image: image.url }), // Use image.url
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Metadata creation failed");
@@ -43,7 +43,29 @@ const createnft = () => {
       console.log(metadataUrl);
 
       // Now call createSale on frontend with metadata URL
-      await createSale(metadataUrl, price, false, null);
+      const tokenId = await createSale(metadataUrl, price, false, null);
+      // Save to database
+      const saveRes = await fetch("/api/create-nft/save-nft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tokenId: Number(tokenId),
+          name,
+          description,
+          imageUrl: image.url, // Use image.url
+          metadataUrl,
+          width: image.width,
+          height: image.height,
+          size: image.size,
+          price,
+          category,
+          address,
+        }),
+      });
+      const saveData = await saveRes.json();
+      if (!saveRes.ok)
+        throw new Error(saveData.error || "Save to database failed");
+
       router.push("/");
     } catch (err) {
       alert("Upload failed: " + err.message);
@@ -79,9 +101,7 @@ const createnft = () => {
 
   return (
     <div className={Style.upload}>
-      <DropZone
-        setImage={setImage}
-      />
+      <DropZone setImage={setImage} />
 
       <div className={Style.upload_box}>
         <div className={Style.upload_box_input}>

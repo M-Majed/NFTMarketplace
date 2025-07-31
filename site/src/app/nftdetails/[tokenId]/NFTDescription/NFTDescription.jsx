@@ -1,6 +1,6 @@
 // src/app/nftdetails/[nftId]/NFTDescription/NFTDescription.jsx
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   MdVerified,
@@ -24,7 +24,6 @@ import img from "@/lib/img";
 export default function NFTDescription({ nft, seller, price, usdPrice  }) {
   const [social, setSocial] = useState(false);
   const [NFTMenu, setNFTMenu] = useState(false);
-  const [owner, setOwner] = useState(false);
 
   const openSocial = () => {
     setSocial(!social);
@@ -83,19 +82,12 @@ export default function NFTDescription({ nft, seller, price, usdPrice  }) {
       </div>
       {/* //Part TWO */}
       <div className={Style.NFTDescription_profile}>
-        <h1>{nft.title}</h1>
+        <h1>{nft.name}</h1>
         <div className={Style.NFTDescription_profile_box}>
-          <Image
-            src={seller.avatarUrl}
-            alt={seller.name}
-            width={40}
-            height={40}
-            className={Style.NFTDescription_profile_box_img}
-          />
           <div className={Style.NFTDescription_profile_box_info}>
             <small>Creator</small> <br />
             <span>
-              {seller.name} <MdVerified />
+              {seller.walletAddress} <MdVerified />
             </span>
           </div>
         </div>

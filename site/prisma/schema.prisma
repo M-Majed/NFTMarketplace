@@ -43,6 +43,7 @@ model NFT {
 
   width  Int?
   height Int?
+  size   Int?
 
   owner   User   @relation("UserNFTs", fields: [ownerId], references: [id])
   ownerId String
