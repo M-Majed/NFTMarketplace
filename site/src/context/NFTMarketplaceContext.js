@@ -32,7 +32,6 @@ export const NFTMarketplaceContext = React.createContext();
 
 export const NFTMarketplaceProvider = ({ children }) => {
 
-  //$ works fine
   const createSale = async (url, formInputPrice, isReselling, tokenId) => {
     try {
       const price = ethers.parseUnits(formInputPrice, "ether");
@@ -60,7 +59,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
       const { readContract } =
         await connectingWithSmartContract();
       const data =
-        type == "fetchItemsListed"
+        type == "ListedNFTs"
           ? await readContract.fetchItemsListed()
           : await readContract.fetchMyNFTs();
       const items = await Promise.all(

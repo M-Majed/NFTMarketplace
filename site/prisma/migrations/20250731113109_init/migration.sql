@@ -1,59 +1,59 @@
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "name" TEXT NOT NULL,
     "walletAddress" TEXT NOT NULL,
-    "avatarUrl" TEXT,
-    "balance" REAL NOT NULL DEFAULT 0,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateTable
 CREATE TABLE "NFT" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "tokenId" TEXT NOT NULL,
-    "contractAddress" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "description" TEXT,
+    "tokenId" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
     "imageUrl" TEXT NOT NULL,
-    "metadata" JSONB,
-    "category" TEXT,
+    "metadata" TEXT NOT NULL,
     "width" INTEGER,
     "height" INTEGER,
     "ownerId" TEXT NOT NULL,
-    "addedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "NFT_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "Listing" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "nftId" TEXT NOT NULL,
+    "tokenId" INTEGER NOT NULL,
+    "price" TEXT NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "category" TEXT,
     "sellerId" TEXT NOT NULL,
-    "description" TEXT,
-    "price" REAL NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Listing_nftId_fkey" FOREIGN KEY ("nftId") REFERENCES "NFT" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Listing_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Listing_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Listing_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "NFT" ("tokenId") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "Transaction" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "nftId" TEXT NOT NULL,
+    "tokenId" INTEGER NOT NULL,
     "listingId" TEXT NOT NULL,
     "buyerId" TEXT NOT NULL,
     "sellerId" TEXT NOT NULL,
-    "price" REAL NOT NULL,
+    "price" TEXT NOT NULL,
+    "type" TEXT,
+    "txHash" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Transaction_nftId_fkey" FOREIGN KEY ("nftId") REFERENCES "NFT" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "Transaction_buyerId_fkey" FOREIGN KEY ("buyerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Transaction_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Transaction_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Transaction_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "NFT" ("tokenId") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_walletAddress_key" ON "User"("walletAddress");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Listing_nftId_key" ON "Listing"("nftId");
+CREATE UNIQUE INDEX "NFT_tokenId_key" ON "NFT"("tokenId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Listing_tokenId_key" ON "Listing"("tokenId");

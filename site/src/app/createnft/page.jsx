@@ -81,7 +81,6 @@ const createnft = () => {
     <div className={Style.upload}>
       <DropZone
         setImage={setImage}
-        // uploadToIPFS={uploadToIPFS}
       />
 
       <div className={Style.upload_box}>
