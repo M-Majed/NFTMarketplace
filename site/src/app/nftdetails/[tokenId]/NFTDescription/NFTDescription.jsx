@@ -21,9 +21,18 @@ import {
 import Style from "./NFTDescription.module.css";
 import img from "@/lib/img";
 
+import { useContext } from "react";
+import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
+import { useAccount } from "wagmi";
+import { useRouter } from "next/navigation";
+
 export default function NFTDescription({ nft, seller, price, usdPrice  }) {
   const [social, setSocial] = useState(false);
   const [NFTMenu, setNFTMenu] = useState(false);
+
+  const { buyNFT } = useContext(NFTMarketplaceContext);
+  const { address, isConnected } = useAccount();
+  const router = useRouter();
 
   const openSocial = () => {
     setSocial(!social);
@@ -33,6 +42,31 @@ export default function NFTDescription({ nft, seller, price, usdPrice  }) {
   const openNFTMenu = () => {
     setNFTMenu(!NFTMenu);
     setSocial(false);
+  };
+
+  const handleBuy = async () => {
+    if (!isConnected) return alert("Connect your wallet first");
+
+    try {
+      const txHash = await buyNFT({ tokenId: nft.tokenId, price });
+      if (!txHash) throw new Error("Transaction failed");
+
+      const res = await fetch("/api/buy-nft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tokenId: nft.tokenId,
+          buyerAddress: address,
+          price,
+          txHash,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Update failed");
+      router.push("/");
+    } catch (err) {
+      alert("Buy failed: " + err.message);
+    }
   };
 
   return (
@@ -102,7 +136,7 @@ export default function NFTDescription({ nft, seller, price, usdPrice  }) {
 
           <div className={Style.NFTDescription_profile_biding_box_buttons}>
             <button
-              onClick={() => {}}
+              onClick={handleBuy}
               className={
                 Style.NFTDescription_profile_biding_box_buttons_button
               }>

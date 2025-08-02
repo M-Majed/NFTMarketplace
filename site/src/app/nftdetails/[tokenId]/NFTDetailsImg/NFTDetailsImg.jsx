@@ -6,6 +6,8 @@ import Image from "next/image";
 //INTERNAL IMPORT
 import Style from "./NFTDetailsImg.module.css";
 import img from "@/lib/img";
+import { NFTMarketplaceAddress } from "@/context/constants";
+
 export default function NFTDetailsImg({ nft, listing }) {
   return (
     <div className={Style.NFTDetailsImg}>
@@ -19,13 +21,13 @@ export default function NFTDetailsImg({ nft, listing }) {
         />
       <div className={Style.NFTDetailsImg_description}>
         <p>
-          {listing.description ? listing.description : "No description available."}
+          {nft.description ? nft.description : "No description available."}
         </p>
         <small>{nft.width} x {nft.height} px</small>
         <p>
           <small>Contract Address</small>
           <br />
-          {nft.contractAddress}
+          {NFTMarketplaceAddress}
         </p>
         <p>
           <small>Token ID</small>

@@ -1,6 +1,6 @@
 // src/context/NFTMarketplaceContext.js
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Web3Modal from "web3modal";
 import { ethers } from "ethers";
 import { NFTMarketplaceAddress, NFTMarketplaceABI } from "./constants";
@@ -32,6 +32,7 @@ const connectingWithSmartContract = async () => {
 export const NFTMarketplaceContext = React.createContext();
 
 export const NFTMarketplaceProvider = ({ children }) => {
+  
   const createSale = async (url, formInputPrice, isReselling, tokenId) => {
     try {
       const price = ethers.parseUnits(formInputPrice, "ether");
@@ -111,12 +112,14 @@ export const NFTMarketplaceProvider = ({ children }) => {
 
   const buyNFT = async (nft) => {
     try {
-      const contract = await connectingWithSmartContract();
+      const { readContract, writeContract } =
+        await connectingWithSmartContract();
       const price = ethers.parseUnits(nft.price.toString(), "ether");
-      const transaction = await contract.createMarketSale(nft.tokenId, {
+      const transaction = await writeContract.createMarketSale(nft.tokenId, {
         value: price,
       });
       await transaction.wait();
+      return transaction.hash;
     } catch (error) {
       console.error("Error buying NFT:", error);
     }

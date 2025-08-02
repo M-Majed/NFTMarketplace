@@ -80,7 +80,14 @@ export default function BigNFTSilder({ listings }) {
 
           <div className={Style.bigNFTSlider_left_buttons}>
             <button className={Style.bigNFTSlider_left_buttons_button} onClick={() => {}}> Buy </button>
-            <button className={Style.bigNFTSlider_left_buttons_button} onClick={() => {}}> View </button>
+            <button
+              className={Style.bigNFTSlider_left_buttons_button}
+              onClick={() => {
+                window.location.href = `/nftdetails/${listings[idx].nft.tokenId}`;
+              }}
+            >
+              View
+            </button>
           </div>
         </div>
 
