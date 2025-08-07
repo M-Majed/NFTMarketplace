@@ -19,7 +19,7 @@ export async function GET(request) {
     // 1) Find the user by walletAddress
     const user = await prisma.user.findUnique({
       where: { walletAddress: address },
-      select: { id: true, name: true, avatarUrl: true },
+      select: { id: true },
     });
     if (!user) {
       return NextResponse.json(
@@ -32,14 +32,14 @@ export async function GET(request) {
     const nfts = await prisma.nFT.findMany({
       where: { ownerId: user.id },
       // Pull in the metadata JSON so the client can read title/image/etc.
-      select: { id: true, title: true, imageUrl: true, tokenId:true  },
+      select: { id: true, name: true, imageUrl: true, tokenId:true  },
     });
 
     // 3) Fetch their active listings
     const listings = await prisma.listing.findMany({
-      where: { sellerId: user.id, status: "ACTIVE" },
+      where: { sellerId: user.id, active: true },
       include: {
-        nft: { select: { id: true, title:true  } },
+        nft: { select: { id: true, name:true  } },
       },
     });
 
@@ -52,7 +52,7 @@ export async function GET(request) {
         ],
       },
       include: {
-        nft:    { select: { id: true, title: true } },
+        nft:    { select: { id: true, name: true } },
         buyer:  { select: { walletAddress: true } },
         seller: { select: { walletAddress: true } },
       },

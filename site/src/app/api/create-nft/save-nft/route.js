@@ -39,7 +39,7 @@ export async function POST(request) {
         width,
         height,
         size,
-        ownerId: user.id,
+        ownerId: "ContractId",
       },
     });
 

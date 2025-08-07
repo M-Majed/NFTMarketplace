@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Style from "./page.module.css";
-import img from '@/lib/img'
+import img from "@/lib/img";
 import Image from "next/image";
 import { MdDeleteForever, MdEdit } from "react-icons/md";
 import { useAccount, useBalance } from "wagmi";
@@ -67,7 +67,7 @@ const Profile = () => {
           <h2>
             $
             {profileData.listings
-              .reduce((sum, listing) => sum + listing.price, 0)
+              .reduce((sum, listing) => sum + parseFloat(listing.price), 0)
               .toFixed(2)}
           </h2>
           <p>Portfolio Value</p>
@@ -108,11 +108,11 @@ const Profile = () => {
                     src={nft.imageUrl}
                     width={200}
                     height={200}
-                    alt={nft.title}
+                    alt={nft.name}
                     className={Style.Profile_MyNFTs_NFTGrid_card_img}
                   />
                   <div className={Style.Profile_MyNFTs_NFTGrid_card_info}>
-                    <h3>{nft.title}</h3>
+                    <h3>{nft.name}</h3>
                   </div>
                 </Link>
               ))}
@@ -132,7 +132,7 @@ const Profile = () => {
                 <button
                   key={listing.id}
                   className={Style.Profile_MyNFTs_list_item}>
-                  {listing.nft.title} - Price: {listing.price} ETH
+                  {listing.nft.name} - Price: {listing.price} ETH
                   <div className={Style.Profile_MyNFTs_list_item_btns}>
                     <MdDeleteForever
                       className={Style.Profile_MyNFTs_list_item_btns_btn}
@@ -161,7 +161,7 @@ const Profile = () => {
                   <div
                     key={tx.id}
                     className={Style.Profile_TransactionHistory_list_item}>
-                    {isSeller ? "Sold" : "Bought"} {tx.nft.title} - Price:{" "}
+                    {isSeller ? "Sold" : "Bought"} {tx.nft.name} - Price:{" "}
                     {tx.price} ETH
                   </div>
                 );

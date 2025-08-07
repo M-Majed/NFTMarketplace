@@ -8,8 +8,41 @@ import { TbArrowBigLeftLines, TbArrowBigRightLine } from "react-icons/tb";
 
 //INTERNAL IMPORT
 import Style from "./BigNFTSilder.module.css";
-
+import { useContext } from "react";
+import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
+import { useAccount } from "wagmi";
+import { useRouter } from "next/navigation";
 export default function BigNFTSilder({ listings }) {
+    const { buyNFT } = useContext(NFTMarketplaceContext);
+  const { address, isConnected } = useAccount();
+  const router = useRouter();
+
+  const handleBuy = async () => {
+    if (!isConnected) return alert("Connect your wallet first");
+
+    const listing = listings[idx];
+
+    try {
+      const txHash = await buyNFT({ tokenId: listing.nft.tokenId, price: listing.price });
+      if (!txHash) throw new Error("Transaction failed");
+
+      const res = await fetch("/api/buy-nft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tokenId: listing.nft.tokenId,
+          buyerAddress: address,
+          price: listing.price,
+          txHash,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Update failed");
+      router.push("/");
+    } catch (err) {
+      alert("Buy failed: " + err.message);
+    }
+  };
   const [idx, setIdx] = useState(0);
 
  // include both ETH and USD in each slide
@@ -35,6 +68,8 @@ export default function BigNFTSilder({ listings }) {
   }
 
   const current = sliderData[idx];
+
+
 
   return (
     <div className={Style.bigNFTSlider}>
@@ -79,7 +114,7 @@ export default function BigNFTSilder({ listings }) {
           </div>
 
           <div className={Style.bigNFTSlider_left_buttons}>
-            <button className={Style.bigNFTSlider_left_buttons_button} onClick={() => {}}> Buy </button>
+            <button className={Style.bigNFTSlider_left_buttons_button} onClick={handleBuy}> Buy </button>
             <button
               className={Style.bigNFTSlider_left_buttons_button}
               onClick={() => {
