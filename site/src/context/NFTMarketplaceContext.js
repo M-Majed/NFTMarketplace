@@ -125,12 +125,49 @@ export const NFTMarketplaceProvider = ({ children }) => {
     }
   };
 
+  const cancelListing = async (nft) => {
+  try {
+    const { readContract, writeContract } = await connectingWithSmartContract();
+
+    // Get the required cancellation fee from the contract
+    const fee = await readContract.getListingPrice();
+
+    // Send tx to cancel on-chain (fee goes to the contract balance)
+    const tx = await writeContract.cancelListing(nft.tokenId, { value: fee });
+    const receipt = await tx.wait();
+
+    // Update DB
+    const web3Modal = new Web3Modal();
+    const conn = await web3Modal.connect();
+    const provider = new ethers.BrowserProvider(conn);
+    const signer = await provider.getSigner();
+    const walletAddress = await signer.getAddress();
+
+    await fetch("/api/cancel-sell", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tokenId: Number(nft.tokenId),
+        walletAddress,
+        txHash: tx.hash ?? receipt?.transactionHash ?? null,
+      }),
+    }).catch(console.error);
+
+    return tx.hash ?? receipt?.transactionHash ?? null;
+  } catch (error) {
+    console.error("cancelListing failed:", error);
+    throw error;
+  }
+};
+
+
   return (
     <NFTMarketplaceContext.Provider
       value={{
         createSale,
         fetchMyNFTsOrListedNFTs,
         buyNFT,
+        cancelListing,
       }}>
       {children}
     </NFTMarketplaceContext.Provider>

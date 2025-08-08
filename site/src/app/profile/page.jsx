@@ -1,12 +1,13 @@
 // src/app/profile/page.jsx
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Style from "./page.module.css";
 import img from "@/lib/img";
 import Image from "next/image";
 import { MdDeleteForever, MdEdit } from "react-icons/md";
 import { useAccount, useBalance } from "wagmi";
 import Link from "next/link";
+import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("MyNFTs");
@@ -17,6 +18,8 @@ const Profile = () => {
     listings: [],
     transactions: [],
   });
+  const { cancelListing } = useContext(NFTMarketplaceContext);
+  const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
     if (!isConnected) return;
@@ -24,6 +27,27 @@ const Profile = () => {
       .then((res) => res.json())
       .then((data) => setProfileData(data));
   }, [address, isConnected]);
+
+  const handleCancel = async (listing, e) => {
+    e?.stopPropagation?.();
+    try {
+      setCancellingId(listing.id);
+      // On-chain cancel (pays fee to contract) + DB update (inside context->API call)
+      await cancelListing({ tokenId: listing.tokenId, price: listing.price });
+      // Refresh profile data
+      const res = await fetch(`/api/profile?address=${address}`);
+      const data = await res.json();
+      setProfileData(data);
+    } catch (err) {
+      console.error("Cancel failed:", err);
+      alert(
+        "Cancel failed: " +
+          (err?.shortMessage || err?.message || "Unknown error")
+      );
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   if (!isConnected) {
     return <p>Please connect your wallet to view your profile.</p>;
@@ -136,6 +160,19 @@ const Profile = () => {
                   <div className={Style.Profile_MyNFTs_list_item_btns}>
                     <MdDeleteForever
                       className={Style.Profile_MyNFTs_list_item_btns_btn}
+                      title={
+                        cancellingId === listing.id
+                          ? "Cancelling..."
+                          : "Cancel listing"
+                      }
+                      onClick={(e) => handleCancel(listing, e)}
+                      style={{
+                        opacity: cancellingId === listing.id ? 0.5 : 1,
+                        pointerEvents:
+                          cancellingId === listing.id ? "none" : "auto",
+                        cursor:
+                          cancellingId === listing.id ? "default" : "pointer",
+                      }}
                     />
                     <MdEdit
                       className={Style.Profile_MyNFTs_list_item_btns_btn}
