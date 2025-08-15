@@ -18,7 +18,11 @@ const Profile = () => {
     listings: [],
     transactions: [],
   });
-  const { cancelListing } = useContext(NFTMarketplaceContext);
+  const { cancelListing, fetchMyNFTsOrListedNFTs } = useContext(
+    NFTMarketplaceContext
+  );
+  const [chainNFTs, setChainNFTs] = useState([]);
+  const [loadingChain, setLoadingChain] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
@@ -27,6 +31,24 @@ const Profile = () => {
       .then((res) => res.json())
       .then((data) => setProfileData(data));
   }, [address, isConnected]);
+
+  // Load *on-chain* NFTs for the "My NFTs" tab
+  useEffect(() => {
+    if (!isConnected || activeTab !== "MyNFTs") return;
+    let alive = true;
+    setLoadingChain(true);
+    fetchMyNFTsOrListedNFTs("MyNFTs")
+      .then((items) => {
+        if (alive) setChainNFTs(items || []);
+      })
+      .catch(console.error)
+      .finally(() => {
+        if (alive) setLoadingChain(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [isConnected, address, activeTab, fetchMyNFTsOrListedNFTs]);
 
   const handleCancel = async (listing, e) => {
     e?.stopPropagation?.();
@@ -120,29 +142,27 @@ const Profile = () => {
       {activeTab == "MyNFTs" && (
         <div className={Style.Profile_MyNFTs}>
           <h2>Owned NFTs</h2>
-          {profileData.nfts.length > 0 ? (
+          {loadingChain ? (
+            <p>Loading your on-chain NFTs…</p>
+          ) : chainNFTs.length > 0 ? (
             <div className={Style.Profile_MyNFTs_NFTGrid}>
-              {profileData.nfts.map((nft) => (
-                <Link
-                  key={nft.id}
-                  href={`/nftdetails/${nft.tokenId}`}
-                  className={Style.Profile_MyNFTs_NFTGrid_card}>
-                  {" "}
+              {chainNFTs.map((nft) => (
+                <div key={nft.tokenId} className={Style.Profile_MyNFTs_NFTGrid_card}>
                   <Image
-                    src={nft.imageUrl}
+                    src={nft.image}
                     width={200}
                     height={200}
-                    alt={nft.name}
+                    alt={nft.name || `Token #${nft.tokenId}`}
                     className={Style.Profile_MyNFTs_NFTGrid_card_img}
                   />
                   <div className={Style.Profile_MyNFTs_NFTGrid_card_info}>
-                    <h3>{nft.name}</h3>
+                    <h3>{nft.name || `Token #${nft.tokenId}`}</h3>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           ) : (
-            <p>No NFTs owned yet.</p>
+            <p>No NFTs owned yet (on-chain).</p>
           )}
         </div>
       )}
@@ -153,8 +173,9 @@ const Profile = () => {
           {profileData.listings.length > 0 ? (
             <div className={Style.Profile_MyNFTs_list}>
               {profileData.listings.map((listing) => (
-                <button
+                <Link
                   key={listing.id}
+                  href={`/nftdetails/${listing.tokenId}`}
                   className={Style.Profile_MyNFTs_list_item}>
                   {listing.nft.name} - Price: {listing.price} ETH
                   <div className={Style.Profile_MyNFTs_list_item_btns}>
@@ -165,7 +186,12 @@ const Profile = () => {
                           ? "Cancelling..."
                           : "Cancel listing"
                       }
-                      onClick={(e) => handleCancel(listing, e)}
+                      onClick={(e) => {
+                        // prevent navigating to details when clicking delete
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleCancel(listing, e);
+                      }}
                       style={{
                         opacity: cancellingId === listing.id ? 0.5 : 1,
                         pointerEvents:
@@ -178,7 +204,7 @@ const Profile = () => {
                       className={Style.Profile_MyNFTs_list_item_btns_btn}
                     />
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           ) : (

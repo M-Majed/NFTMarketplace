@@ -155,7 +155,6 @@ contract NFTMarketplace is ERC721URIStorage {
 
         idMarketItem[tokenId].owner = payable(msg.sender);
         idMarketItem[tokenId].sold = true;
-        idMarketItem[tokenId].owner = payable(address(0));
 
         _itemsSold++;
 
@@ -184,25 +183,25 @@ contract NFTMarketplace is ERC721URIStorage {
         return items;
     }
 
-    function fetchMyNFTs() public view returns (MarketItem[] memory) {
-        uint256 totalCount = _tokenIds;
-        uint256 itemCount = 0;
-        uint256 currentIndex = 0;
-
-        MarketItem[] memory items = new MarketItem[](itemCount);
-
-        for (uint256 i = 0; i < totalCount; i++) {
-            if (idMarketItem[i + 1].owner == msg.sender) {
-                itemCount += 1;
-                uint256 currentId = i + 1;
-                MarketItem storage currentItem = idMarketItem[currentId];
-                items[currentIndex] = currentItem;
-                currentIndex += 1;
-            }
+function fetchMyNFTs() public view returns (MarketItem[] memory) {
+    uint256 totalCount = _tokenIds;
+    uint256 count = 0;
+    for (uint256 i = 1; i <= totalCount; i++) {
+        if (ownerOf(i) == msg.sender) {
+            count++;
         }
-
-        return items;
     }
+
+    MarketItem[] memory items = new MarketItem[](count);
+    uint256 idx = 0;
+    for (uint256 i = 1; i <= totalCount; i++) {
+        if (ownerOf(i) == msg.sender) {
+            items[idx] = idMarketItem[i];
+            idx++;
+        }
+    }
+    return items;
+}
 
     function fetchItemsListed() public view returns (MarketItem[] memory) {
         uint256 totalCount = _tokenIds;

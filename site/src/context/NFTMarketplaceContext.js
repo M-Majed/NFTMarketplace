@@ -73,40 +73,39 @@ export const NFTMarketplaceProvider = ({ children }) => {
     }
   };
 
-  const fetchMyNFTsOrListedNFTs = async (type) => {
+  const fetchMyNFTsOrListedNFTs = async (type = "MyNFTs") => {
     try {
-      const { readContract } = await connectingWithSmartContract();
+      const { readContract, writeContract } = await connectingWithSmartContract();
+      // Use signer-bound contract for view functions that rely on msg.sender
+      const view = writeContract;
       const data =
-        type == "ListedNFTs"
-          ? await readContract.fetchItemsListed()
-          : await readContract.fetchMyNFTs();
+        type === "ListedNFTs"
+          ? await view.fetchItemsListed()
+          : await view.fetchMyNFTs();
+
       const items = await Promise.all(
-        data.map(
-          async ({ tokenId, seller, owner, price: unformattedPrice }) => {
-            const tokenURI = await readContract.tokenURI(tokenId);
-            const {
-              data: { image, description, name },
-            } = await axios.get(tokenURI);
-            const price = ethers.utils.formatUnits(
-              unformattedPrice.toString(),
-              "ether"
-            );
-            return {
-              price,
-              tokenId: tokenId.tonumber(),
-              seller,
-              owner,
-              image,
-              name,
-              description,
-              tokenURI,
-            };
-          }
-        )
+        data.map(async (item) => {
+          const tokenId = Number(item.tokenId);
+          const tokenURI = await readContract.tokenURI(tokenId);
+          const res = await axios.get(tokenURI);
+          const { image, description, name } = res.data ?? {};
+
+          return {
+            tokenId,
+            seller: item.seller,
+            owner: item.owner,
+            price: Number(ethers.formatUnits(item.price, "ether")),
+            image,
+            name,
+            description,
+            tokenURI,
+          };
+        })
       );
       return items;
     } catch (error) {
       console.error("Error fetching NFTs:", error);
+      return [];
     }
   };
 
