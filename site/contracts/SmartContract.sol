@@ -5,11 +5,11 @@ pragma solidity ^0.8.28;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 //$ create a new contract NFTMarketplace that inherits from ERC721URIStorage
-contract NFTMarketplace is ERC721URIStorage {
+contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
     uint256 private _tokenIds;
-    uint256 private _itemsSold;
 
     //$ listingPrice: price to list the nft
     uint256 listingPrice = 0.01 ether;
@@ -108,28 +108,40 @@ contract NFTMarketplace is ERC721URIStorage {
         );
     }
 
-    function resellToken(uint256 tokenId, uint256 price) public payable {
+    function resellToken(
+        uint256 tokenId,
+        uint256 price
+    ) public payable nonReentrant {
+        require(price > 0, "Price must be at least 1");
+        require(msg.value == listingPrice, "Fee must equal listing price");
+
+        // Must be the on-chain owner
+        require(ownerOf(tokenId) == msg.sender, "Not token owner");
+
+        // Must not already be listed (escrowed in the marketplace)
+        require(ownerOf(tokenId) != address(this), "Already listed");
+
+        // Marketplace must be approved for this token or as operator
         require(
-            idMarketItem[tokenId].owner == msg.sender,
-            "You are not the owner of this token"
-        );
-        require(
-            msg.value == listingPrice,
-            "Price must be equal to listing price"
+            getApproved(tokenId) == address(this) ||
+                isApprovedForAll(msg.sender, address(this)),
+            "Marketplace not approved"
         );
 
+        // Update market state
         idMarketItem[tokenId].sold = false;
         idMarketItem[tokenId].price = price;
         idMarketItem[tokenId].owner = payable(address(this));
         idMarketItem[tokenId].seller = payable(msg.sender);
 
-        _itemsSold--;
+        // If you track this metric, keep your existing behavior:
 
-        _transfer(msg.sender, address(this), tokenId);
+        // Move NFT into escrow; uses approval checks
+        transferFrom(msg.sender, address(this), tokenId);
     }
 
     // Cancel a listed item and pay the cancellation fee to the contract
-    function cancelListing(uint256 tokenId) public payable {
+    function cancelListing(uint256 tokenId) public payable nonReentrant {
         MarketItem storage item = idMarketItem[tokenId];
 
         require(item.owner == address(this), "Item is not currently listed");
@@ -145,81 +157,82 @@ contract NFTMarketplace is ERC721URIStorage {
         // NOTE: Fee stays in the contract balance (see getBalance()).
     }
 
-    function createMarketSale(uint256 tokenId) public payable {
+    function createMarketSale(uint256 tokenId) public payable nonReentrant {
         uint256 price = idMarketItem[tokenId].price;
+        require(msg.value == price, "Please submit the asking price");
 
-        require(
-            msg.value == price,
-            "Please submit the asking price in order to complete the purchase"
-        );
+        address payable seller = idMarketItem[tokenId].seller;
 
+        // ---- effects (state updates) BEFORE external calls
         idMarketItem[tokenId].owner = payable(msg.sender);
         idMarketItem[tokenId].sold = true;
 
-        _itemsSold++;
-
         _transfer(address(this), msg.sender, tokenId);
 
-        payable(owner).transfer(listingPrice);
-        payable(idMarketItem[tokenId].seller).transfer(msg.value);
+        // ---- interactions (ETH transfers) via call
+        (bool feeOk, ) = owner.call{value: listingPrice}("");
+        require(feeOk, "Fee transfer failed");
+
+        (bool payoutOk, ) = seller.call{value: msg.value}("");
+        require(payoutOk, "Payout transfer failed");
     }
 
-    function fetchMarketItems() public view returns (MarketItem[] memory) {
-        uint256 itemCount = _tokenIds;
-        uint256 unSoldItemCount = _tokenIds - _itemsSold;
-        uint256 currentIndex = 0;
+    // function fetchMarketItems() public view returns (MarketItem[] memory) {
+    //     uint256 itemCount = _tokenIds;
+    //     uint256 unSoldItemCount = _tokenIds - _itemsSold;
+    //     uint256 currentIndex = 0;
 
-        MarketItem[] memory items = new MarketItem[](unSoldItemCount);
+    //     MarketItem[] memory items = new MarketItem[](unSoldItemCount);
 
-        for (uint256 i = 0; i < itemCount; i++) {
-            if (idMarketItem[i + 1].owner == address(this)) {
-                uint256 currentId = i + 1;
-                MarketItem storage currentItem = idMarketItem[currentId];
-                items[currentIndex] = currentItem;
-                currentIndex += 1;
-            }
-        }
+    //     for (uint256 i = 0; i < itemCount; i++) {
+    //         if (idMarketItem[i + 1].owner == address(this)) {
+    //             uint256 currentId = i + 1;
+    //             MarketItem storage currentItem = idMarketItem[currentId];
+    //             items[currentIndex] = currentItem;
+    //             currentIndex += 1;
+    //         }
+    //     }
 
-        return items;
-    }
+    //     return items;
+    // }
 
-function fetchMyNFTs() public view returns (MarketItem[] memory) {
-    uint256 totalCount = _tokenIds;
-    uint256 count = 0;
-    for (uint256 i = 1; i <= totalCount; i++) {
-        if (ownerOf(i) == msg.sender) {
-            count++;
-        }
-    }
-
-    MarketItem[] memory items = new MarketItem[](count);
-    uint256 idx = 0;
-    for (uint256 i = 1; i <= totalCount; i++) {
-        if (ownerOf(i) == msg.sender) {
-            items[idx] = idMarketItem[i];
-            idx++;
-        }
-    }
-    return items;
-}
-
-    function fetchItemsListed() public view returns (MarketItem[] memory) {
+    function fetchMyNFTs() public view returns (MarketItem[] memory) {
         uint256 totalCount = _tokenIds;
-        uint256 itemCount = 0;
-        uint256 currentIndex = 0;
-
-        MarketItem[] memory items = new MarketItem[](itemCount);
-
-        for (uint256 i = 0; i < totalCount; i++) {
-            if (idMarketItem[i + 1].seller == msg.sender) {
-                itemCount += 1;
-                uint256 currentId = i + 1;
-                MarketItem storage currentItem = idMarketItem[currentId];
-                items[currentIndex] = currentItem;
-                currentIndex += 1;
+        uint256 count = 0;
+        for (uint256 i = 1; i <= totalCount; i++) {
+            if (ownerOf(i) == msg.sender) {
+                count++;
             }
         }
 
+        MarketItem[] memory items = new MarketItem[](count);
+        uint256 idx = 0;
+        for (uint256 i = 1; i <= totalCount; i++) {
+            if (ownerOf(i) == msg.sender) {
+                items[idx] = idMarketItem[i];
+                idx++;
+            }
+        }
         return items;
     }
+
+    // function fetchItemsListed() public view returns (MarketItem[] memory) {
+    //     uint256 totalCount = _tokenIds;
+    //     uint256 itemCount = 0;
+    //     uint256 currentIndex = 0;
+
+    //     MarketItem[] memory items = new MarketItem[](itemCount);
+
+    //     for (uint256 i = 0; i < totalCount; i++) {
+    //         if (idMarketItem[i + 1].seller == msg.sender) {
+    //             itemCount += 1;
+    //             uint256 currentId = i + 1;
+    //             MarketItem storage currentItem = idMarketItem[currentId];
+    //             items[currentIndex] = currentItem;
+    //             currentIndex += 1;
+    //         }
+    //     }
+
+    //     return items;
+    // }
 }
