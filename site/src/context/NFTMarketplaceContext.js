@@ -1,76 +1,64 @@
 // src/context/NFTMarketplaceContext.js
 "use client";
-import React, { useEffect } from "react";
-import Web3Modal from "web3modal";
-import { ethers } from "ethers";
-import { NFTMarketplaceAddress, NFTMarketplaceABI } from "./constants";
-import axios from "axios";
 
-const connectingWithSmartContract = async () => {
-  try {
-    const web3Modal = new Web3Modal();
-    const conn = await web3Modal.connect();
-    const provider = new ethers.BrowserProvider(conn);
-    const signer = await provider.getSigner();
-    return {
-      readContract: new ethers.Contract(
-        NFTMarketplaceAddress,
-        NFTMarketplaceABI,
-        provider
-      ),
-      writeContract: new ethers.Contract(
-        NFTMarketplaceAddress,
-        NFTMarketplaceABI,
-        signer
-      ),
-    };
-  } catch (error) {
-    console.error("Error connecting with smart contract:", error);
-  }
-};
+import React from "react";
+import axios from "axios";
+import { useAccount, usePublicClient, useWriteContract } from "wagmi";
+import { parseEther, formatEther, parseEventLogs } from "viem";
+import { NFTMarketplaceAddress, NFTMarketplaceABI } from "./constants";
 
 export const NFTMarketplaceContext = React.createContext();
 
 export const NFTMarketplaceProvider = ({ children }) => {
-  // Ensures the marketplace (this contract) is approved to transfer the user's NFTs
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
+
+  // Ensure the marketplace (this contract) is approved to transfer the user's NFTs
   const ensureApprovalForAll = async () => {
-    const { writeContract } = await connectingWithSmartContract();
+    if (!address) throw new Error("Please connect a wallet first.");
 
-    // ethers v6: signer address lives on the runner behind the contract
-    const ownerAddress = await writeContract.runner.getAddress();
-
-    // Is the contract already approved as operator?
-    const alreadyApproved = await writeContract.isApprovedForAll(
-      ownerAddress,
-      NFTMarketplaceAddress
-    );
+    const alreadyApproved = await publicClient.readContract({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "isApprovedForAll",
+      args: [address, NFTMarketplaceAddress],
+      // account not strictly required for a pure read, but harmless
+    });
 
     if (!alreadyApproved) {
-      const tx = await writeContract.setApprovalForAll(
-        NFTMarketplaceAddress,
-        true
-      );
-      await tx.wait();
+      const hash = await writeContractAsync({
+        address: NFTMarketplaceAddress,
+        abi: NFTMarketplaceABI,
+        functionName: "setApprovalForAll",
+        args: [NFTMarketplaceAddress, true],
+      });
+      await publicClient.waitForTransactionReceipt({ hash });
     }
   };
 
   // Resell an owned NFT: on-chain + DB
- const resellNFT = async ({ tokenId, priceEth, category }) => {
-   if (!tokenId) throw new Error("tokenId required");
+  const resellNFT = async ({ tokenId, priceEth, category }) => {
+    if (!address) throw new Error("Please connect a wallet first.");
+    if (tokenId === undefined || tokenId === null) throw new Error("tokenId required");
     if (!priceEth) throw new Error("priceEth required");
 
-    const { readContract, writeContract } = await connectingWithSmartContract();
-    const listingPrice = await readContract.getListingPrice();
+    const listingPrice = await publicClient.readContract({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "getListingPrice",
+    });
 
-    // Make sure marketplace is approved to transfer the user's NFTs
     await ensureApprovalForAll();
 
-    const price = ethers.parseUnits(String(priceEth), "ether");
-    const tx = await writeContract.resellToken(tokenId, price, { value: listingPrice });
-    const receipt = await tx.wait();
-
-    // Who is listing?
-    const walletAddress = await writeContract.runner.getAddress();
+    const hash = await writeContractAsync({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "resellToken",
+      args: [BigInt(tokenId), parseEther(String(priceEth))],
+      value: listingPrice,
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
 
     // Persist to DB
     await fetch("/api/resell", {
@@ -79,73 +67,85 @@ export const NFTMarketplaceProvider = ({ children }) => {
       body: JSON.stringify({
         tokenId: Number(tokenId),
         price: String(priceEth),
-        walletAddress,
-        txHash: tx.hash ?? receipt?.transactionHash ?? null,
+        walletAddress: address,
+        txHash: hash,
         category,
       }),
     }).catch(console.error);
 
-    return tx.hash ?? receipt?.transactionHash ?? null;
+    return hash;
   };
 
-
   const createSale = async (url, formInputPrice, isReselling, tokenId) => {
+    if (!address) throw new Error("Please connect a wallet first.");
+    const price = parseEther(String(formInputPrice));
+
+    const listingPrice = await publicClient.readContract({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "getListingPrice",
+    });
+
+    const hash = await writeContractAsync({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "createToken",
+      args: [url, price],
+      value: listingPrice,
+    });
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+    // Optional: check contract balance if you still want this log
     try {
-      const price = ethers.parseUnits(formInputPrice, "ether");
-      const { readContract, writeContract } =
-        await connectingWithSmartContract();
-      const listingPrice = await readContract.getListingPrice();
+      const contractBalance = await publicClient.readContract({
+        address: NFTMarketplaceAddress,
+        abi: NFTMarketplaceABI,
+        functionName: "getBalance",
+      });
+      console.log("Contract balance after sale:", formatEther(contractBalance));
+    } catch {}
 
-      const tx = await writeContract.createToken(url, price, { value: listingPrice })
-
-
-      const receipt = await tx.wait();
-
-      const contractBalance = await readContract.getBalance();
-      console.log(
-        "Contract balance after sale:",
-        ethers.formatEther(contractBalance)
-      );
-
-      if (!isReselling) {
-        const iface = writeContract.interface;
-        let parsedLog;
-        for (const log of receipt.logs) {
-          try {
-            parsedLog = iface.parseLog(log);
-            if (parsedLog.name === "MarketItemCreated") {
-              return parsedLog.args.tokenId;
-            }
-          } catch {}
-        }
-        if (!parsedLog) throw new Error("Failed to parse tokenId from event");
-      }
-    } catch (error) {
-      console.error("Error creating sale:", error);
+    if (!isReselling) {
+      // Parse the tokenId from the MarketItemCreated event
+      const logs = parseEventLogs({
+        abi: NFTMarketplaceABI,
+        logs: receipt.logs,
+        eventName: "MarketItemCreated",
+      });
+      const tokenIdFromEvent = logs?.[0]?.args?.tokenId;
+      if (tokenIdFromEvent !== undefined) return Number(tokenIdFromEvent);
+      throw new Error("Failed to parse tokenId from MarketItemCreated event");
     }
   };
 
   const fetchMyNFTsOrListedNFTs = async (type = "MyNFTs") => {
     try {
-      const { readContract, writeContract } =
-        await connectingWithSmartContract();
-
       if (type === "ListedNFTs") {
-        // Use your backend instead (replace with your actual route)
         const res = await fetch("/api/fetch-nfts", { cache: "no-store" });
-        const listed = await res.json();
-        return listed;
+        return await res.json();
       }
 
-      // "MyNFTs" comes from SC (relies on msg.sender, so use writeContract)
-      const data = await writeContract.fetchMyNFTs();
+      if (!address) throw new Error("Please connect a wallet first.");
+
+      // This view relies on msg.sender; pass `account` so the call is simulated "from" the user
+      const data = await publicClient.readContract({
+        address: NFTMarketplaceAddress,
+        abi: NFTMarketplaceABI,
+        functionName: "fetchMyNFTs",
+        account: address,
+      });
 
       const items = await Promise.all(
         data.map(async (item) => {
           const tokenId = Number(item.tokenId);
-          const tokenURI = await readContract.tokenURI(tokenId);
 
-          // Be defensive when fetching off-chain metadata
+          const tokenURI = await publicClient.readContract({
+            address: NFTMarketplaceAddress,
+            abi: NFTMarketplaceABI,
+            functionName: "tokenURI",
+            args: [BigInt(tokenId)],
+          });
+
           let meta = {};
           try {
             const res = await axios.get(tokenURI);
@@ -158,7 +158,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
             tokenId,
             seller: item.seller,
             owner: item.owner,
-            price: Number(ethers.formatUnits(item.price, "ether")),
+            price: Number(formatEther(item.price)),
             image: meta.image,
             name: meta.name,
             description: meta.description,
@@ -166,6 +166,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
           };
         })
       );
+
       return items;
     } catch (error) {
       console.error("Error fetching NFTs:", error);
@@ -174,65 +175,53 @@ export const NFTMarketplaceProvider = ({ children }) => {
   };
 
   const buyNFT = async (nft) => {
-    try {
-      const { readContract, writeContract } =
-        await connectingWithSmartContract();
-      const price = ethers.parseUnits(nft.price.toString(), "ether");
-      const transaction = await writeContract.createMarketSale(nft.tokenId, {
-        value: price,
-      });
-      await transaction.wait();
-      return transaction.hash;
-    } catch (error) {
-      console.error("Error buying NFT:", error);
-    }
+    if (!address) throw new Error("Please connect a wallet first.");
+    const hash = await writeContractAsync({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "createMarketSale",
+      args: [BigInt(nft.tokenId)],
+      value: parseEther(String(nft.price)),
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
+    return hash;
   };
 
   const cancelListing = async (nft) => {
-    try {
-      const { readContract, writeContract } =
-        await connectingWithSmartContract();
+    if (!address) throw new Error("Please connect a wallet first.");
 
-      // Get the required cancellation fee from the contract
-      const fee = await readContract.getListingPrice();
+    const fee = await publicClient.readContract({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "getListingPrice",
+    });
 
-      // Send tx to cancel on-chain (fee goes to the contract balance)
-      const tx = await writeContract.cancelListing(nft.tokenId, { value: fee });
-      const receipt = await tx.wait();
+    const hash = await writeContractAsync({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "cancelListing",
+      args: [BigInt(nft.tokenId)],
+      value: fee,
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
 
-      // Update DB
-      const web3Modal = new Web3Modal();
-      const conn = await web3Modal.connect();
-      const provider = new ethers.BrowserProvider(conn);
-      const signer = await provider.getSigner();
-      const walletAddress = await signer.getAddress();
+    await fetch("/api/cancel-sell", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tokenId: Number(nft.tokenId),
+        walletAddress: address,
+        txHash: hash,
+      }),
+    }).catch(console.error);
 
-      await fetch("/api/cancel-sell", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tokenId: Number(nft.tokenId),
-          walletAddress,
-          txHash: tx.hash ?? receipt?.transactionHash ?? null,
-        }),
-      }).catch(console.error);
-
-      return tx.hash ?? receipt?.transactionHash ?? null;
-    } catch (error) {
-      console.error("cancelListing failed:", error);
-      throw error;
-    }
+    return hash;
   };
 
   return (
     <NFTMarketplaceContext.Provider
-      value={{
-        createSale,
-        fetchMyNFTsOrListedNFTs,
-        buyNFT,
-        cancelListing,
-        resellNFT,
-      }}>
+      value={{ createSale, fetchMyNFTsOrListedNFTs, buyNFT, cancelListing, resellNFT }}
+    >
       {children}
     </NFTMarketplaceContext.Provider>
   );

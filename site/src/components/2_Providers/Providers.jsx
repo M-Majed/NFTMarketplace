@@ -22,7 +22,7 @@ const hardhatLocal = {
 // Build the Wagmi/RainbowKit config, including Mainnet + Hardhat
 const wagmiConfig = getDefaultConfig({
   appName:   'My NFT Marketplace',
-  projectId: 'YOUR_PROJECT_ID',      // ← replace with your actual Project ID
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,      // ← replace with your actual Project ID
   chains:    [mainnet, hardhatLocal],
   ssr:       true,
 });
