@@ -18,12 +18,70 @@ const Profile = () => {
     listings: [],
     transactions: [],
   });
-  const { cancelListing, fetchMyNFTsOrListedNFTs } = useContext(
+  const { cancelListing, fetchMyNFTsOrListedNFTs, resellNFT } = useContext(
     NFTMarketplaceContext
   );
   const [chainNFTs, setChainNFTs] = useState([]);
   const [loadingChain, setLoadingChain] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
+  const [resellingId, setResellingId] = useState(null);
+  const [showPriceModal, setShowPriceModal] = useState(false);
+  const [priceInput, setPriceInput] = useState("");
+  const [selectedNFT, setSelectedNFT] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("Art");
+  const CATEGORY_OPTIONS = [
+    "Art",
+    "Game",
+    "Nature",
+    "Sport",
+    "Portrait",
+    "Animal",
+  ]; // Prisma enum
+  const openResellDialog = (nft, e) => {
+    e?.stopPropagation?.();
+    setSelectedNFT(nft);
+    setPriceInput("");
+    setSelectedCategory("Art");
+    setShowPriceModal(true);
+  };
+
+  const closeResellDialog = () => {
+    if (resellingId) return; // prevent closing while submitting
+    setShowPriceModal(false);
+    setSelectedNFT(null);
+    setPriceInput("");
+  };
+
+  const confirmResell = async () => {
+    if (!selectedNFT) return;
+    const price = String(priceInput).trim();
+    if (!/^\d+(\.\d+)?$/.test(price) || Number(price) <= 0) {
+      alert("Please enter a valid positive number (ETH).");
+      return;
+    }
+    try {
+      setResellingId(selectedNFT.tokenId);
+      await resellNFT({
+        tokenId: selectedNFT.tokenId,
+        priceEth: price,
+        category: selectedCategory,
+      });
+      const res = await fetch(`/api/profile?address=${address}`);
+      const data = await res.json();
+      setProfileData(data);
+      const updated = await fetchMyNFTsOrListedNFTs("MyNFTs");
+      setChainNFTs(updated || []);
+      closeResellDialog();
+    } catch (err) {
+      console.error("Resell failed:", err);
+      alert(
+        "Resell failed: " +
+          (err?.shortMessage || err?.message || "Unknown error")
+      );
+    } finally {
+      setResellingId(null);
+    }
+  };
 
   useEffect(() => {
     if (!isConnected) return;
@@ -147,7 +205,19 @@ const Profile = () => {
           ) : chainNFTs.length > 0 ? (
             <div className={Style.Profile_MyNFTs_NFTGrid}>
               {chainNFTs.map((nft) => (
-                <div key={nft.tokenId} className={Style.Profile_MyNFTs_NFTGrid_card}>
+                <div
+                  key={nft.tokenId}
+                  className={`${Style.Profile_MyNFTs_NFTGrid_card} ${
+                    resellingId === nft.tokenId ? Style.isBusy : ""
+                  }`}
+                  onClick={(e) =>
+                    resellingId ? null : openResellDialog(nft, e)
+                  }
+                  title={
+                    resellingId === nft.tokenId
+                      ? "Listing…"
+                      : "Click to list this NFT"
+                  }>
                   <Image
                     src={nft.image}
                     width={200}
@@ -157,6 +227,11 @@ const Profile = () => {
                   />
                   <div className={Style.Profile_MyNFTs_NFTGrid_card_info}>
                     <h3>{nft.name || `Token #${nft.tokenId}`}</h3>
+                    <small>
+                      {resellingId === nft.tokenId
+                        ? "Listing…"
+                        : "Click to list for sale"}
+                    </small>
                   </div>
                 </div>
               ))}
@@ -180,7 +255,9 @@ const Profile = () => {
                   {listing.nft.name} - Price: {listing.price} ETH
                   <div className={Style.Profile_MyNFTs_list_item_btns}>
                     <MdDeleteForever
-                      className={Style.Profile_MyNFTs_list_item_btns_btn}
+                      className={`${Style.Profile_MyNFTs_list_item_btns_btn} ${
+                        cancellingId === listing.id ? Style.isBusyIcon : ""
+                      }`}
                       title={
                         cancellingId === listing.id
                           ? "Cancelling..."
@@ -191,13 +268,6 @@ const Profile = () => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleCancel(listing, e);
-                      }}
-                      style={{
-                        opacity: cancellingId === listing.id ? 0.5 : 1,
-                        pointerEvents:
-                          cancellingId === listing.id ? "none" : "auto",
-                        cursor:
-                          cancellingId === listing.id ? "default" : "pointer",
                       }}
                     />
                     <MdEdit
@@ -233,6 +303,54 @@ const Profile = () => {
           ) : (
             <p>No transactions yet.</p>
           )}
+        </div>
+      )}
+      {showPriceModal && (
+        <div className={Style.ModalOverlay} onClick={closeResellDialog}>
+          <div className={Style.Modal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={Style.ModalTitle}>List NFT</h3>
+            <p className={Style.ModalSubtitle}>Token #{selectedNFT?.tokenId}</p>
+            <label className={Style.ModalLabel}>Price (ETH)</label>
+            <input
+              className={Style.ModalInput}
+              type="number"
+              min="0"
+              step="0.0001"
+              placeholder="0.00"
+              value={priceInput}
+              onChange={(e) => setPriceInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") confirmResell();
+                if (e.key === "Escape") closeResellDialog();
+              }}
+            />
+            <label className={Style.ModalLabel}>Category</label>
+            <select
+              className={Style.ModalSelect}
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}>
+              {CATEGORY_OPTIONS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            <div className={Style.ModalActions}>
+              <button
+                className={Style.Button}
+                onClick={closeResellDialog}
+                disabled={!!resellingId}>
+                Cancel
+              </button>
+              <button
+                className={`${Style.Button} ${Style.ButtonPrimary}`}
+                onClick={confirmResell}
+                disabled={!!resellingId || !priceInput || !selectedCategory}
+                title={!priceInput ? "Enter a price" : "List NFT"}>
+                {resellingId === selectedNFT?.tokenId ? "Listing…" : "List"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

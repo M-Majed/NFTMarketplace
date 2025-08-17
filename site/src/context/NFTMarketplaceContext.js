@@ -54,6 +54,41 @@ export const NFTMarketplaceProvider = ({ children }) => {
     }
   };
 
+  // Resell an owned NFT: on-chain + DB
+ const resellNFT = async ({ tokenId, priceEth, category }) => {
+   if (!tokenId) throw new Error("tokenId required");
+    if (!priceEth) throw new Error("priceEth required");
+
+    const { readContract, writeContract } = await connectingWithSmartContract();
+    const listingPrice = await readContract.getListingPrice();
+
+    // Make sure marketplace is approved to transfer the user's NFTs
+    await ensureApprovalForAll();
+
+    const price = ethers.parseUnits(String(priceEth), "ether");
+    const tx = await writeContract.resellToken(tokenId, price, { value: listingPrice });
+    const receipt = await tx.wait();
+
+    // Who is listing?
+    const walletAddress = await writeContract.runner.getAddress();
+
+    // Persist to DB
+    await fetch("/api/resell", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tokenId: Number(tokenId),
+        price: String(priceEth),
+        walletAddress,
+        txHash: tx.hash ?? receipt?.transactionHash ?? null,
+        category,
+      }),
+    }).catch(console.error);
+
+    return tx.hash ?? receipt?.transactionHash ?? null;
+  };
+
+
   const createSale = async (url, formInputPrice, isReselling, tokenId) => {
     try {
       const price = ethers.parseUnits(formInputPrice, "ether");
@@ -61,14 +96,8 @@ export const NFTMarketplaceProvider = ({ children }) => {
         await connectingWithSmartContract();
       const listingPrice = await readContract.getListingPrice();
 
-      const tx = !isReselling
-        ? // MINT & LIST (no approval needed here)
-          await writeContract.createToken(url, price, { value: listingPrice })
-        : // RESELL (requires approval once)
-          (await ensureApprovalForAll(),
-          await writeContract.resellToken(tokenId, price, {
-            value: listingPrice,
-          }));
+      const tx = await writeContract.createToken(url, price, { value: listingPrice })
+
 
       const receipt = await tx.wait();
 
@@ -202,6 +231,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
         fetchMyNFTsOrListedNFTs,
         buyNFT,
         cancelListing,
+        resellNFT,
       }}>
       {children}
     </NFTMarketplaceContext.Provider>
