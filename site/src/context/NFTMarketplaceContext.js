@@ -40,7 +40,8 @@ export const NFTMarketplaceProvider = ({ children }) => {
   // Resell an owned NFT: on-chain + DB
   const resellNFT = async ({ tokenId, priceEth, category }) => {
     if (!address) throw new Error("Please connect a wallet first.");
-    if (tokenId === undefined || tokenId === null) throw new Error("tokenId required");
+    if (tokenId === undefined || tokenId === null)
+      throw new Error("tokenId required");
     if (!priceEth) throw new Error("priceEth required");
 
     const listingPrice = await publicClient.readContract({
@@ -113,7 +114,9 @@ export const NFTMarketplaceProvider = ({ children }) => {
         eventName: "MarketItemCreated",
       });
       const tokenIdFromEvent = logs?.[0]?.args?.tokenId;
-      if (tokenIdFromEvent !== undefined) return Number(tokenIdFromEvent);
+      if (tokenIdFromEvent !== undefined) {
+        return { tokenId: Number(tokenIdFromEvent), txHash: hash };
+      }
       throw new Error("Failed to parse tokenId from MarketItemCreated event");
     }
   };
@@ -220,8 +223,13 @@ export const NFTMarketplaceProvider = ({ children }) => {
 
   return (
     <NFTMarketplaceContext.Provider
-      value={{ createSale, fetchMyNFTsOrListedNFTs, buyNFT, cancelListing, resellNFT }}
-    >
+      value={{
+        createSale,
+        fetchMyNFTsOrListedNFTs,
+        buyNFT,
+        cancelListing,
+        resellNFT,
+      }}>
       {children}
     </NFTMarketplaceContext.Provider>
   );

@@ -5,9 +5,7 @@ import Style from "./DropZone.module.css";
 import Image from "next/image";
 import img from "@/lib/img";
 
-export default function DropZone({
-  setImage,
-}) {
+export default function DropZone({ setImage }) {
   const [fileUrl, setFileUrl] = useState(null);
 
   const onDrop = useCallback(
@@ -31,7 +29,7 @@ export default function DropZone({
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Upload failed");
 
-        const url = data.url;
+        const { url, hash } = data;
         const img = new window.Image();
         img.onload = () => {
           const { width, height } = img;
@@ -43,7 +41,7 @@ export default function DropZone({
           }
           // if OK, show preview and notify parent
           setFileUrl(url);
-          setImage({ url, width, height, size: file.size });
+          setImage({ url, hash, width, height, size: file.size });
           console.log(url);
         };
         img.onerror = () => {

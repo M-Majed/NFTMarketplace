@@ -25,8 +25,9 @@ export async function POST(request) {
       },
     });
 
-    const imgHash = `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
-    return new Response(JSON.stringify({ url: imgHash }), { status: 200 });
+    const { IpfsHash } = response.data;
+    const url = `https://gateway.pinata.cloud/ipfs/${IpfsHash}`;
+    return new Response(JSON.stringify({ url, hash: IpfsHash }), { status: 200 });
   } catch (error) {
     console.error('Error uploading image to IPFS:', error);
     return new Response(JSON.stringify({ error: 'Upload failed' }), { status: 500 });
