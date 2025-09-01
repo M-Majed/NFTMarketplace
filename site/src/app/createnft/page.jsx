@@ -1,6 +1,6 @@
 // src/app/createnft/page.jsx
 "use client";
-import React, { useState, useContext, useEffect, useRef  } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { TiTick } from "react-icons/ti";
 import Image from "next/image";
 import { useAccount } from "wagmi";
@@ -18,38 +18,16 @@ const createnft = () => {
   const [category, setCategory] = useState(0);
   const [price, setPrice] = useState(0);
   const [image, setImage] = useState(null);
-  const pending = useRef({ imageHash: null, metadataHash: null });
-  const committedRef = useRef(false);
 
   const { address, isConnected } = useAccount();
   const { createSale } = useContext(NFTMarketplaceContext);
   const router = useRouter();
 
-  // If we leave the page before commit, unpin any staged content
-  useEffect(() => {
-    const cleanup = () => {
-      if (committedRef.current) return;
-      const hashes = [pending.current.imageHash, pending.current.metadataHash].filter(Boolean);
-      if (!hashes.length) return;
-      // sendBeacon works while the page is closing
-      navigator.sendBeacon(
-        "/api/create-nft/unpin",
-        JSON.stringify({ hashes })
-      );
-    };
-    window.addEventListener("pagehide", cleanup);
-    return () => cleanup();
-  }, []);
-
-  // watch the DropZone image.hash
-  useEffect(() => {
-    if (image?.hash) pending.current.imageHash = image.hash;
-  }, [image]);
-
 const handleUpload = async () => {
     if (!isConnected) return alert("Connect your wallet first");
-    if (!image?.url || !image?.hash) return alert("Please choose an image first");
-    if (!name || !description || !price) return alert("Please fill all required fields");
+    if (!image?.url) return alert("Please choose an image first"); // Updated check
+    if (!name || !description || !price)
+      return alert("Please fill all required fields");
 
     try {
       // Send to backend for metadata IPFS
@@ -62,13 +40,10 @@ const handleUpload = async () => {
       if (!res.ok) throw new Error(data.error || "Metadata creation failed");
 
       const metadataUrl = data.url;
-      const metadataHash = data.hash;
-      pending.current.metadataHash = metadataHash;
       console.log(metadataUrl);
 
       // Now call createSale on frontend with metadata URL
-      const { tokenId, txHash } = await createSale(metadataUrl, price, false, null);
-      committedRef.current = true; // from here on, never unpin
+      const tokenId = await createSale(metadataUrl, price, false, null);
       // Save to database
       const saveRes = await fetch("/api/create-nft/save-nft", {
         method: "POST",
@@ -85,9 +60,6 @@ const handleUpload = async () => {
           price,
           category,
           address,
-        txHash,
-        imageHash: image.hash,
-        metadataHash,
         }),
       });
       const saveData = await saveRes.json();
@@ -96,19 +68,6 @@ const handleUpload = async () => {
 
       router.push("/");
     } catch (err) {
-    // If we failed before commit, clean up pins now (in addition to pagehide safety)
-    if (!committedRef.current) {
-      try {
-        await fetch("/api/create-nft/unpin", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          keepalive: true,
-          body: JSON.stringify({
-            hashes: [pending.current.imageHash, pending.current.metadataHash].filter(Boolean),
-          }),
-        });
-      } catch {}
-    }
       alert("Upload failed: " + err.message);
     }
   };

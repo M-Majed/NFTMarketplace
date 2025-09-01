@@ -19,9 +19,8 @@ export async function POST(request) {
       },
     });
 
-    const { IpfsHash } = response.data;
-    const url = `https://gateway.pinata.cloud/ipfs/${IpfsHash}`;
-    return new Response(JSON.stringify({ url, hash: IpfsHash }), { status: 200 });
+    const url = `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
+    return new Response(JSON.stringify({ url }), { status: 200 });
   } catch (error) {
     console.error('Error creating metadata on IPFS:', error);
     return new Response(JSON.stringify({ error: 'Metadata creation failed' }), { status: 500 });
