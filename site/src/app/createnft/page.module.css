@@ -3,6 +3,10 @@
   width: 80%;
 }
 
+.upload_box{
+  max-width: 300px;
+}
+
 .upload_box_input_itemName,
 .upload_box_input_description{
     width: 100%;

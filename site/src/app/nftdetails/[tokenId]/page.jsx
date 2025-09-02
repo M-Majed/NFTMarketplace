@@ -44,6 +44,7 @@ export default async function NFTDetailsPage({ params }){
         seller={listing.seller}
         price={listing.price}
         usdPrice={usdPrice}
+        listingId={listing.id}
       />
     </div>
   );

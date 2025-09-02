@@ -1,5 +1,6 @@
 // src/app/api/create-nft/create-metadata/route.js
 import axios from 'axios';
+export const runtime = "nodejs";
 
 export async function POST(request) {
   try {

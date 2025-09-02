@@ -16,20 +16,43 @@ const createnft = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(0);
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState("");
   const [image, setImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { address, isConnected } = useAccount();
   const { createSale } = useContext(NFTMarketplaceContext);
   const router = useRouter();
 
-const handleUpload = async () => {
+  const handlePriceChange = (e) => {
+    let v = e.target.value;
+
+    // Only digits and dots
+    v = v.replace(/[^\d.]/g, "");
+
+    // Keep only the first dot
+    const firstDot = v.indexOf(".");
+    if (firstDot !== -1) {
+      v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, "");
+    }
+
+    // Strip leading zeros from integer part unless it's a "0." decimal
+    if (!v.startsWith("0.") && /^0\d+$/.test(v)) {
+      v = v.replace(/^0+/, "");
+    }
+
+    setPrice(v);
+  };
+
+  const handleUpload = async () => {
+    if (isSubmitting) return;
     if (!isConnected) return alert("Connect your wallet first");
     if (!image?.url) return alert("Please choose an image first"); // Updated check
     if (!name || !description || !price)
       return alert("Please fill all required fields");
 
     try {
+      setIsSubmitting(true);
       // Send to backend for metadata IPFS
       const res = await fetch("/api/create-nft/create-metadata", {
         method: "POST",
@@ -69,6 +92,8 @@ const handleUpload = async () => {
       router.push("/");
     } catch (err) {
       alert("Upload failed: " + err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -101,9 +126,11 @@ const handleUpload = async () => {
 
   return (
     <div className={Style.upload}>
-      <DropZone setImage={setImage} />
-
       <div className={Style.upload_box}>
+        <DropZone setImage={setImage} />
+      </div>
+
+      <div>
         <div className={Style.upload_box_input}>
           <h2>Item Name</h2>
           <input
@@ -157,12 +184,17 @@ const handleUpload = async () => {
           <div className={Style.upload_box_Price_left}>
             <h2>Buyer pays:</h2>
             <input
-              type="text"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="any"
               className={Style.upload_box_Price_itemPrice}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={handlePriceChange}
+              value={price}
+              placeholder="e.g. 0.05"
             />
           </div>
-          <div className={Style.upload_box_Price_right}>
+          {/* <div className={Style.upload_box_Price_right}>
             <h2>You receive:</h2>
             <input
               type="text"
@@ -170,12 +202,17 @@ const handleUpload = async () => {
               value={(price * 0.87).toFixed(5)}
               readOnly
             />
-          </div>
+          </div> */}
         </div>
 
         <div className={Style.upload_box_btn}>
-          <Button btnName="Create and list NFT" handleClick={handleUpload} />
-          <Button btnName="Preview" />
+          <Button
+            btnName={isSubmitting ? "Processing..." : "Create and list NFT"}
+            handleClick={isSubmitting ? undefined : handleUpload}
+            disabled={isSubmitting}
+            aria-disabled={isSubmitting}
+          />{" "}
+          {/* <Button btnName="Preview" /> */}
         </div>
       </div>
     </div>

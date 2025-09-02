@@ -1,6 +1,7 @@
 // src/app/api/create-nft/upload-image/route.js
 import axios from 'axios';
 import FormData from 'form-data';
+export const runtime = "nodejs";
 
 export async function POST(request) {
   try {

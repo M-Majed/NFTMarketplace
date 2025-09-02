@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import { NFTMarketplaceAddress, NFTMarketplaceABI } from "@/context/constants";
 import axios from "axios";
+export const runtime = "nodejs";
 
 export async function GET() {
   try {
