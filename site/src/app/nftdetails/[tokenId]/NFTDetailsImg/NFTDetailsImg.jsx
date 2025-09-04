@@ -1,41 +1,34 @@
-// src/app/nftdetails/[nftId]/NFTDetailsImg/NFTDetailsImg.jsx
 'use client'
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Image from "next/image";
-
-//INTERNAL IMPORT
 import Style from "./NFTDetailsImg.module.css";
-import img from "@/lib/img";
 import { NFTMarketplaceAddress } from "@/context/constants";
 
 export default function NFTDetailsImg({ nft, listing }) {
   return (
     <div className={Style.NFTDetailsImg}>
-        <Image
-          src={nft.imageUrl}
-          alt={nft.name}
-          width={nft.width}
-          height={nft.height}
-          objectFit="cover"
-          className={Style.NFTDetailsImg_NFT_img}
-        />
+      <Image
+        src={nft.imageUrl}
+        alt={nft.name}
+        width={nft.width}
+        height={nft.height}
+        sizes="(max-width: 1024px) 100vw, 60vw"
+        className={Style.NFTDetailsImg_NFT_img}
+        style={{ objectFit: "cover" }}  // replaces non-supported objectFit prop
+        priority
+      />
       <div className={Style.NFTDetailsImg_description}>
-        <p>
-          {nft.description ? nft.description : "No description available."}
-        </p>
+        <p>{nft.description ? nft.description : "No description available."}</p>
         <small>{nft.width} x {nft.height} px</small>
         <p>
-          <small>Contract Address</small>
-          <br />
+          <small>Contract Address</small><br />
           {NFTMarketplaceAddress}
         </p>
         <p>
-          <small>Token ID</small>
-          <br />
+          <small>Token ID</small><br />
           {nft.tokenId}
         </p>
       </div>
     </div>
   );
 };
-
