@@ -1,99 +1,84 @@
-// src/app/marketplace/page.jsx
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useAccount } from "wagmi";
 import Link from "next/link";
-import NFTCard from "./NFTCard/NFTCard";
-import { prisma } from "@/lib/prisma";
-import Style from "./page.module.css";
+import NFTCard from "./NFTCard/NFTCard";           // keep your path
+import Style from "./page.module.css";     // keep your styles
 
-export default async function MarketplacePage({ searchParams }) {
-  const {
-    category: catParam,
-    search,
-    minPrice,
-    maxPrice,
-    page: pageParam,
-  } = searchParams;
+export default function MarketplacePage() {
+  const searchParams = useSearchParams();
+  const { address, isConnected } = useAccount();
 
-  // parse page number, default to 1
-  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
-  const take = 12;
-  const skip = (currentPage - 1) * take;
+  const [items, setItems] = useState([]);
+  const [page, setPage] = useState(Number(searchParams.get("page") || "1"));
+  const [pages, setPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  const categories = catParam
-    ? Array.isArray(catParam)
-      ? catParam
-      : [catParam]
-    : [];
-  const where = {
-    active: true,
-    ...(categories.length > 0 ? { category: { in: categories } } : {}),
-    ...(search
-      ? {
-          OR: [
-            { nft: { name: { contains: search } } },
-            { nft: { description: { contains: search } } },
-          ],
-        }
-      : {}),
+  const buildApiQS = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    const wishlist = params.get("wishlist");
+    // only attach wallet when wishlist mode is on
+    if (wishlist && isConnected && address) params.set("address", address);
+    else params.delete("address");
+    return params.toString();
   };
 
-  // fetch all matching non-price filters, sorted by createdAt desc (newest first)
-  const allListings = await prisma.listing.findMany({
-    where,
-    include: { nft: true, seller: true },
-    orderBy: { createdAt: 'desc' },
-  });
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/marketplace?${buildApiQS()}`, { cache: "no-store" });
+        const data = await res.json();
+        if (!alive) return;
+        setItems(data.items || []);
+        setPage(data.page || 1);
+        setPages(data.pages || 1);
+      } catch (e) {
+        console.error(e);
+        if (alive) {
+          setItems([]);
+          setPage(1);
+          setPages(1);
+        }
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [searchParams, address, isConnected]);
 
-  // parse min/max, default min to 0, max to Infinity
-  const min = minPrice ? parseFloat(minPrice) : 0;
-  const max = maxPrice ? parseFloat(maxPrice) : Infinity;
-
-  // filter numerically on price
-  const filtered = allListings.filter(l => {
-    const p = parseFloat(l.price);
-    return !isNaN(p) && p >= min && p <= max;
-  });
-
-  const totalCount = filtered.length;
-  const listings = filtered.slice(skip, skip + take);
-
-  const totalPages = Math.ceil(totalCount / take);
-
-  // helper to rebuild the querystring with a new page
-  const buildHref = (page) => {
-    const params = new URLSearchParams();
-    categories.forEach((cat) => params.append("category", cat));
-    if (search) params.set("search", search);
-    if (minPrice) params.set("minPrice", minPrice);
-    if (maxPrice) params.set("maxPrice", maxPrice);
-    params.set("page", String(page));
+  const buildHref = (n) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(n));
     return `/marketplace?${params.toString()}`;
   };
+
+  // Friendly message if someone opens wishlist view without a wallet connected
+  if (searchParams.get("wishlist") && !isConnected) {
+    return <p>Please connect your wallet to view your wishlist.</p>;
+  }
+
   return (
     <div>
-      <NFTCard items={listings} />
-
-      {/* pagination controls */}
+      {loading ? <p>Loading…</p> : <NFTCard items={items} />}
       <nav className={Style.pagination}>
-        {currentPage > 1 && (
-          <Link href={buildHref(currentPage - 1)}>← Prev</Link>
-        )}{" "}
-        {Array.from({ length: totalPages }, (_, i) => {
-          const pageNum = i + 1;
+        {page > 1 && <Link href={buildHref(page - 1)}>← Prev</Link>}
+        {Array.from({ length: pages }, (_, i) => {
+          const n = i + 1;
           return (
             <Link
-              key={pageNum}
-              href={buildHref(pageNum)}
-              className={`${Style.pageLink} ${
-                pageNum === currentPage ? Style.activePage : ""
-              }`}>
-              {pageNum}
+              key={n}
+              href={buildHref(n)}
+              className={`${Style.pageLink} ${n === page ? Style.activePage : ""}`}>
+              {n}
             </Link>
           );
-        })}{" "}
-        {currentPage < totalPages && (
-          <Link href={buildHref(currentPage + 1)}>Next →</Link>
-        )}
+        })}
+        {page < pages && <Link href={buildHref(page + 1)}>Next →</Link>}
       </nav>
     </div>
   );

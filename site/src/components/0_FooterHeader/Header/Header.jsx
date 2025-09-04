@@ -3,13 +3,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MdNotifications } from "react-icons/md";
-import { BsSearch } from "react-icons/bs";
+import { PiListHeartBold } from "react-icons/pi";import { BsSearch } from "react-icons/bs";
 import style from "./Header.module.css";
-import img from '@/lib/img'
+import img from "@/lib/img";
 import Discover from "./Discover/Discover";
 import HelpCenter from "./HelpCenter/HelpCenter";
-import Notification from "./Notification/Notification";
+import Notification from "./Notification --not-needed/Notification";
 import { useRouter } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
@@ -113,17 +112,13 @@ const Header = () => {
           )}
         </div>
         <div
-          ref={notificationRef}
           className={style.header_container_right_notification}
-          onClick={openNotification}>
-          <MdNotifications
+          onClick={() => router.push("/marketplace?wishlist=1")}
+          style={{ cursor: "pointer" }}
+          >
+          <PiListHeartBold
             className={style.header_container_right_notification_icon}
           />
-          {notification && (
-            <div className={style.header_container_right_notification_box}>
-              <Notification />
-            </div>
-          )}
         </div>
 
         <ConnectButton.Custom>
@@ -131,7 +126,7 @@ const Header = () => {
             account,
             chain,
             openChainModal,
-            openConnectModal ,
+            openConnectModal,
             openAccountModal,
             authenticationStatus,
             mounted,
@@ -145,7 +140,10 @@ const Header = () => {
             return (() => {
               if (!connected) {
                 return (
-                  <button onClick={openConnectModal} type="button" className={style.header_container_right_createNFT}>
+                  <button
+                    onClick={openConnectModal}
+                    type="button"
+                    className={style.header_container_right_createNFT}>
                     Connect Wallet
                   </button>
                 );
@@ -158,7 +156,10 @@ const Header = () => {
                 );
               }
               return (
-                <button onClick={openAccountModal} type="button" className={style.header_container_right_createNFT}>
+                <button
+                  onClick={openAccountModal}
+                  type="button"
+                  className={style.header_container_right_createNFT}>
                   {account.displayName}
                 </button>
               );
