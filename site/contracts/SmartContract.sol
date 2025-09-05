@@ -6,16 +6,23 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 //$ create a new contract NFTMarketplace that inherits from ERC721URIStorage
-contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
+contract NFTMarketplace is
+    ERC721URIStorage,
+    ReentrancyGuard,
+    Ownable2Step,
+    Pausable
+{
     uint256 private _tokenIds;
 
     //$ listingPrice: price to list the nft
     uint256 listingPrice = 0.01 ether;
 
     //$ represent an address that can receive Ether.
-    address payable owner;
+    // (owner is provided by Ownable; access via owner())
 
     //$ mapping: key value pair
     //* every nft will have a unique id
@@ -40,18 +47,19 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
         bool sold
     );
 
-    //$ modifier: a special function that is used to modify the behavior of functions
-    //* checks if the caller is the owner of the contract
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can call this function");
-        _;
+    constructor() ERC721("MRMNFTMarketPlace", "MNMP") Ownable(msg.sender) {
+        // owner is set by Ownable; no custom assignment needed
     }
 
-    //$ constructor
-    //* ERC721("name of smartcontract", "symbol of smartcontract")
-    constructor() ERC721("MRMNFTMarketPlace", "MNMP") {
-        //* whoever deploys this contract will be the owner
-        owner = payable(msg.sender);
+    // --- Emergency controls ---
+    /// @notice Pause marketplace actions (list, mint+list, buy). Cancel is still allowed.
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    /// @notice Unpause marketplace actions.
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     //$ update the price of the nft
@@ -70,7 +78,7 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
     function createToken(
         string memory tokenURI,
         uint256 price
-    ) public payable returns (uint256) {
+    ) public payable whenNotPaused returns (uint256) {
         _tokenIds++;
         uint256 newtokenId = _tokenIds;
 
@@ -111,32 +119,32 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
     function resellToken(
         uint256 tokenId,
         uint256 price
-    ) public payable nonReentrant {
-        require(price > 0, "Price must be at least 1");
+    ) public payable nonReentrant whenNotPaused {
+        require(price > 0, "Price must be > 0 wei");
         require(msg.value == listingPrice, "Fee must equal listing price");
 
-        // Must be the on-chain owner
+        // --- existence & ownership (OZ v5 safe existence check)
+        require(_ownerOf(tokenId) != address(0), "Token does not exist");
         require(ownerOf(tokenId) == msg.sender, "Not token owner");
 
-        // Must not already be listed (escrowed in the marketplace)
+        // --- not already escrowed in marketplace (defensive clarity)
         require(ownerOf(tokenId) != address(this), "Already listed");
 
-        // Marketplace must be approved for this token or as operator
+        // --- approval (we pull into escrow via transferFrom)
         require(
             getApproved(tokenId) == address(this) ||
                 isApprovedForAll(msg.sender, address(this)),
             "Marketplace not approved"
         );
 
-        // Update market state
-        idMarketItem[tokenId].sold = false;
-        idMarketItem[tokenId].price = price;
-        idMarketItem[tokenId].owner = payable(address(this));
-        idMarketItem[tokenId].seller = payable(msg.sender);
+        // --- effects: write listing metadata before transferring
+        MarketItem storage item = idMarketItem[tokenId];
+        item.sold = false;
+        item.price = price;
+        item.owner = payable(address(this));
+        item.seller = payable(msg.sender);
 
-        // If you track this metric, keep your existing behavior:
-
-        // Move NFT into escrow; uses approval checks
+        // --- interaction: move NFT into escrow
         transferFrom(msg.sender, address(this), tokenId);
     }
 
@@ -151,50 +159,46 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
         // Move NFT back to the seller and mark as not listed
         item.owner = payable(msg.sender);
         item.sold = false;
+        item.seller = payable(address(0));
+        item.price = 0;
 
         _transfer(address(this), msg.sender, tokenId);
 
         // NOTE: Fee stays in the contract balance (see getBalance()).
     }
 
-    function createMarketSale(uint256 tokenId) public payable nonReentrant {
-        uint256 price = idMarketItem[tokenId].price;
-        require(msg.value == price, "Please submit the asking price");
+    function createMarketSale(
+        uint256 tokenId
+    ) public payable nonReentrant whenNotPaused {
+        // --- existence & listing checks
+        require(_ownerOf(tokenId) != address(0), "Token does not exist");
+        MarketItem storage item = idMarketItem[tokenId];
+        require(item.seller != address(0), "Listing not found");
+        require(ownerOf(tokenId) == address(this), "Not listed");
+        require(item.owner == address(this), "Not listed (state)");
+        require(!item.sold, "Already sold");
+        require(item.price > 0, "Invalid price");
+        require(msg.value == item.price, "Please submit the asking price");
 
-        address payable seller = idMarketItem[tokenId].seller;
+        // snapshot values before mutating/clearing
+        address payable seller = item.seller;
+        uint256 price = item.price;
 
         // ---- effects (state updates) BEFORE external calls
-        idMarketItem[tokenId].owner = payable(msg.sender);
-        idMarketItem[tokenId].sold = true;
+        item.owner = payable(msg.sender);
+        item.sold = true;
+        // clear stale listing data
+        item.seller = payable(address(0));
+        item.price = 0;
 
         _transfer(address(this), msg.sender, tokenId);
-
         // ---- interactions (ETH transfers) via call
-        (bool feeOk, ) = owner.call{value: listingPrice}("");
+        (bool feeOk, ) = payable(owner()).call{value: listingPrice}("");
         require(feeOk, "Fee transfer failed");
 
-        (bool payoutOk, ) = seller.call{value: msg.value}("");
+        (bool payoutOk, ) = seller.call{value: price}("");
         require(payoutOk, "Payout transfer failed");
     }
-
-    // function fetchMarketItems() public view returns (MarketItem[] memory) {
-    //     uint256 itemCount = _tokenIds;
-    //     uint256 unSoldItemCount = _tokenIds - _itemsSold;
-    //     uint256 currentIndex = 0;
-
-    //     MarketItem[] memory items = new MarketItem[](unSoldItemCount);
-
-    //     for (uint256 i = 0; i < itemCount; i++) {
-    //         if (idMarketItem[i + 1].owner == address(this)) {
-    //             uint256 currentId = i + 1;
-    //             MarketItem storage currentItem = idMarketItem[currentId];
-    //             items[currentIndex] = currentItem;
-    //             currentIndex += 1;
-    //         }
-    //     }
-
-    //     return items;
-    // }
 
     function fetchMyNFTs() public view returns (MarketItem[] memory) {
         uint256 totalCount = _tokenIds;
@@ -215,24 +219,4 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
         }
         return items;
     }
-
-    // function fetchItemsListed() public view returns (MarketItem[] memory) {
-    //     uint256 totalCount = _tokenIds;
-    //     uint256 itemCount = 0;
-    //     uint256 currentIndex = 0;
-
-    //     MarketItem[] memory items = new MarketItem[](itemCount);
-
-    //     for (uint256 i = 0; i < totalCount; i++) {
-    //         if (idMarketItem[i + 1].seller == msg.sender) {
-    //             itemCount += 1;
-    //             uint256 currentId = i + 1;
-    //             MarketItem storage currentItem = idMarketItem[currentId];
-    //             items[currentIndex] = currentItem;
-    //             currentIndex += 1;
-    //         }
-    //     }
-
-    //     return items;
-    // }
 }
