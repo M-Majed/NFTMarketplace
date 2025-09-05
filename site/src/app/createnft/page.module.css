@@ -1,57 +1,83 @@
-.upload {
+/* Page container + responsive grid */
+.upload{
   margin: 0 auto;
-  width: 80%;
+  max-width: 1200px;
+  padding-inline: clamp(16px, 3vw, 32px);
+
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(16px, 3vw, 40px);
+  align-items: start;
 }
 
+/* left: dropzone | right: form */
+.upload > :first-child { grid-column: span 5; }
+.upload > :last-child  { grid-column: span 7; }
+
+@media (max-width: 1024px){
+  .upload{
+    grid-template-columns: 1fr;
+  }
+  .upload > :first-child,
+  .upload > :last-child { grid-column: 1 / -1; }
+}
+
+/* keep a sensible max for the drop area wrapper */
 .upload_box{
-  max-width: 300px;
+  max-width: 100%;
 }
 
+/* inputs */
 .upload_box_input_itemName,
 .upload_box_input_description{
-    width: 100%;
-    border: 1px solid white;
-    padding: 1rem;
-    border-radius: 20px;
-    background-color: transparent;
-    outline: none;
+  width: 100%;
+  border: 1px solid white;
+  padding: 1rem;
+  border-radius: 20px;
+  background-color: transparent;
+  outline: none;
 }
 
-.upload_box_slider {
+.upload_box_input{ margin: 12px 0; }
+
+/* categories – allow wrapping */
+.upload_box_category h2{ margin-bottom: 8px; }
+
+.upload_box_slider{
   display: flex;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
-.upload_box_slider_item {
+.upload_box_slider_item{
   border: 1px solid white;
   border-radius: 15px;
   padding: 10px;
   cursor: pointer;
 }
 
-.upload_box_slider_item_box {
+.upload_box_slider_item_box{
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-.upload_box_slider_item_box_img_img {
-  border-radius: 50px;
-}
+.upload_box_slider_item_box_img_img{ border-radius: 50px; }
+.upload_box_slider_item_box_img_icon{ font-size: 25px; }
 
-.upload_box_slider_item_box_img_icon {
-  font-size: 25px;
-}
-
-.upload_box_slider p {
+.upload_box_slider p{
   font-size: 20px;
   font-weight: 700;
-  line-height: 0.5;
+  line-height: 1;
 }
 
+/* price row – stack on phones */
 .upload_box_Price{
   display: flex;
-  gap: 50px;
+  gap: clamp(16px, 3vw, 50px);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 8px;
 }
 
 .upload_box_Price_itemPrice{
@@ -60,18 +86,21 @@
   border-radius: 20px;
   background-color: transparent;
   outline: none;
+  min-width: min(260px, 100%);
 }
 
-.upload_box_btn {
+/* buttons */
+.upload_box_btn{
   display: flex;
   margin-block: 20px;
-  gap: 4.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.active {
-  background-color: #012c2a;
-}
-.previewOverlay {
+.active{ background-color: #012c2a; }
+
+/* (kept your preview overlay styles for future use) */
+.previewOverlay{
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.6);
@@ -83,9 +112,8 @@
   padding: 2rem;
   z-index: 1000;
 }
-
 .previewOverlay :global(.NFTDetailsImg),
-.previewOverlay :global(.NFTDescription) {
+.previewOverlay :global(.NFTDescription){
   background: #fff;
   padding: 1rem;
   border-radius: 1rem;

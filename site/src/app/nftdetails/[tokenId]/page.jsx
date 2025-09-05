@@ -5,6 +5,8 @@ import Style from "./page.module.css";
 import NFTDetailsImg from "./NFTDetailsImg/NFTDetailsImg";
 import NFTDescription from "./NFTDescription/NFTDescription";
 export const revalidate = 60;
+import { prisma } from "@/lib/prisma";
+
 
 export default async function NFTDetailsPage({ params }){
   const { tokenId } = params;

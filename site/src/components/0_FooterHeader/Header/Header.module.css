@@ -7,6 +7,7 @@
     font-weight: 600;
 }
 
+/* LEFT side (logo + search) */
 .header_container_left{
     display: flex;
     align-items:  center;
@@ -19,8 +20,6 @@
     height: 50px;
     cursor: pointer;
 }
-
-
 
 .header_container_left_box_input{
     width: 50%;
@@ -47,6 +46,7 @@
     margin-top: 5px;
 }
 
+/* RIGHT side (menus, buttons) */
 .header_container_right{
     display: flex;
     align-items: center;
@@ -84,6 +84,7 @@
     user-select: none;
 }
 
+/* desktop dropdowns */
 .header_container_right_discover_box,
 .header_container_right_help_box,
 .header_container_right_notification_box,
@@ -97,20 +98,11 @@
     background-color: black;
     z-index: 20;
 }
-.header_container_right_help_box{
-    width: 200%;
-}
-.header_container_right_notification_box{
-    width: 1000%;
-    margin-top: 20px;
-}
-.header_container_right_profile_box{
-    width: 400%;
-}
+.header_container_right_help_box{ width: 200%; }
+.header_container_right_notification_box{ width: 1000%; margin-top: 20px; }
+.header_container_right_profile_box{ width: 400%; }
 
-.header_container_right_notification_icon{
-    font-size: 25px;
-}
+.header_container_right_notification_icon{ font-size: 25px; }
 
 .header_container_right_profileImg{
     width: 50px;
@@ -118,6 +110,147 @@
     border-radius: 10px;
 }
 
+/* ========== MOBILE: hamburger + sidebar ========== */
+.mobile_toggle{
+    display: none;
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+}
 
+/* dark overlay behind the drawer */
+.sidebar_overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+    z-index: 50;
+}
+.sidebar_overlay_open{
+    opacity: 1;
+    pointer-events: auto;
+}
 
+/* the drawer */
+.sidebar{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(86vw, 360px);
+    background: #000;
+    border-right: 1px solid #fff;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    z-index: 60;
 
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+}
+.sidebar_open{ transform: translateX(0); }
+
+.sidebar_header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.sidebar_close{
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+.sidebar_search{
+    display: flex;
+    gap: 8px;
+    border: 1px solid #fff;
+    border-radius: 12px;
+    padding: 6px 8px;
+}
+.sidebar_search input{
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: inherit;
+    font: inherit;
+}
+.sidebar_search button{
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* groups */
+.sidebar_group{
+    border-top: 1px solid rgba(255,255,255,.3);
+    padding-top: 12px;
+}
+.sidebar_link{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-weight: 700;
+    cursor: pointer;
+}
+.sidebar_panel{
+    padding-left: 8px;
+    display: grid;
+    gap: 6px;
+}
+
+/* actions */
+.sidebar_primary_button{
+    width: 100%;
+    border: 2px solid white;
+    background: transparent;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s;
+}
+.sidebar_primary_button:hover{
+    background: white;
+    color: black;
+}
+.wishlist_button{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+}
+
+/* responsive switches */
+@media (max-width: 1300px){
+    .header{
+        width: 100%;
+        padding-block: 16px;
+        padding-inline: 16px;
+    }
+    .header_container_left{
+        gap: 12px;
+    }
+    .header_container_left_box_input{
+        display: none; /* search moves into sidebar */
+    }
+    .header_container_right{
+        display: none; /* replaced by sidebar */
+    }
+    .mobile_toggle{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

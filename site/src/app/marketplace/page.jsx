@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
 import Link from "next/link";
-import NFTCard from "./NFTCard/NFTCard";           // keep your path
-import Style from "./page.module.css";     // keep your styles
+import NFTCard from "./NFTCard/NFTCard";
+import Style from "./page.module.css";
 
 export default function MarketplacePage() {
   const searchParams = useSearchParams();
@@ -18,7 +18,6 @@ export default function MarketplacePage() {
   const buildApiQS = () => {
     const params = new URLSearchParams(searchParams.toString());
     const wishlist = params.get("wishlist");
-    // only attach wallet when wishlist mode is on
     if (wishlist && isConnected && address) params.set("address", address);
     else params.delete("address");
     return params.toString();
@@ -46,9 +45,7 @@ export default function MarketplacePage() {
         if (alive) setLoading(false);
       }
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, [searchParams, address, isConnected]);
 
   const buildHref = (n) => {
@@ -57,23 +54,19 @@ export default function MarketplacePage() {
     return `/marketplace?${params.toString()}`;
   };
 
-  // Friendly message if someone opens wishlist view without a wallet connected
   if (searchParams.get("wishlist") && !isConnected) {
-    return <p>Please connect your wallet to view your wishlist.</p>;
+    return <p className={Style.marketplace}>Please connect your wallet to view your wishlist.</p>;
   }
 
   return (
-    <div>
+    <div className={Style.marketplace}>
       {loading ? <p>Loading…</p> : <NFTCard items={items} />}
       <nav className={Style.pagination}>
         {page > 1 && <Link href={buildHref(page - 1)}>← Prev</Link>}
         {Array.from({ length: pages }, (_, i) => {
           const n = i + 1;
           return (
-            <Link
-              key={n}
-              href={buildHref(n)}
-              className={`${Style.pageLink} ${n === page ? Style.activePage : ""}`}>
+            <Link key={n} href={buildHref(n)} className={`${Style.pageLink} ${n === page ? Style.activePage : ""}`}>
               {n}
             </Link>
           );
