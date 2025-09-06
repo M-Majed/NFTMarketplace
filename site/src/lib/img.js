@@ -1,11 +1,7 @@
 // src/lib/img.js
-import logo from "@/../public/img/Logo/logo.svg";
+import logo from "@/../public/img/Logo/logo.png";
 
 import user1 from "@/../public/img/Users/user1.png";
-import user2 from "@/../public/img/Users/user2.png";
-import user3 from "@/../public/img/Users/user3.png";
-import user4 from "@/../public/img/Users/user4.png";
-import user5 from "@/../public/img/Users/user5.png";
 
 import nft1 from "@/../public/img/NFTs/nft1.png";
 import nft2 from "@/../public/img/NFTs/nft2.png";
@@ -28,10 +24,6 @@ import Sport from "@/../public/img/Categories/sport.jpg";
 export default {
   logo,
   user1,
-  user2,
-  user3,
-  user4,
-  user5,
   nft1,
   nft2,
   nft3,

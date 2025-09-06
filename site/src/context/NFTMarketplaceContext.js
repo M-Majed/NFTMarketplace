@@ -40,7 +40,8 @@ export const NFTMarketplaceProvider = ({ children }) => {
   // Resell an owned NFT: on-chain + DB
   const resellNFT = async ({ tokenId, priceEth, category }) => {
     if (!address) throw new Error("Please connect a wallet first.");
-    if (tokenId === undefined || tokenId === null) throw new Error("tokenId required");
+    if (tokenId === undefined || tokenId === null)
+      throw new Error("tokenId required");
     if (!priceEth) throw new Error("priceEth required");
 
     const listingPrice = await publicClient.readContract({
@@ -70,7 +71,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
         walletAddress: address,
         txHash: hash,
         category,
-        marketplaceAddress:NFTMarketplaceAddress,
+        marketplaceAddress: NFTMarketplaceAddress,
       }),
     }).catch(console.error);
 
@@ -219,10 +220,42 @@ export const NFTMarketplaceProvider = ({ children }) => {
     return hash;
   };
 
+  // ---- New: fees & balances API ----
+  const getPendingBalance = async (addr) => {
+    const who = addr ?? address;
+    if (!who) throw new Error("Please connect a wallet first.");
+    return await publicClient.readContract({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "pendingBalanceOf",
+      args: [who],
+    });
+  };
+
+  const withdraw = async ({ amountEth }) => {
+    if (!address) throw new Error("Please connect a wallet first.");
+    if (!amountEth) throw new Error("amountEth required");
+    const hash = await writeContractAsync({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "withdraw",
+      args: [parseEther(String(amountEth))],
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
+    return hash;
+  };
+
   return (
     <NFTMarketplaceContext.Provider
-      value={{ createSale, fetchMyNFTsOrListedNFTs, buyNFT, cancelListing, resellNFT }}
-    >
+      value={{
+        createSale,
+        fetchMyNFTsOrListedNFTs,
+        buyNFT,
+        cancelListing,
+        resellNFT,
+        getPendingBalance,
+        withdraw,
+      }}>
       {children}
     </NFTMarketplaceContext.Provider>
   );

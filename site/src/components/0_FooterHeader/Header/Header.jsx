@@ -61,7 +61,9 @@ const Header = () => {
     if (mobileOpen) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = prev; };
+      return () => {
+        document.body.style.overflow = prev;
+      };
     }
   }, [mobileOpen]);
 
@@ -70,9 +72,11 @@ const Header = () => {
       <div className={style.header}>
         <div className={style.header_container_left}>
           <Link href="/">
-            <div className={style.header_container_left_logo}>
-              <Image className={style.logo} src={img.logo} alt="NFT MARKETPLACE" />
-            </div>
+            <Image
+              className={style.header_container_left_logo}
+              src={img.logo}
+              alt="NFT MARKETPLACE"
+            />
           </Link>
 
           {/* Desktop search */}
@@ -87,8 +91,7 @@ const Header = () => {
             <button
               className={style.header_container_left_searchbtn}
               onClick={handleSearch}
-              aria-label="Search"
-            >
+              aria-label="Search">
               <BsSearch />
             </button>
           </div>
@@ -105,8 +108,7 @@ const Header = () => {
           <div
             className={style.header_container_right_discover}
             onMouseEnter={() => setDiscover(true)}
-            onMouseLeave={() => setDiscover(false)}
-          >
+            onMouseLeave={() => setDiscover(false)}>
             <p>Discover</p>
             {discover && (
               <div className={style.header_container_right_discover_box}>
@@ -118,8 +120,7 @@ const Header = () => {
           <div
             className={style.header_container_right_help}
             onMouseEnter={() => setHelp(true)}
-            onMouseLeave={() => setHelp(false)}
-          >
+            onMouseLeave={() => setHelp(false)}>
             <p>Help Center</p>
             {help && (
               <div className={style.header_container_right_help_box}>
@@ -131,8 +132,7 @@ const Header = () => {
           <div
             className={style.header_container_right_notification}
             onClick={() => router.push("/marketplace?wishlist=1")}
-            style={{ cursor: "pointer" }}
-          >
+            style={{ cursor: "pointer" }}>
             <PiListHeartBold
               className={style.header_container_right_notification_icon}
             />
@@ -160,8 +160,7 @@ const Header = () => {
                     <button
                       onClick={openConnectModal}
                       type="button"
-                      className={style.header_container_right_createNFT}
-                    >
+                      className={style.header_container_right_createNFT}>
                       Connect Wallet
                     </button>
                   );
@@ -177,8 +176,7 @@ const Header = () => {
                   <button
                     onClick={openAccountModal}
                     type="button"
-                    className={style.header_container_right_createNFT}
-                  >
+                    className={style.header_container_right_createNFT}>
                     {account.displayName}
                   </button>
                 );
@@ -199,8 +197,7 @@ const Header = () => {
         <button
           className={style.mobile_toggle}
           onClick={() => setMobileOpen(true)}
-          aria-label="Open menu"
-        >
+          aria-label="Open menu">
           <RxHamburgerMenu />
         </button>
       </div>
@@ -216,17 +213,20 @@ const Header = () => {
       {/* Mobile sidebar */}
       <aside
         className={`${style.sidebar} ${mobileOpen ? style.sidebar_open : ""}`}
-        aria-hidden={!mobileOpen}
-      >
+        aria-hidden={!mobileOpen}>
         <div className={style.sidebar_header}>
           <Link href="/" onClick={() => setMobileOpen(false)}>
-            <Image src={img.logo} alt="NFT MARKETPLACE" width={40} height={40} />
+            <Image
+              src={img.logo}
+              alt="NFT MARKETPLACE"
+              width={40}
+              height={40}
+            />
           </Link>
           <button
             className={style.sidebar_close}
             onClick={() => setMobileOpen(false)}
-            aria-label="Close menu"
-          >
+            aria-label="Close menu">
             <IoClose />
           </button>
         </div>
@@ -254,8 +254,7 @@ const Header = () => {
         <div className={style.sidebar_group}>
           <div
             className={style.sidebar_link}
-            onClick={() => setMobileDiscoverOpen((v) => !v)}
-          >
+            onClick={() => setMobileDiscoverOpen((v) => !v)}>
             <span>Discover</span>
             <span>{mobileDiscoverOpen ? "–" : "+"}</span>
           </div>
@@ -269,8 +268,7 @@ const Header = () => {
         <div className={style.sidebar_group}>
           <div
             className={style.sidebar_link}
-            onClick={() => setMobileHelpOpen((v) => !v)}
-          >
+            onClick={() => setMobileHelpOpen((v) => !v)}>
             <span>Help Center</span>
             <span>{mobileHelpOpen ? "–" : "+"}</span>
           </div>
@@ -287,8 +285,7 @@ const Header = () => {
             onClick={() => {
               setMobileOpen(false);
               router.push("/marketplace?wishlist=1");
-            }}
-          >
+            }}>
             <PiListHeartBold /> Wishlist
           </button>
         </div>
@@ -318,8 +315,7 @@ const Header = () => {
                         openConnectModal();
                       }}
                       type="button"
-                      className={style.sidebar_primary_button}
-                    >
+                      className={style.sidebar_primary_button}>
                       Connect Wallet
                     </button>
                   );
@@ -329,8 +325,7 @@ const Header = () => {
                     <button
                       onClick={openChainModal}
                       type="button"
-                      className={style.sidebar_primary_button}
-                    >
+                      className={style.sidebar_primary_button}>
                       Wrong network
                     </button>
                   );
@@ -340,12 +335,13 @@ const Header = () => {
                     <button
                       onClick={openAccountModal}
                       type="button"
-                      className={style.sidebar_primary_button}
-                    >
+                      className={style.sidebar_primary_button}>
                       {account.displayName}
                     </button>
                     {isConnected && (
-                      <Link href="/profile" onClick={() => setMobileOpen(false)}>
+                      <Link
+                        href="/profile"
+                        onClick={() => setMobileOpen(false)}>
                         <button className={style.sidebar_primary_button}>
                           Profile
                         </button>

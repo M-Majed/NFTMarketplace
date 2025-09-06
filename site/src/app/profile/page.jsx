@@ -8,6 +8,7 @@ import { MdDeleteForever, MdEdit } from "react-icons/md";
 import { useAccount, useBalance } from "wagmi";
 import Link from "next/link";
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
+import { formatEther } from "viem";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("MyNFTs");
@@ -19,9 +20,13 @@ const Profile = () => {
     transactions: [],
   });
 
-  const { cancelListing, fetchMyNFTsOrListedNFTs, resellNFT } = useContext(
-    NFTMarketplaceContext
-  );
+  const {
+    cancelListing,
+    fetchMyNFTsOrListedNFTs,
+    resellNFT,
+    getPendingBalance,
+    withdraw,
+  } = useContext(NFTMarketplaceContext);
   const [chainNFTs, setChainNFTs] = useState([]);
   const [loadingChain, setLoadingChain] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
@@ -40,13 +45,38 @@ const Profile = () => {
   ]; // Prisma enum
 
   // pagination for transactions
-const [txPage, setTxPage] = useState(1);
-const [txPageSize, setTxPageSize] = useState(10);
+  const [txPage, setTxPage] = useState(1);
+  const [txPageSize, setTxPageSize] = useState(10);
+
+  // withdrawable earnings (on-chain)
+  const [pendingWei, setPendingWei] = useState(0n);
+  const [loadingPending, setLoadingPending] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
+
+  const refreshPending = async () => {
+    if (!isConnected) return;
+    try {
+      setLoadingPending(true);
+      const wei = await getPendingBalance(address);
+      setPendingWei(wei ?? 0n);
+    } catch (e) {
+      console.warn("getPendingBalance failed:", e);
+    } finally {
+      setLoadingPending(false);
+    }
+  };
 
   useEffect(() => {
-  const totalPages = Math.max(1, Math.ceil((profileData.transactions?.length || 0) / txPageSize));
-  if (txPage > totalPages) setTxPage(totalPages);
-}, [profileData.transactions, txPage, txPageSize]);
+    refreshPending();
+  }, [address, isConnected]);
+
+  useEffect(() => {
+    const totalPages = Math.max(
+      1,
+      Math.ceil((profileData.transactions?.length || 0) / txPageSize)
+    );
+    if (txPage > totalPages) setTxPage(totalPages);
+  }, [profileData.transactions, txPage, txPageSize]);
   const openResellDialog = (nft, e) => {
     e?.stopPropagation?.();
     setSelectedNFT(nft);
@@ -135,7 +165,23 @@ const [txPageSize, setTxPageSize] = useState(10);
           (err?.shortMessage || err?.message || "Unknown error")
       );
     } finally {
-      setCancellingId(null);
+      refreshPending();
+    }
+  };
+
+  const handleWithdrawAll = async () => {
+    const eth = Number(formatEther(pendingWei));
+    if (!eth || eth <= 0) return;
+    try {
+      setWithdrawing(true);
+      await withdraw({ amountEth: eth });
+      await refreshPending();
+      alert("Withdraw successful.");
+    } catch (err) {
+      console.error("Withdraw failed:", err);
+      alert("Withdraw failed: " + (err?.shortMessage || err?.message || "Unknown error"));
+    } finally {
+      setWithdrawing(false);
     }
   };
 
@@ -160,12 +206,22 @@ const [txPageSize, setTxPageSize] = useState(10);
           <h2>{address}</h2>
           <div className={Style.Profile_info_wallet}>
             <p>Wallet Address: {address}</p>
-            <p>
-              Balance:{" "}
-              {balanceData
-                ? `${balanceData.formatted} ${balanceData.symbol}`
-                : "0.00 ETH"}
-            </p>
+            <div className={Style.Profile_info_actions}>
+              <span>
+                Balance:&nbsp;
+                {loadingPending
+                  ? "…"
+                  : `${Number(formatEther(pendingWei)).toFixed(4)} ETH`}
+              </span>
+              <button
+                className={`${Style.Button} ${Style.ButtonPrimary}`}
+                onClick={handleWithdrawAll}
+                disabled={withdrawing || pendingWei === 0n}
+                title={pendingWei === 0n ? "No earnings to withdraw" : "Withdraw all earnings"}
+              >
+                {withdrawing ? "Withdrawing…" : "Withdraw"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -298,87 +354,95 @@ const [txPageSize, setTxPageSize] = useState(10);
       {activeTab == "TransactionHistory" && (
         <div className={Style.Profile_MyNFTs}>
           <h2>Transaction History</h2>
-{profileData.transactions.length > 0 ? (() => {
-  const start = (txPage - 1) * txPageSize;
-  const end = start + txPageSize;
-  const paginated = profileData.transactions.slice(start, end);
-  const totalPages = Math.max(1, Math.ceil(profileData.transactions.length / txPageSize));
+          {profileData.transactions.length > 0 ? (
+            (() => {
+              const start = (txPage - 1) * txPageSize;
+              const end = start + txPageSize;
+              const paginated = profileData.transactions.slice(start, end);
+              const totalPages = Math.max(
+                1,
+                Math.ceil(profileData.transactions.length / txPageSize)
+              );
 
-  return (
-    <>
-      <div className={Style.Profile_TransactionHistory_list}>
-        {paginated.map((tx) => {
-          const isSeller = tx.seller.walletAddress === address;
-          return (
-            <div key={tx.id} className={Style.Profile_TransactionHistory_list_item}>
-              {isSeller ? "Sold" : "Bought"} {tx.nft.name} - Price: {tx.price} ETH
-            </div>
-          );
-        })}
-      </div>
+              return (
+                <>
+                  <div className={Style.Profile_TransactionHistory_list}>
+                    {paginated.map((tx) => {
+                      const isSeller = tx.seller.walletAddress === address;
+                      return (
+                        <div
+                          key={tx.id}
+                          className={
+                            Style.Profile_TransactionHistory_list_item
+                          }>
+                          {isSeller ? "Sold" : "Bought"} {tx.nft.name} - Price:{" "}
+                          {tx.price} ETH
+                        </div>
+                      );
+                    })}
+                  </div>
 
-      <div className={Style.Pagination}>
-        <div className={Style.Pagination_controls}>
-          <button
-            className={Style.Button}
-            onClick={() => setTxPage(1)}
-            disabled={txPage === 1}
-            aria-label="First page"
-          >
-            « First
-          </button>
-          <button
-            className={Style.Button}
-            onClick={() => setTxPage((p) => Math.max(1, p - 1))}
-            disabled={txPage === 1}
-            aria-label="Previous page"
-          >
-            ‹ Prev
-          </button>
-          <span className={Style.Pagination_info}>
-            Page {txPage} of {totalPages}
-          </span>
-          <button
-            className={Style.Button}
-            onClick={() => setTxPage((p) => Math.min(totalPages, p + 1))}
-            disabled={txPage === totalPages}
-            aria-label="Next page"
-          >
-            Next ›
-          </button>
-          <button
-            className={Style.Button}
-            onClick={() => setTxPage(totalPages)}
-            disabled={txPage === totalPages}
-            aria-label="Last page"
-          >
-            Last »
-          </button>
-        </div>
+                  <div className={Style.Pagination}>
+                    <div className={Style.Pagination_controls}>
+                      <button
+                        className={Style.Button}
+                        onClick={() => setTxPage(1)}
+                        disabled={txPage === 1}
+                        aria-label="First page">
+                        « First
+                      </button>
+                      <button
+                        className={Style.Button}
+                        onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+                        disabled={txPage === 1}
+                        aria-label="Previous page">
+                        ‹ Prev
+                      </button>
+                      <span className={Style.Pagination_info}>
+                        Page {txPage} of {totalPages}
+                      </span>
+                      <button
+                        className={Style.Button}
+                        onClick={() =>
+                          setTxPage((p) => Math.min(totalPages, p + 1))
+                        }
+                        disabled={txPage === totalPages}
+                        aria-label="Next page">
+                        Next ›
+                      </button>
+                      <button
+                        className={Style.Button}
+                        onClick={() => setTxPage(totalPages)}
+                        disabled={txPage === totalPages}
+                        aria-label="Last page">
+                        Last »
+                      </button>
+                    </div>
 
-        <label className={Style.Pagination_pageSize}>
-          <span>Rows per page</span>
-          <select
-            className={Style.PageSizeSelect}
-            value={txPageSize}
-            onChange={(e) => {
-              const newSize = Number(e.target.value);
-              setTxPageSize(newSize);
-              setTxPage(1); // reset to first page when size changes
-            }}
-          >
-            {[5, 10, 20, 50].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-    </>
-  );
-})() : (
-  <p>No transactions yet.</p>
-)}
-
+                    <label className={Style.Pagination_pageSize}>
+                      <span>Rows per page</span>
+                      <select
+                        className={Style.PageSizeSelect}
+                        value={txPageSize}
+                        onChange={(e) => {
+                          const newSize = Number(e.target.value);
+                          setTxPageSize(newSize);
+                          setTxPage(1); // reset to first page when size changes
+                        }}>
+                        {[5, 10, 20, 50].map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                </>
+              );
+            })()
+          ) : (
+            <p>No transactions yet.</p>
+          )}
         </div>
       )}
       {showPriceModal && (
