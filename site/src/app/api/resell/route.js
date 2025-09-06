@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export async function POST(req) {
   try {
-    const { tokenId, price, walletAddress, txHash, category } =
+    const { tokenId, price, walletAddress, txHash, category, marketplaceAddress  } =
       await req.json();
     // Optional category validation (must match Prisma enum if provided)
     const ALLOWED = ["Art", "Game", "Nature", "Sport", "Portrait", "Animal"];
@@ -71,28 +71,53 @@ export async function POST(req) {
     }
     const seller = nft.owner;
 
-    // Upsert listing for this tokenId (unique)
-    const listing = await prisma.listing.upsert({
-      where: { tokenId: tokenIdInt },
-      update: {
-        price: String(price),
-        active: true,
-        sellerId: seller.id,
-        ...(category ? { category } : {}),
-      },
-      create: {
-        tokenId: tokenIdInt,
-        price: String(price),
-        active: true,
-        sellerId: seller.id,
-        // category: optional – leave null/unchanged unless you collect it in UI
-        ...(category ? { category } : {}),
-      },
-      include: {
-        nft: true,
-        seller: true,
-      },
+    // Resolve marketplace (contract) address: body override or env
+    const marketAddrRaw =
+      marketplaceAddress ||
+      process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS ||
+      process.env.MARKETPLACE_ADDRESS ||
+      process.env.NEXT_PUBLIC_NFT_MARKETPLACE_ADDRESS ||
+      process.env.NFT_MARKETPLACE_ADDRESS;
+    if (!marketAddrRaw || typeof marketAddrRaw !== "string") {
+      return NextResponse.json(
+        { error: "Marketplace (contract) address missing. Pass `marketplaceAddress` in body or set an env var." },
+        { status: 500 }
+      );
+    }
+    const marketAddr = marketAddrRaw.toLowerCase();
+
+    // Ensure a User row exists for the contract address
+    const contractUser = await prisma.user.upsert({
+      where: { walletAddress: marketAddr },
+      create: { walletAddress: marketAddr },
+      update: {},
     });
+
+    // Atomically: set NFT owner to contract + upsert listing
+    const [updatedNFT, listing] = await prisma.$transaction([
+      prisma.nFT.update({
+        where: { tokenId: tokenIdInt },
+        data: { ownerId: contractUser.id },
+        select: { tokenId: true, ownerId: true },
+      }),
+      prisma.listing.upsert({
+        where: { tokenId: tokenIdInt },
+        update: {
+          price: String(price),
+          active: true,
+          sellerId: seller.id,
+          ...(category ? { category } : {}),
+        },
+        create: {
+          tokenId: tokenIdInt,
+          price: String(price),
+          active: true,
+          sellerId: seller.id,
+          ...(category ? { category } : {}),
+        },
+        include: { nft: true, seller: true },
+      }),
+    ]);
 
     // NOTE: Not creating a Transaction here due to schema constraints (needs buyerId).
     // We'll create a SALE/RESALE transaction after purchase.
@@ -101,6 +126,7 @@ export async function POST(req) {
       {
         ok: true,
         listing,
+        nft: updatedNFT,
         txHash: txHash || null,
       },
       { status: 201 }

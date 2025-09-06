@@ -30,14 +30,15 @@ export default function Category({ items }) {
             href={`/marketplace?category=${encodeURIComponent(name)}`}
             className={Style.category_categories_box}
           >
-            <Image
-              src={categoryImages[name] || '/img/categories/default.jpg'}
-              className={Style.category_categories_box_img}
-              alt={`${name} background`}
-              width={300}
-              height={180}
-              objectFit="cover"
-            />
+<Image
+  src={categoryImages[name] || '/img/categories/default.jpg'}
+  className={Style.category_categories_box_img}
+  alt={`${name} background`}
+  width={300}
+  height={180}
+  sizes="(max-width: 560px) 48vw, (max-width: 900px) 33vw, 300px"
+/>
+
             <div className={Style.category_categories_box_title}>
               <span> <BsCircleFill /></span>
               <div className={Style.category_categories_box_title_info}>

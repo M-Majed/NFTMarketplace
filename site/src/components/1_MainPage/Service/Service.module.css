@@ -1,24 +1,22 @@
-
 .service{
-    width: 80%;
-    margin: 0 auto;
-    margin-top: 50px;
+  margin: 0 auto;
+  max-width: 1200px;
+  padding-inline: clamp(16px, 3vw, 32px);
+  margin-top: clamp(24px, 5vw, 60px);
 }
 
 .service_box{
-    display: flex;
-    text-align: center;
-    gap: 25px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: clamp(16px, 3vw, 24px);
+  text-align: center;
 }
 
-.service_box_item_step{
-    margin-block: 20px;
-}
+.service_box_item_step{ margin-block: 14px; }
 
 .service_box_item_step span{
-    padding: 5px 10px;
-    border-radius: 20px;
-    background-color:  white;
-    color: black;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background-color: white;
+  color: black;
 }
-

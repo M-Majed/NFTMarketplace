@@ -18,6 +18,7 @@ const Profile = () => {
     listings: [],
     transactions: [],
   });
+
   const { cancelListing, fetchMyNFTsOrListedNFTs, resellNFT } = useContext(
     NFTMarketplaceContext
   );
@@ -37,6 +38,15 @@ const Profile = () => {
     "Portrait",
     "Animal",
   ]; // Prisma enum
+
+  // pagination for transactions
+const [txPage, setTxPage] = useState(1);
+const [txPageSize, setTxPageSize] = useState(10);
+
+  useEffect(() => {
+  const totalPages = Math.max(1, Math.ceil((profileData.transactions?.length || 0) / txPageSize));
+  if (txPage > totalPages) setTxPage(totalPages);
+}, [profileData.transactions, txPage, txPageSize]);
   const openResellDialog = (nft, e) => {
     e?.stopPropagation?.();
     setSelectedNFT(nft);
@@ -143,6 +153,7 @@ const Profile = () => {
             alt="NFT image"
             width={70}
             height={70}
+            sizes="(max-width: 600px) 56px, 70px"
           />
         </div>
         <div className={Style.Profile_info}>
@@ -224,6 +235,7 @@ const Profile = () => {
                     height={200}
                     alt={nft.name || `Token #${nft.tokenId}`}
                     className={Style.Profile_MyNFTs_NFTGrid_card_img}
+                    sizes="(max-width: 600px) 45vw, 200px"
                   />
                   <div className={Style.Profile_MyNFTs_NFTGrid_card_info}>
                     <h3>{nft.name || `Token #${nft.tokenId}`}</h3>
@@ -286,23 +298,87 @@ const Profile = () => {
       {activeTab == "TransactionHistory" && (
         <div className={Style.Profile_MyNFTs}>
           <h2>Transaction History</h2>
-          {profileData.transactions.length > 0 ? (
-            <div className={Style.Profile_TransactionHistory_list}>
-              {profileData.transactions.map((tx) => {
-                const isSeller = tx.seller.walletAddress === address;
-                return (
-                  <div
-                    key={tx.id}
-                    className={Style.Profile_TransactionHistory_list_item}>
-                    {isSeller ? "Sold" : "Bought"} {tx.nft.name} - Price:{" "}
-                    {tx.price} ETH
-                  </div>
-                );
-              })}
+{profileData.transactions.length > 0 ? (() => {
+  const start = (txPage - 1) * txPageSize;
+  const end = start + txPageSize;
+  const paginated = profileData.transactions.slice(start, end);
+  const totalPages = Math.max(1, Math.ceil(profileData.transactions.length / txPageSize));
+
+  return (
+    <>
+      <div className={Style.Profile_TransactionHistory_list}>
+        {paginated.map((tx) => {
+          const isSeller = tx.seller.walletAddress === address;
+          return (
+            <div key={tx.id} className={Style.Profile_TransactionHistory_list_item}>
+              {isSeller ? "Sold" : "Bought"} {tx.nft.name} - Price: {tx.price} ETH
             </div>
-          ) : (
-            <p>No transactions yet.</p>
-          )}
+          );
+        })}
+      </div>
+
+      <div className={Style.Pagination}>
+        <div className={Style.Pagination_controls}>
+          <button
+            className={Style.Button}
+            onClick={() => setTxPage(1)}
+            disabled={txPage === 1}
+            aria-label="First page"
+          >
+            « First
+          </button>
+          <button
+            className={Style.Button}
+            onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+            disabled={txPage === 1}
+            aria-label="Previous page"
+          >
+            ‹ Prev
+          </button>
+          <span className={Style.Pagination_info}>
+            Page {txPage} of {totalPages}
+          </span>
+          <button
+            className={Style.Button}
+            onClick={() => setTxPage((p) => Math.min(totalPages, p + 1))}
+            disabled={txPage === totalPages}
+            aria-label="Next page"
+          >
+            Next ›
+          </button>
+          <button
+            className={Style.Button}
+            onClick={() => setTxPage(totalPages)}
+            disabled={txPage === totalPages}
+            aria-label="Last page"
+          >
+            Last »
+          </button>
+        </div>
+
+        <label className={Style.Pagination_pageSize}>
+          <span>Rows per page</span>
+          <select
+            className={Style.PageSizeSelect}
+            value={txPageSize}
+            onChange={(e) => {
+              const newSize = Number(e.target.value);
+              setTxPageSize(newSize);
+              setTxPage(1); // reset to first page when size changes
+            }}
+          >
+            {[5, 10, 20, 50].map((n) => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+    </>
+  );
+})() : (
+  <p>No transactions yet.</p>
+)}
+
         </div>
       )}
       {showPriceModal && (

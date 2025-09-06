@@ -89,9 +89,6 @@ export default function BigNFTSilder({ listings }) {
               <p>Creator</p>
               <h4>
                 {current.name}{" "}
-                <span>
-                  <MdVerified />
-                </span>
               </h4>
             </div>
           </div>

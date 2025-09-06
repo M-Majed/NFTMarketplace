@@ -70,6 +70,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
         walletAddress: address,
         txHash: hash,
         category,
+        marketplaceAddress:NFTMarketplaceAddress,
       }),
     }).catch(console.error);
 

@@ -97,20 +97,6 @@
     font-size: 30px;
 }
 
-/* .bigNFTSlider_left_bidding_box_timer{
-    display: flex;
-    gap: 50px;
-    text-align: center;
-    padding: 0px 0px 30px;
-    border-bottom:  1px solid black;
-}
-
-
-.bigNFTSlider_left_bidding_box_timer_item p{
-    font-size: 30px;
-    font-weight: bold;
-    line-height: 0;
-} */
 
 .bigNFTSlider_left_buttons{
     display: flex;
@@ -140,7 +126,7 @@
     display: flex;
     gap: 30px;
     font-size: 30px;
-    margin-top: 35px;
+    margin-top: 70px;
     color:white;
 }
 
@@ -187,7 +173,7 @@
     font-size: large;
 }
 
-/* @media (max-width: 1230px){
+@media (max-width: 1100px){
     .bigNFTSlider{
         grid-template-rows: repeat(12, 1fr);
         justify-items: center;
@@ -197,7 +183,7 @@
     .bigNFTSlider_left{
         grid-row: 3 / -1;
         grid-column: 1 / -1;
-        height: 400px;
+        height: 63%;
         width: 350px;
     }
     .bigNFTSlider_right{
@@ -258,4 +244,118 @@
         top: -410px;
         left: 320px;
     }
-} */
+    .bigNFTSlider_left_sliderBtn{
+    gap: 50px;
+    margin-top: 20px;
+    justify-self: center;
+}
+}
+
+/* ---------- TEXT + ROW BEHAVIOR FIXES (<1480px) ---------- */
+@media (max-width: 1480px){
+  /* make the creator row a 2-column text grid so items never collide */
+  .bigNFTSlider_left_creator{
+    display: grid;
+    grid-template-columns: 1fr auto;   /* wallet (flexible) | category (auto) */
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 6px;
+    min-width: 0;                       /* allow shrinking */
+  }
+
+  /* allow the wallet block to shrink and elide */
+  .bigNFTSlider_left_creator_profile,
+  .bigNFTSlider_left_creator_profile_info{
+    min-width: 0;
+  }
+  .bigNFTSlider_left_creator_profile_info{
+    line-height: 1.1;                   /* was 0 → clipping */
+  }
+  .bigNFTSlider_left_creator_profile_info p{
+    margin-bottom: 2px;                 /* undo -5px */
+  }
+  .bigNFTSlider_left_creator_profile_info h4{
+    margin: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;                 /* long wallet → … */
+  }
+
+  /* category stays on the right but won’t overlap; elide if long */
+  .bigNFTSlider_left_creator_Category{
+    min-width: 0;
+    justify-self: end;
+  }
+  .bigNFTSlider_left_creator_Category_info{
+    min-width: 0;
+    line-height: 1.1;                   /* was 0 */
+    text-align: right;
+  }
+  .bigNFTSlider_left_creator_Category_info h4{
+    margin: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* scale heading & icon so text doesn’t crush */
+  .bigNFTSlider_left h2{
+    font-size: clamp(24px, 2.4vw, 34px);
+    line-height: 1.15;
+    margin: 0;
+    word-break: break-word;
+  }
+  .bigNFTSlider_left_creator_Category_icon{
+    font-size: clamp(26px, 2.2vw, 34px);
+  }
+
+  /* price text won’t clip */
+  .bigNFTSlider_left_bidding_box p{
+    font-size: clamp(13px, 1.3vw, 15px);
+    line-height: 1.25;
+    margin: 6px 0 0 0;
+  }
+  .bigNFTSlider_left_bidding_box small{
+    line-height: 1;
+    padding: 8px 14px;  /* smaller so it doesn’t collide with text */
+  }
+
+  /* keep button labels readable without changing your layout */
+  .bigNFTSlider_left_buttons_button{
+    font-size: clamp(14px, 1.2vw, 15px);
+  }
+}
+
+/* stack the two text blocks on narrower widths, still without
+   touching the hero’s overall layout */
+@media (max-width: 1100px){
+  .bigNFTSlider_left_creator{
+    grid-template-columns: 1fr;   /* wallet on row 1, category on row 2 */
+    justify-items: start;
+  }
+}
+
+/* ===== Hard fix for narrow phones (≤560px). Theme/layout unchanged. ===== */
+@media (max-width: 560px){
+  .bigNFTSlider{
+    justify-items: stretch;   
+  }
+
+  .bigNFTSlider_left{
+    grid-row: 4 / -1;
+    width: auto;                       /* override 350px */
+    margin: 0 25px;                  /* prevent edge-to-edge */
+    height: 48%;                     /* override 400px */
+}
+
+  .bigNFTSlider_left_bidding{
+    margin-top: 20px;
+  }
+    .bigNFTSlider_right{
+        width: auto;  
+    }
+    
+}
+
