@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 
-//INTERNAL IMPORT`
+// INTERNAL IMPORT
 import Style from "./Button.module.css";
 
 export default function Button({ btnName, handleClick = () => {}, icon, classStyle }) {
@@ -16,4 +16,4 @@ export default function Button({ btnName, handleClick = () => {}, icon, classSty
       </button>
     </div>
   );
-};
+}

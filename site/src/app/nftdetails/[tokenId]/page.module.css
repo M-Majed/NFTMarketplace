@@ -1,27 +1,22 @@
 .NFTDetailsPage{
-    /* container */
     margin: 0 auto;
     max-width: 1200px;
     padding-inline: clamp(16px, 3vw, 32px);
 
-    /* grid */
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     gap: clamp(16px, 3vw, 40px);
     align-items: start;
 }
 
-/* left column: image/details */
 .NFTDetailsPage > :first-child {
     grid-column: span 7;
 }
 
-/* right column: description/purchase */
 .NFTDetailsPage > :last-child {
     grid-column: span 5;
 }
 
-/* stack on smaller screens */
 @media (max-width: 1024px) {
     .NFTDetailsPage{
         grid-template-columns: 1fr;

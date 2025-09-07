@@ -1,62 +1,86 @@
-// app/api/listings/cancel/route.js
+// app/api/listings/cancel-sell/route.js
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+
 export const runtime = "nodejs";
 
 const prisma = new PrismaClient();
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const { tokenId, walletAddress, txHash } = await req.json();
+    const {
+      tokenId: token_id,
+      walletAddress: wallet_address,
+      txHash: tx_hash,
+    } = await request.json();
 
-    if (typeof tokenId !== "number")
-      return NextResponse.json({ ok: false, error: "tokenId (number) required" }, { status: 400 });
-    if (!walletAddress)
-      return NextResponse.json({ ok: false, error: "walletAddress required" }, { status: 400 });
+    if (typeof token_id !== "number") {
+      return NextResponse.json(
+        { ok: false, error: "tokenId (number) required" },
+        { status: 400 }
+      );
+    }
 
-    // Find the user calling cancel
-    const user = await prisma.user.findUnique({
-      where: { walletAddress },
+    if (!wallet_address) {
+      return NextResponse.json(
+        { ok: false, error: "walletAddress required" },
+        { status: 400 }
+      );
+    }
+
+    const user_record = await prisma.user.findUnique({
+      where: { walletAddress: wallet_address },
       select: { id: true },
     });
-    if (!user) {
-      return NextResponse.json({ ok: false, error: "User not found" }, { status: 404 });
+
+    if (!user_record) {
+      return NextResponse.json(
+        { ok: false, error: "User not found" },
+        { status: 404 }
+      );
     }
 
-    // Make sure the listing exists and belongs to this user
-    const listing = await prisma.listing.findUnique({
-      where: { tokenId },
+    const listing_record = await prisma.listing.findUnique({
+      where: { tokenId: token_id },
       select: { id: true, active: true, sellerId: true },
     });
-    if (!listing) {
-      return NextResponse.json({ ok: false, error: "Listing not found" }, { status: 404 });
-    }
-    if (listing.sellerId !== user.id) {
-      return NextResponse.json({ ok: false, error: "Not the listing seller" }, { status: 403 });
+
+    if (!listing_record) {
+      return NextResponse.json(
+        { ok: false, error: "Listing not found" },
+        { status: 404 }
+      );
     }
 
-    const [updatedListing, updatedNft] = await prisma.$transaction([
+    if (listing_record.sellerId !== user_record.id) {
+      return NextResponse.json(
+        { ok: false, error: "Not the listing seller" },
+        { status: 403 }
+      );
+    }
+
+    const [updated_listing, updated_nft] = await prisma.$transaction([
       prisma.listing.update({
-        where: { tokenId },
+        where: { tokenId: token_id },
         data: { active: false },
       }),
       prisma.nFT.update({
-        // Model name is NFT → client accessor is nFT
-        where: { tokenId },
-        data: { ownerId: user.id },
+        where: { tokenId: token_id },
+        data: { ownerId: user_record.id },
       }),
     ]);
 
-    // If you later want to log tx, add a Transaction row here (enum lacks CANCEL today).
-
     return NextResponse.json({
       ok: true,
-      listing: updatedListing,
-      nft: updatedNft,
-      txHash: txHash ?? null,
+      listing: updated_listing,
+      nft: updated_nft,
+      txHash: tx_hash ?? null,
     });
   } catch (err) {
     console.error("Cancel API error:", err);
-    return NextResponse.json({ ok: false, error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

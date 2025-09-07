@@ -3,7 +3,6 @@
     background-color: rgb(0, 20, 21);
     border-radius: 20px;
     padding: clamp(16px, 2.5vw, 24px);
-    /* remove fixed height – let content size naturally */
 }
 
 /* top right action bar */
@@ -25,7 +24,7 @@
     cursor: pointer;
 }
 
-/* anchor dropdown to the right of the icons so it never overflows */
+/* anchor dropdown to the right of the icons */
 .NFTDescription_share_box_social{
     position: absolute;
     top: calc(100% + 8px);
@@ -76,7 +75,7 @@
 
 .NFTDescription_profile_box_info span{
     font-weight: 800;
-    word-break: break-all; /* long wallet addresses */
+    word-break: break-all;
 }
 
 /* pricing */
@@ -130,7 +129,6 @@
     color: black;
 }
 
-/* make buttons full-width on narrow screens for easier tapping */
 @media (max-width: 480px){
     .NFTDescription_profile_biding_box_buttons_button{
         width: 100%;

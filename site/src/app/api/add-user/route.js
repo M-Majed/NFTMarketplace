@@ -1,26 +1,24 @@
 // src/app/api/users/route.js
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
 export const runtime = "nodejs";
 
-import { NextResponse } from "next/server";
-import { prisma }      from "@/lib/prisma";
-
 export async function POST(request) {
-  const { walletAddress } = await request.json();
-  if (!walletAddress) {
+  const { walletAddress: wallet_address } = await request.json();
+
+  if (!wallet_address) {
     return NextResponse.json(
       { error: "walletAddress is required" },
       { status: 400 }
-    );
+    );W
   }
 
-  // upsert: create if new, otherwise no-op
-  const user = await prisma.user.upsert({
-    where:  { walletAddress },
+  const user_record = await prisma.user.upsert({
+    where: { walletAddress: wallet_address },
     update: {},
-    create: {
-      walletAddress,
-    },
+    create: { walletAddress: wallet_address },
   });
 
-  return NextResponse.json(user);
+  return NextResponse.json(user_record);
 }

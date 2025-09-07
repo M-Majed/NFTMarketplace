@@ -16,7 +16,7 @@
   align-items: stretch;
 }
 
-/* === existing card styles (unchanged) === */
+/* === card styles (kept) === */
 .NFTCard_box {
   background-color: white;
   padding: 5px;
@@ -62,34 +62,6 @@
   line-height: 0;
 }
 
-.NFTCard_box_overlay_update_left {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 7px 14px;
-  color: black;
-  border-radius: 20px;
-  margin: 5px;
-}
-.NFTCard_box_overlay_update_left_like {
-  display: flex;
-  align-items: center;
-  font-size: 15px;
-  gap: 2px;
-}
-.NFTCard_box_overlay_update_left_like_icon { color: red; }
-
-.NFTCard_box_overlay_update_right {
-  background-color: rgba(255, 255, 255, 0.8);
-  color: black;
-  padding: 5px 10px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 500;
-}
-.NFTCard_box_overlay_update_right p { margin: 8px 0px; }
-
 .NFTCard_box_overlay_update_details {
   line-height: 0;
   z-index: 10;
@@ -100,15 +72,19 @@
   color: black;
   border-radius: 10px;
 }
+
 .NFTCard_box_overlay_update_details_price { padding: 0px 0px 10px 10px; }
+
 .NFTCard_box_overlay_update_details_price_box {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
+
 .NFTCard_box_overlay_update_details_price_box h4 {
   font-size: clamp(16px, 2.4vw, 18px);
 }
+
 .NFTCard_box_overlay_update_details_price_box_bid {
   border: 2px solid black;
   padding: 2px;
@@ -118,6 +94,7 @@
   margin-top: -12px;
   padding-top: 10px;
 }
+
 .NFTCard_box_overlay_update_details_category {
   margin: 16px;
   font-size: 22px;

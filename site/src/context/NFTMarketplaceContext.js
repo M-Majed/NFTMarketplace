@@ -23,7 +23,6 @@ export const NFTMarketplaceProvider = ({ children }) => {
       abi: NFTMarketplaceABI,
       functionName: "isApprovedForAll",
       args: [address, NFTMarketplaceAddress],
-      // account not strictly required for a pure read, but harmless
     });
 
     if (!alreadyApproved) {
@@ -37,18 +36,26 @@ export const NFTMarketplaceProvider = ({ children }) => {
     }
   };
 
+  // Helper: ask the contract to compute the 1% listing fee for a given price (wei)
+  const getListingFeeForPrice = async (priceWei) => {
+    return await publicClient.readContract({
+      address: NFTMarketplaceAddress,
+      abi: NFTMarketplaceABI,
+      functionName: "listingFeeFor",
+      args: [priceWei],
+    });
+  };
+
   // Resell an owned NFT: on-chain + DB
   const resellNFT = async ({ tokenId, priceEth, category }) => {
     if (!address) throw new Error("Please connect a wallet first.");
     if (tokenId === undefined || tokenId === null)
       throw new Error("tokenId required");
-    if (!priceEth) throw new Error("priceEth required");
+    if (priceEth === undefined || priceEth === null)
+      throw new Error("priceEth required");
 
-    const listingPrice = await publicClient.readContract({
-      address: NFTMarketplaceAddress,
-      abi: NFTMarketplaceABI,
-      functionName: "getListingPrice",
-    });
+    const priceWei = parseEther(String(priceEth));
+    const listingFee = await getListingFeeForPrice(priceWei);
 
     await ensureApprovalForAll();
 
@@ -56,8 +63,8 @@ export const NFTMarketplaceProvider = ({ children }) => {
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
       functionName: "resellToken",
-      args: [BigInt(tokenId), parseEther(String(priceEth))],
-      value: listingPrice,
+      args: [BigInt(tokenId), priceWei],
+      value: listingFee,
     });
     await publicClient.waitForTransactionReceipt({ hash });
 
@@ -81,19 +88,14 @@ export const NFTMarketplaceProvider = ({ children }) => {
   const createSale = async (url, formInputPrice, isReselling, tokenId) => {
     if (!address) throw new Error("Please connect a wallet first.");
     const price = parseEther(String(formInputPrice));
-
-    const listingPrice = await publicClient.readContract({
-      address: NFTMarketplaceAddress,
-      abi: NFTMarketplaceABI,
-      functionName: "getListingPrice",
-    });
+    const listingFee = await getListingFeeForPrice(price);
 
     const hash = await writeContractAsync({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
       functionName: "createToken",
       args: [url, price],
-      value: listingPrice,
+      value: listingFee,
     });
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -192,11 +194,15 @@ export const NFTMarketplaceProvider = ({ children }) => {
   const cancelListing = async (nft) => {
     if (!address) throw new Error("Please connect a wallet first.");
 
-    const fee = await publicClient.readContract({
-      address: NFTMarketplaceAddress,
-      abi: NFTMarketplaceABI,
-      functionName: "getListingPrice",
-    });
+    // Need the listed price to compute the dynamic fee.
+    const priceEth = nft?.price ?? nft?.priceEth;
+    if (priceEth === undefined || priceEth === null) {
+      throw new Error(
+        "nft.price (ETH) is required to compute the cancel fee. Pass the listing price with the NFT object."
+      );
+    }
+    const priceWei = parseEther(String(priceEth));
+    const fee = await getListingFeeForPrice(priceWei);
 
     const hash = await writeContractAsync({
       address: NFTMarketplaceAddress,
@@ -255,7 +261,8 @@ export const NFTMarketplaceProvider = ({ children }) => {
         resellNFT,
         getPendingBalance,
         withdraw,
-      }}>
+      }}
+    >
       {children}
     </NFTMarketplaceContext.Provider>
   );

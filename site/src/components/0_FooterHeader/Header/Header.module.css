@@ -1,3 +1,4 @@
+/* src/components/0_FooterHeader/Header/Header.module.css */
 .header{
     padding-block: 30px;
     width: 80%;
@@ -14,14 +15,11 @@
     gap: 20px;
     flex: 1;
 }
-
 .header_container_left_logo{
     width: 50px;
     height: 50px;
     cursor: pointer;
 }
-
-
 .header_container_left_box_input{
     width: 50%;
     border: 1px solid #ffffff;
@@ -29,15 +27,13 @@
     padding-inline: 5px;
     border-radius: 15px;
 }
-
 .header_container_left_box_input input{
-    width: 80%;
+    width: 95%;
     border: none;
     background-color: transparent;
     font-size: 15px;
     outline: none;
 }
-
 .header_container_left_searchbtn{
     background-color: transparent;
     border: none;
@@ -54,7 +50,6 @@
     flex: 0.8;
     justify-content: space-between;
 }
-
 .header_container_right_createNFT{
     background-color: transparent;
     border: none;
@@ -67,18 +62,14 @@
     cursor: pointer;
     transition: all .2s;
 }
-
 .header_container_right_createNFT:hover{
     border: none;
     background-color: white;
     color: black;
 }
-
 .header_container_right_discover,
 .header_container_right_help,
-.header_container_right_notification,
-.header_container_right_button,
-.header_container_right_profile{
+.header_container_right_notification{
     position: relative;
     cursor: pointer;
     text-align: center;
@@ -87,9 +78,7 @@
 
 /* desktop dropdowns */
 .header_container_right_discover_box,
-.header_container_right_help_box,
-.header_container_right_notification_box,
-.header_container_right_profile_box{
+.header_container_right_help_box{
     position: absolute;
     padding: 10px 10px;
     box-shadow: white 0px 0px 5px;
@@ -100,16 +89,8 @@
     z-index: 20;
 }
 .header_container_right_help_box{ width: 200%; }
-.header_container_right_notification_box{ width: 1000%; margin-top: 20px; }
-.header_container_right_profile_box{ width: 400%; }
 
 .header_container_right_notification_icon{ font-size: 25px; }
-
-.header_container_right_profileImg{
-    width: 50px;
-    height: 50px;
-    border-radius: 10px;
-}
 
 /* ========== MOBILE: hamburger + sidebar ========== */
 .mobile_toggle{

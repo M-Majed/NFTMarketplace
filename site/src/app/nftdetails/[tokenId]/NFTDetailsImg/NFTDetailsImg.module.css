@@ -1,10 +1,8 @@
-/* added container class (was missing) */
 .NFTDetailsImg{
     display: grid;
     gap: clamp(10px, 2vw, 16px);
 }
 
-/* make image fluid and keep aspect ratio */
 .NFTDetailsImg_NFT_img{
     display: block;
     width: 100%;
@@ -12,7 +10,6 @@
     border-radius: 15px;
 }
 
-/* readable card with fluid spacing */
 .NFTDetailsImg_description{
     padding: clamp(.5rem, 1.2vw, 1rem);
     border-radius: 10px;

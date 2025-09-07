@@ -1,6 +1,8 @@
 // src/app/nftdetails/[nftId]/NFTDescription/NFTDescription.jsx
 "use client";
-import React, { useState, useContext, useRef, useEffect } from "react";import Image from "next/image";
+
+import React, { useState, useContext, useRef, useEffect } from "react";
+import Image from "next/image";
 import {
   MdVerified,
   MdCloudUpload,
@@ -16,30 +18,23 @@ import {
   TiSocialInstagram,
 } from "react-icons/ti";
 
-// INTERNAL IMPORT
 import Style from "./NFTDescription.module.css";
 import img from "@/lib/img";
-
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 
-export default function NFTDescription({
-  nft,
-  seller,
-  price,
-  usdPrice,
-  listingId,
-}) {
+export default function NFTDescription({ nft, seller, price, usdPrice, listingId }) {
   const [social, setSocial] = useState(false);
   const [NFTMenu, setNFTMenu] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [inWishlist, setInWishlist] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
-  
+
   const { buyNFT } = useContext(NFTMarketplaceContext);
   const { address, isConnected } = useAccount();
   const router = useRouter();
+
   // Check wishlist status when wallet or listing changes
   useEffect(() => {
     const run = async () => {
@@ -47,15 +42,13 @@ export default function NFTDescription({
       setIsChecking(true);
       try {
         const res = await fetch(
-          `/api/wishlist?listingId=${encodeURIComponent(
-            listingId
-          )}&walletAddress=${encodeURIComponent(address)}`,
+          `/api/wishlist?listingId=${encodeURIComponent(listingId)}&walletAddress=${encodeURIComponent(address)}`,
           { cache: "no-store" }
         );
         const data = await res.json();
         if (res.ok) setInWishlist(!!data.inWishlist);
       } catch {
-        // silently ignore
+        // ignore
       } finally {
         setIsChecking(false);
       }
@@ -65,8 +58,8 @@ export default function NFTDescription({
 
   // --- tiny hover-gap protection ---
   const timers = useRef({ social: null, menu: null });
-  const OPEN_DELAY = 0; // open immediately
-  const CLOSE_DELAY = 300; // close a beat later
+  const OPEN_DELAY = 0;     // open immediately
+  const CLOSE_DELAY = 300;  // close a beat later
 
   const clearTimer = (key) => {
     if (timers.current[key]) {
@@ -97,8 +90,6 @@ export default function NFTDescription({
     timers.current.menu = setTimeout(() => setNFTMenu(false), CLOSE_DELAY);
   };
   // --- end hover-gap protection ---
-
-
 
   const handleBuy = async () => {
     if (!isConnected) return alert("Connect your wallet first");
@@ -166,10 +157,12 @@ export default function NFTDescription({
       setIsAdding(false);
     }
   };
-const handleWishlistClick = (e) => {
-  if (inWishlist) return handleRemoveFromWishlist(e);
-  return handleAddToWishlist(e);
-};
+
+  const handleWishlistClick = (e) => {
+    if (inWishlist) return handleRemoveFromWishlist(e);
+    return handleAddToWishlist(e);
+  };
+
   return (
     <div className={Style.NFTDescription}>
       <div className={Style.NFTDescription_share}>
@@ -181,22 +174,13 @@ const handleWishlistClick = (e) => {
               <div
                 className={Style.NFTDescription_share_box_social}
                 onMouseEnter={openSocial}
-                onMouseLeave={closeSocial}>
-                <a href="#">
-                  <TiSocialFacebook /> Facebook
-                </a>
-                <a href="#">
-                  <TiSocialInstagram /> Instagram
-                </a>
-                <a href="#">
-                  <TiSocialLinkedin /> LinkedIn
-                </a>
-                <a href="#">
-                  <TiSocialTwitter /> Twitter
-                </a>
-                <a href="#">
-                  <TiSocialYoutube /> YouTube
-                </a>
+                onMouseLeave={closeSocial}
+              >
+                <a href="#"><TiSocialFacebook /> Facebook</a>
+                <a href="#"><TiSocialInstagram /> Instagram</a>
+                <a href="#"><TiSocialLinkedin /> LinkedIn</a>
+                <a href="#"><TiSocialTwitter /> Twitter</a>
+                <a href="#"><TiSocialYoutube /> YouTube</a>
               </div>
             )}
           </div>
@@ -208,15 +192,12 @@ const handleWishlistClick = (e) => {
               <div
                 className={Style.NFTDescription_share_box_social}
                 onMouseEnter={openMenu}
-                onMouseLeave={closeMenu}>
-                <a href="#">
-                  <MdReportProblem /> Report
-                </a>
+                onMouseLeave={closeMenu}
+              >
+                <a href="#"><MdReportProblem /> Report</a>
                 <a href="#" onClick={handleWishlistClick}>
                   <MdOutlineAddToPhotos />{" "}
-                  {isAdding
-                    ? (inWishlist ? "Removing..." : "Adding...")
-                    : (inWishlist ? "Remove from WishList" : "Add to WishList")}
+                  {isAdding ? (inWishlist ? "Removing..." : "Adding...") : (inWishlist ? "Remove from WishList" : "Add to WishList")}
                 </a>
               </div>
             )}
@@ -224,15 +205,13 @@ const handleWishlistClick = (e) => {
         </div>
       </div>
 
-      {/* //Part TWO */}
+      {/* Part TWO */}
       <div className={Style.NFTDescription_profile}>
         <h1>{nft.name}</h1>
         <div className={Style.NFTDescription_profile_box}>
           <div className={Style.NFTDescription_profile_box_info}>
             <small>Creator</small> <br />
-            <span>
-              {seller.walletAddress} <MdVerified />
-            </span>
+            <span>{seller.walletAddress} <MdVerified /></span>
           </div>
         </div>
 
@@ -247,9 +226,8 @@ const handleWishlistClick = (e) => {
           <div className={Style.NFTDescription_profile_biding_box_buttons}>
             <button
               onClick={handleBuy}
-              className={
-                Style.NFTDescription_profile_biding_box_buttons_button
-              }>
+              className={Style.NFTDescription_profile_biding_box_buttons_button}
+            >
               Buy Now
             </button>
           </div>
