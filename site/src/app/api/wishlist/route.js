@@ -1,37 +1,29 @@
-// route.js
+// src/app/api/wishlist/route.js
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
-export const runtime = "nodejs";
-
-const prisma = globalThis.prisma ?? new PrismaClient();
-if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
-
-export async function GET(request) {
+export async function GET(req) {
   try {
-    const { searchParams: search_params } = new URL(request.url);
-    const listing_id = search_params.get("listingId");
-    const wallet_address = search_params.get("walletAddress");
-
-    if (!listing_id || !wallet_address) {
+    const { searchParams } = new URL(req.url);
+    const listingId = searchParams.get("listingId");
+    const walletAddress = searchParams.get("walletAddress");
+    if (!listingId || !walletAddress) {
       return NextResponse.json(
         { error: "listingId and walletAddress are required" },
         { status: 400 }
       );
     }
-
-    const user_record = await prisma.user.findUnique({
-      where: { walletAddress: wallet_address },
+    const user = await prisma.user.findUnique({
+      where: { walletAddress },
       select: { id: true },
     });
-    if (!user_record) return NextResponse.json({ inWishlist: false });
+    if (!user) return NextResponse.json({ inWishlist: false });
 
-    const existing_item = await prisma.wishlistItem.findFirst({
-      where: { userId: user_record.id, listingId: listing_id },
+    const existing = await prisma.wishlistItem.findFirst({
+      where: { userId: user.id, listingId },
       select: { id: true },
     });
-
-    return NextResponse.json({ inWishlist: !!existing_item });
+    return NextResponse.json({ inWishlist: !!existing });
   } catch (err) {
     console.error("wishlist:GET error", err);
     const body =
@@ -42,73 +34,79 @@ export async function GET(request) {
   }
 }
 
-export async function POST(request) {
-  try {
-    const { listingId: listing_id, walletAddress: wallet_address } = await request.json();
 
-    if (!listing_id || !wallet_address) {
+
+const prisma = globalThis.prisma ?? new PrismaClient();
+if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
+
+export async function POST(req) {
+  try {
+    const { listingId, walletAddress } = await req.json();
+
+    if (!listingId || !walletAddress) {
       return NextResponse.json(
         { error: "listingId and walletAddress are required" },
         { status: 400 }
       );
     }
 
-    const listing_record = await prisma.listing.findUnique({
-      where: { id: listing_id },
+    // Enforce: only allow active listings to be wishlisted
+    const listing = await prisma.listing.findUnique({
+      where: { id: listingId },
       select: { id: true, active: true },
     });
 
-    if (!listing_record || !listing_record.active) {
+    if (!listing || !listing.active) {
       return NextResponse.json(
         { error: "Listing is not active or not found" },
         { status: 400 }
       );
     }
 
-    const user_record = await prisma.user.upsert({
-      where: { walletAddress: wallet_address },
+    // Ensure user exists (by wallet)
+    const user = await prisma.user.upsert({
+      where: { walletAddress },
       update: {},
-      create: { walletAddress: wallet_address },
+      create: { walletAddress },
       select: { id: true },
     });
 
-    const wishlist_item = await prisma.wishlistItem.upsert({
+    // Upsert to avoid duplicates (relies on @@unique([userId, listingId]))
+    const wishlistItem = await prisma.wishlistItem.upsert({
       where: {
-        userId_listingId: { userId: user_record.id, listingId: listing_id },
+        userId_listingId: { userId: user.id, listingId },
       },
       update: {},
-      create: { userId: user_record.id, listingId: listing_id },
+      create: { userId: user.id, listingId },
       select: { id: true },
     });
 
-    return NextResponse.json({ ok: true, id: wishlist_item.id });
+    return NextResponse.json({ ok: true, id: wishlistItem.id });
   } catch (err) {
     console.error("wishlist:POST error", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
-export async function DELETE(request) {
+export async function DELETE(req) {
   try {
-    const { listingId: listing_id, walletAddress: wallet_address } = await request.json();
-
-    if (!listing_id || !wallet_address) {
+    const { listingId, walletAddress } = await req.json();
+    if (!listingId || !walletAddress) {
       return NextResponse.json(
         { error: "listingId and walletAddress are required" },
         { status: 400 }
       );
     }
-
-    const user_record = await prisma.user.findUnique({
-      where: { walletAddress: wallet_address },
+    const user = await prisma.user.findUnique({
+      where: { walletAddress },
       select: { id: true },
     });
-    if (!user_record) return NextResponse.json({ ok: true, removed: false });
+    if (!user) return NextResponse.json({ ok: true, removed: false });
 
+    // Use deleteMany to avoid depending on composite key alias
     const result = await prisma.wishlistItem.deleteMany({
-      where: { userId: user_record.id, listingId: listing_id },
+      where: { userId: user.id, listingId },
     });
-
     return NextResponse.json({ ok: true, removed: result.count > 0 });
   } catch (err) {
     console.error("wishlist:DELETE error", err);

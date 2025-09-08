@@ -2,96 +2,108 @@
 import React, { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { FaFilter, FaAngleDown, FaAngleUp } from "react-icons/fa";
-import style from "./Filter.module.css";
+import Style from "./Filter.module.css";
 
-const Filter = () => {
+
+const Filter = ({}) => {
   const categories = ["Art", "Game", "Nature", "Sport", "Portrait", "Animal"];
 
-  const [filter_open, set_filter_open] = useState(false);
-  const [min_price, set_min_price] = useState("");
-  const [max_price, set_max_price] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   const router = useRouter();
-  const path_name = usePathname();
-  const search_params = useSearchParams();
+  const path = usePathname();
+  const params = useSearchParams();
 
-  const toggle_filter = () => set_filter_open(!filter_open);
+  //FUNCTION SECTION
+  const openFilter = () => {
+    setFilterOpen(!filterOpen);
+  };
 
-  const handle_input_change = (e, setter) => {
+  const handleInputChange = (e, setter) => {
     const value = e.target.value;
-    if (value === "" || /^(\d+(\.\d{0,18})?|\.\d{0,18})$/.test(value)) {
+    // allow empty or valid positive number with up to 18 decimals (for ETH precision)
+    if (value === '' || /^(\d+(\.\d{0,18})?|\.\d{0,18})$/.test(value)) {
       setter(value);
     }
   };
 
-  const handle_category_click = (cat) => {
-    const existing = search_params.getAll("category");
+  const handleCategoryClick = (cat) => {
+    // read all existing category params
+    const existing = params.getAll("category");
+    // compute next set: toggle this cat
     const next = existing.includes(cat)
       ? existing.filter((c) => c !== cat)
       : [...existing, cat];
-    const sp = new URLSearchParams(search_params.toString());
+    // rebuild URLSearchParams
+    const sp = new URLSearchParams(params.toString());
     sp.delete("category");
     next.forEach((c) => sp.append("category", c));
-    router.push(`${path_name}?${sp.toString()}`);
+    router.push(`${path}?${sp.toString()}`);
   };
 
-  const handle_price_filter = () => {
-    const sp = new URLSearchParams(search_params.toString());
-    if (min_price) sp.set("minPrice", min_price);
-    else sp.delete("minPrice");
-    if (max_price) sp.set("maxPrice", max_price);
-    else sp.delete("maxPrice");
-    router.push(`${path_name}?${sp.toString()}`);
+  const handlePriceFilter = () => {
+    const sp = new URLSearchParams(params.toString());
+    if (minPrice) sp.set('minPrice', minPrice);
+    else sp.delete('minPrice');
+    if (maxPrice) sp.set('maxPrice', maxPrice);
+    else sp.delete('maxPrice');
+    router.push(`${path}?${sp.toString()}`);
   };
 
   return (
-    <div className={style.filter}>
-      <div className={style.filter_box}>
-        <div className={style.filter_box_left}>
+    <div className={Style.filter}>
+      <div className={Style.filter_box}>
+        <div className={Style.filter_box_left}>
           {categories.map((cat) => {
-            const is_selected = search_params.getAll("category").includes(cat);
+            const selected = params.getAll("category").includes(cat);
             return (
               <button
                 key={cat}
-                onClick={() => handle_category_click(cat)}
+                onClick={() => handleCategoryClick(cat)}
                 className={[
-                  style.filter_box_left_button,
-                  is_selected ? style.selected : "",
+                  Style.filter_box_left_button,
+                  selected ? Style.selected : "",
                 ].join(" ")}>
                 {cat}
               </button>
             );
           })}
         </div>
-        <div className={style.filter_box_right}>
-          <div className={style.filter_box_right_box} onClick={toggle_filter}>
+        <div className={Style.filter_box_right}>
+          <div
+            className={Style.filter_box_right_box}
+            onClick={() => openFilter()}>
             <FaFilter />
-            <span>Filter</span> {filter_open ? <FaAngleUp /> : <FaAngleDown />}
+            <span>Filter</span> {filterOpen ? <FaAngleUp /> : <FaAngleDown />}
           </div>
         </div>
       </div>
 
-      {filter_open && (
-        <div className={style.filter_box_items}>
-          <div className={style.filter_box_items_box}>
+      {filterOpen && (
+        <div className={Style.filter_box_items}>
+          <div className={Style.filter_box_items_box}>
             <p>Min price:</p>
             <input
               type="text"
               placeholder="ETH"
-              value={min_price}
-              onChange={(e) => handle_input_change(e, set_min_price)}
+              value={minPrice}
+              onChange={(e) => handleInputChange(e, setMinPrice)}
             />
             <p>Max price:</p>
             <input
               type="text"
               placeholder="ETH"
-              value={max_price}
-              onChange={(e) => handle_input_change(e, set_max_price)}
+              value={maxPrice}
+              onChange={(e) => handleInputChange(e, setMaxPrice)}
             />
           </div>
           <button
-            className={style.filter_box_items_button}
-            onClick={handle_price_filter}>
+            className={Style.filter_box_items_button}
+            onClick={() => {
+              handlePriceFilter();
+            }}>
             Apply Filter
           </button>
         </div>

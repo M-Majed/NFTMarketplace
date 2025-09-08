@@ -2,224 +2,262 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol"; //* base NFT interface
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol"; //* tokenURI storage
-import "hardhat/console.sol"; //* for local debugging
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol"; //* reentrancy guard
-import "@openzeppelin/contracts/access/Ownable2Step.sol"; //* safer ownership transfer
-import "@openzeppelin/contracts/utils/Pausable.sol"; //* pause()/unpause()
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
-contract NFTMarketplace is
-    ERC721URIStorage,
-    ReentrancyGuard,
-    Ownable2Step,
-    Pausable
-{
-    //$ Variables and NFT Struct
+contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard, Ownable2Step, Pausable {
     uint256 private _tokenIds;
 
-    uint16 public constant FEE_BPS   = 100; //* 1% listing/cancel/sale fee
+    // Flat fee required on list/resell/cancel (kept name to preserve FE calls)
+    uint256 public listingPrice = 0.01 ether;
 
-    uint256 private protocolAccrued; //* earned Fees
-    mapping(address => uint256) private balances; //* Sellers balance
+    // Unified protocol fee accounting (new)
+    uint16 private protocolFeeBps;            // e.g., 250 = 2.5%, max 10000
+    address payable private feeRecipient;     // separate recipient (owner by default)
+    uint256 private protocolAccrued;          // accumulated protocol fees (listing + cancel + sales fee)
+    mapping(address => uint256) private balances; // withdrawable seller proceeds
+
+    mapping(uint256 => MarketItem) private idMarketItem;
 
     struct MarketItem {
         uint256 tokenId;
-        address payable seller;
-        address payable owner;
-        uint256 price;
-        bool sold;
+        address payable seller; // who will receive proceeds
+        address payable owner;  // escrow owner (address(this)) when listed; buyer after sale
+        uint256 price;          // asking price while listed
+        bool sold;              // true only immediately after sale
     }
-    mapping(uint256 => MarketItem) private idMarketItem; //* index MarketItem
 
-    //$ Log for blockchain
-    event MarketItemCreated( //* create nft log
+    event MarketItemCreated(
         uint256 indexed tokenId,
         address seller,
         address owner,
         uint256 price,
         bool sold
     );
-    event ProceedsAccrued(address indexed seller, uint256 amount); //* sell nft log
-    event Withdrawn(address indexed seller, uint256 amount); //* withdraw log
 
-    //$ constructor
-    constructor() ERC721("MRMNFTMarketPlace", "MNMP") Ownable(msg.sender) {} //* NFT collection name and symbol
+    // New accounting events
+    event ProtocolFeeUpdated(uint16 bps);
+    event ListingFeeUpdated(uint256 fee);
+    event FeeRecipientUpdated(address indexed to);
+    event ProceedsAccrued(address indexed seller, uint256 amount);
+    event Withdrawn(address indexed seller, uint256 amount);
+    event ProtocolWithdrawn(address indexed to, uint256 amount);
 
-    //$ Admin: Pause / Unpause
+    constructor() ERC721("MRMNFTMarketPlace", "MNMP") Ownable(msg.sender) {
+        // sensible defaults
+        protocolFeeBps = 0; // start at 0% until configured
+        feeRecipient = payable(msg.sender);
+    }
+
+    // --- Emergency controls ---
     function pause() external onlyOwner { _pause(); }
     function unpause() external onlyOwner { _unpause(); }
 
-    //$ return info
-    function getProtocolFeeBps() external pure returns (uint16) { //* Fee
-        return FEE_BPS;
+    // --- Fees (admin) ---
+    function updateListingPrice(uint256 _listingPrice) public payable onlyOwner {
+        listingPrice = _listingPrice;
+        emit ListingFeeUpdated(_listingPrice);
     }
-    function protocolBalance() public view returns (uint256) { //* SC Balance by fees
-        return protocolAccrued;
+    function setProtocolFeeBps(uint16 newBps) external onlyOwner {
+        require(newBps <= 10_000, "bps too high");
+        protocolFeeBps = newBps;
+        emit ProtocolFeeUpdated(newBps);
     }
-    function pendingBalanceOf(address account) public view returns (uint256) { //* seller balance
-        return balances[account];
-    }
-    function getBalance() public view returns (uint256) { //* raw SC balance
-        return address(this).balance;
-    }
-
-    //$ Functions
-    function listingFeeFor(uint256 price) public pure returns (uint256) { //* calculate Fee
-        return (price * FEE_BPS) / 10_000;
+    function setFeeRecipient(address payable to) external onlyOwner {
+        require(to != address(0), "zero addr");
+        feeRecipient = to;
+        emit FeeRecipientUpdated(to);
     }
 
-    function createToken( //* create NFT
-        string memory tokenURI,
-        uint256 price
-    ) public payable whenNotPaused returns (uint256) {
+    // --- Views (fees & balances) ---
+    function getListingPrice() public view returns (uint256) { return listingPrice; }
+    function getProtocolFeeBps() external view returns (uint16) { return protocolFeeBps; }
+    function getFeeRecipient() external view returns (address) { return feeRecipient; }
+    function protocolBalance() public view returns (uint256) { return protocolAccrued; }
+    function pendingBalanceOf(address account) public view returns (uint256) { return balances[account]; }
+    function getBalance() public view returns (uint256) { return address(this).balance; }
+
+    // --- Mint + list ---
+    function createToken(string memory tokenURI, uint256 price)
+        public
+        payable
+        whenNotPaused
+        returns (uint256)
+    {
         _tokenIds++;
         uint256 newtokenId = _tokenIds;
 
-        _mint(msg.sender, newtokenId); //* ERC721 mint func - owned by msg.sender at first
-        _setTokenURI(newtokenId, tokenURI); //* store metadata
+        _mint(msg.sender, newtokenId);
+        _setTokenURI(newtokenId, tokenURI);
 
-        _createMarketItem(newtokenId, price);
+        createMarketItem(newtokenId, price);
         return newtokenId;
     }
 
-    function _createMarketItem(uint256 tokenId, uint256 price) private { //* list an NFT
-        require(price > 0, "Price must be > 0");
-        uint256 requiredFee = listingFeeFor(price);
-        require(msg.value == requiredFee, "Incorrect listing fee"); //* check if caller sent ETH
+    function createMarketItem(uint256 tokenId, uint256 price) private {
+        require(price > 0, "Price must be at least 1");
+        require(msg.value == listingPrice, "Fee must equal listing price");
 
+        // accrue listing fee
         protocolAccrued += msg.value;
 
-        idMarketItem[tokenId] = MarketItem({ //* create market item
-            tokenId: tokenId,
-            seller: payable(msg.sender),
-            owner: payable(address(this)),
-            price: price,
-            sold: false
-        });
+        idMarketItem[tokenId] = MarketItem(
+            tokenId,
+            payable(msg.sender),
+            payable(address(this)),
+            price,
+            false
+        );
 
-        _transfer(msg.sender, address(this), tokenId); //* move NFT from caller to contract
-        emit MarketItemCreated(tokenId, msg.sender, address(this), price, false); //* log
+        _transfer(msg.sender, address(this), tokenId);
+        emit MarketItemCreated(tokenId, msg.sender, address(this), price, false);
     }
 
-    function resellToken( //* resell an NFT
-        uint256 tokenId,
-        uint256 price
-    ) public payable nonReentrant whenNotPaused {
+    // --- Resell: list an owned NFT back on marketplace ---
+    function resellToken(uint256 tokenId, uint256 price)
+        public
+        payable
+        nonReentrant
+        whenNotPaused
+    {
         require(price > 0, "Price must be > 0 wei");
+        require(msg.value == listingPrice, "Fee must equal listing price");
+
+        // existence & ownership
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
         require(ownerOf(tokenId) == msg.sender, "Not token owner");
+
+        // not already escrowed
         require(ownerOf(tokenId) != address(this), "Already listed");
 
-        require( //* either approve NFT transer for this NFT or all
+        // approval
+        require(
             getApproved(tokenId) == address(this) ||
-            isApprovedForAll(msg.sender, address(this)),
+                isApprovedForAll(msg.sender, address(this)),
             "Marketplace not approved"
         );
 
-        uint256 requiredFee = listingFeeFor(price);
-        require(msg.value == requiredFee, "Incorrect listing fee");
-
+        // accrue listing fee
         protocolAccrued += msg.value;
 
-        //* update token info
+        // effects
         MarketItem storage item = idMarketItem[tokenId];
         item.sold = false;
         item.price = price;
         item.owner = payable(address(this));
         item.seller = payable(msg.sender);
 
-        transferFrom(msg.sender, address(this), tokenId); //* move NFT from user to contract
+        // interaction
+        transferFrom(msg.sender, address(this), tokenId);
     }
 
-    function cancelListing(uint256 tokenId) public payable nonReentrant { //* cancel listing - get minted NFT
+    // --- Cancel a listing (pay fee; NFT back to seller) ---
+    function cancelListing(uint256 tokenId) public payable nonReentrant {
         MarketItem storage item = idMarketItem[tokenId];
 
         require(item.owner == address(this), "Not listed");
         require(item.seller == msg.sender, "Only seller");
+        require(msg.value == listingPrice, "Fee must equal listing price");
 
-        uint256 requiredFee = listingFeeFor(item.price);
-        require(msg.value == requiredFee, "Incorrect cancel fee");
-
+        // accrue cancel fee
         protocolAccrued += msg.value;
-        
-        //* update token info
+
+        // Move NFT back to the seller and clear listing
         item.owner = payable(msg.sender);
         item.sold = false;
         item.seller = payable(address(0));
         item.price = 0;
 
-        _transfer(address(this), msg.sender, tokenId); //* move NFT from contract to user
+        _transfer(address(this), msg.sender, tokenId);
     }
 
-    function createMarketSale( //* selling NFT
-        uint256 tokenId
-    ) public payable nonReentrant whenNotPaused {
+    // --- Buy a listed NFT ---
+    function createMarketSale(uint256 tokenId)
+        public
+        payable
+        nonReentrant
+        whenNotPaused
+    {
+        // existence & listing checks
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
         MarketItem storage item = idMarketItem[tokenId];
         require(item.seller != address(0), "Listing not found");
-        require(
-            ownerOf(tokenId) == address(this) && item.owner == address(this),
-            "Not listed"
-        );
+        require(ownerOf(tokenId) == address(this) && item.owner == address(this), "Not listed");
         require(!item.sold, "Already sold");
         require(item.price > 0, "Invalid price");
         require(msg.value == item.price, "Please submit the asking price");
 
+        // snapshot
         address payable seller = item.seller;
         uint256 price = item.price;
 
-        uint256 requiredFee = listingFeeFor(item.price);
+        // compute protocol fee
+        uint256 fee = (price * protocolFeeBps) / 10_000;
 
-        //* update NFT info
+        // effects
         item.owner = payable(msg.sender);
         item.sold = true;
         item.seller = payable(address(0));
         item.price = 0;
 
-        protocolAccrued += requiredFee;
-
-        //* seller recieves price-fee
-        uint256 sellerProceeds = price - requiredFee;
+        // accounting
+        protocolAccrued += fee;
+        uint256 sellerProceeds = price - fee;
         balances[seller] += sellerProceeds;
+        emit ProceedsAccrued(seller, sellerProceeds);
 
-        emit ProceedsAccrued(seller, sellerProceeds); //* log 
-
-        _transfer(address(this), msg.sender, tokenId); //*  //* move NFT from contract to user
+        // transfer NFT to buyer
+        _transfer(address(this), msg.sender, tokenId);
     }
 
-    function withdraw(uint256 amount) external nonReentrant { //* withdraw
+    // --- Seller withdraws their proceeds (pull-payments) ---
+    function withdraw(uint256 amount) external nonReentrant {
         require(amount > 0, "amount=0");
-
         uint256 bal = balances[msg.sender];
         require(bal >= amount, "insufficient");
-
-        unchecked { //* update user balance - unchecked skips solidity overflow check
-            balances[msg.sender] = bal - amount;
-        }
-        
-        (bool ok, ) = payable(msg.sender).call{value: amount}(""); //* send ETH to user
+        unchecked { balances[msg.sender] = bal - amount; }
+        (bool ok, ) = payable(msg.sender).call{value: amount}("");
         require(ok, "withdraw failed");
-        emit Withdrawn(msg.sender, amount); //*log
+        emit Withdrawn(msg.sender, amount);
     }
 
-    function fetchMyNFTs() public view returns (MarketItem[] memory) { //* get users NFTs
-        uint256 totalCount = _tokenIds;
-        uint256 count = 0;
-        for (uint256 i = 1; i <= totalCount; i++) { //* loop through all NFTs to check owner
-            if (ownerOf(i) == msg.sender) {
-                count++;
-            }
-        }
-
-        MarketItem[] memory items = new MarketItem[](count); //* allocate memory for user NFTs
-        uint256 idx = 0;
-        for (uint256 i = 1; i <= totalCount; i++) { //* get list of users NFTs
-            if (ownerOf(i) == msg.sender) {
-                items[idx] = idMarketItem[i];
-                idx++;
-            }
-        }
-        return items;
+    // --- Owner withdraws protocol accruals to any address ---
+    function withdrawProtocol(address payable to, uint256 amount)
+        external
+        onlyOwner
+        nonReentrant
+    {
+        require(to != address(0), "zero addr");
+        require(amount > 0, "amount=0");
+        uint256 bal = protocolAccrued;
+        require(bal >= amount, "insufficient");
+        unchecked { protocolAccrued = bal - amount; }
+        (bool ok, ) = to.call{value: amount}("");
+        require(ok, "protocol withdraw failed");
+        emit ProtocolWithdrawn(to, amount);
     }
+    function fetchMyNFTs() public view returns (MarketItem[] memory) {
+    uint256 totalCount = _tokenIds;
+    uint256 count = 0;
+    for (uint256 i = 1; i <= totalCount; i++) {
+        if (ownerOf(i) == msg.sender) {
+            count++;
+        }
+    }
+
+    MarketItem[] memory items = new MarketItem[](count);
+    uint256 idx = 0;
+    for (uint256 i = 1; i <= totalCount; i++) {
+        if (ownerOf(i) == msg.sender) {
+            items[idx] = idMarketItem[i];
+            idx++;
+        }
+    }
+    return items;
+}
+
 }

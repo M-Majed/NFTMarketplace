@@ -1,25 +1,24 @@
-// src/app/marketplace/page.jsx
 "use client";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
 import Link from "next/link";
 import NFTCard from "./NFTCard/NFTCard";
-import style from "./page.module.css";
+import Style from "./page.module.css";
 
 export default function MarketplacePage() {
-  const search_params = useSearchParams();
-  const { address, isConnected: is_connected } = useAccount();
+  const searchParams = useSearchParams();
+  const { address, isConnected } = useAccount();
 
-  const [items, set_items] = useState([]);
-  const [page, set_page] = useState(Number(search_params.get("page") || "1"));
-  const [pages, set_pages] = useState(1);
-  const [loading, set_loading] = useState(true);
+  const [items, setItems] = useState([]);
+  const [page, setPage] = useState(Number(searchParams.get("page") || "1"));
+  const [pages, setPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  const build_api_qs = () => {
-    const params = new URLSearchParams(search_params.toString());
+  const buildApiQS = () => {
+    const params = new URLSearchParams(searchParams.toString());
     const wishlist = params.get("wishlist");
-    if (wishlist && is_connected && address) params.set("address", address);
+    if (wishlist && isConnected && address) params.set("address", address);
     else params.delete("address");
     return params.toString();
   };
@@ -27,64 +26,52 @@ export default function MarketplacePage() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      set_loading(true);
+      setLoading(true);
       try {
-        const res = await fetch(`/api/marketplace?${build_api_qs()}`, {
-          cache: "no-store",
-        });
+        const res = await fetch(`/api/marketplace?${buildApiQS()}`, { cache: "no-store" });
         const data = await res.json();
         if (!alive) return;
-        set_items(data.items || []);
-        set_page(data.page || 1);
-        set_pages(data.pages || 1);
+        setItems(data.items || []);
+        setPage(data.page || 1);
+        setPages(data.pages || 1);
       } catch (e) {
+        console.error(e);
         if (alive) {
-          set_items([]);
-          set_page(1);
-          set_pages(1);
+          setItems([]);
+          setPage(1);
+          setPages(1);
         }
       } finally {
-        if (alive) set_loading(false);
+        if (alive) setLoading(false);
       }
     })();
-    return () => {
-      alive = false;
-    };
-  }, [search_params, address, is_connected]);
+    return () => { alive = false; };
+  }, [searchParams, address, isConnected]);
 
-  const build_href = (n) => {
-    const params = new URLSearchParams(search_params.toString());
+  const buildHref = (n) => {
+    const params = new URLSearchParams(searchParams.toString());
     params.set("page", String(n));
     return `/marketplace?${params.toString()}`;
   };
 
-  if (search_params.get("wishlist") && !is_connected) {
-    return (
-      <p className={style.marketplace}>
-        Please connect your wallet to view your wishlist.
-      </p>
-    );
+  if (searchParams.get("wishlist") && !isConnected) {
+    return <p className={Style.marketplace}>Please connect your wallet to view your wishlist.</p>;
   }
 
   return (
-    <div className={style.marketplace}>
+    <div className={Style.marketplace}>
       {loading ? <p>Loading…</p> : <NFTCard items={items} />}
-      <nav className={style.pagination}>
-        {page > 1 && <Link href={build_href(page - 1)}>← Prev</Link>}
+      <nav className={Style.pagination}>
+        {page > 1 && <Link href={buildHref(page - 1)}>← Prev</Link>}
         {Array.from({ length: pages }, (_, i) => {
           const n = i + 1;
           return (
-            <Link
-              key={n}
-              href={build_href(n)}
-              className={`${style.pageLink} ${
-                n === page ? style.activePage : ""
-              }`}>
+            <Link key={n} href={buildHref(n)} className={`${Style.pageLink} ${n === page ? Style.activePage : ""}`}>
               {n}
             </Link>
           );
         })}
-        {page < pages && <Link href={build_href(page + 1)}>Next →</Link>}
+        {page < pages && <Link href={buildHref(page + 1)}>Next →</Link>}
       </nav>
     </div>
   );

@@ -1,30 +1,25 @@
-// src/app/api/fetch-nfts/route.js
-import axios from "axios";
 import { ethers } from "ethers";
 import { NFTMarketplaceAddress, NFTMarketplaceABI } from "@/context/constants";
-
+import axios from "axios";
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const rpc_provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-    const marketplace_contract = new ethers.Contract(
+    const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+    const contract = new ethers.Contract(
       NFTMarketplaceAddress,
       NFTMarketplaceABI,
-      rpc_provider
+      provider
     );
-
-    const raw_items = await marketplace_contract.fetchMarketItems();
-
+    const data = await contract.fetchMarketItems();
     const items = await Promise.all(
-      raw_items.map(
-        async ({ tokenId, seller, owner, price: unformatted_price }) => {
-          const token_uri = await marketplace_contract.tokenURI(tokenId);
+      data.map(
+        async ({ tokenId, seller, owner, price: unformattedPrice }) => {
+          const tokenURI = await contract.tokenURI(tokenId);
           const {
             data: { image, description, name },
-          } = await axios.get(token_uri);
-
-          const price = ethers.formatUnits(unformatted_price, "ether");
+          } = await axios.get(tokenURI);
+          const price = ethers.formatUnits(unformattedPrice, "ether");
 
           return {
             price,
@@ -34,12 +29,11 @@ export async function GET() {
             image,
             name,
             description,
-            tokenURI: token_uri,
+            tokenURI,
           };
         }
       )
     );
-
     return Response.json(items);
   } catch (error) {
     console.error("Error fetching NFTs:", error);

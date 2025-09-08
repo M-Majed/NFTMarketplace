@@ -1,4 +1,3 @@
-/* src/components/1_MainPage/BigNFTSlider/BigNFTSilder.module.css */
 .bigNFTSlider{
     margin: 0 auto;
     width: 80%;
@@ -32,6 +31,10 @@
 .bigNFTSlider_left_creator_profile{
     display: flex;
     gap: 10px;
+}
+
+.bigNFTSlider_left_creator_profile_img{
+    border-radius: 50px;
 }
 
 .bigNFTSlider_left_creator_profile_info{
@@ -73,6 +76,12 @@
     font-size: 15px;
 }
 
+.bigNFTSlider_left_bidding_box_auction{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .bigNFTSlider_left_bidding_box small{
     background-color: black;
     color: white;
@@ -83,6 +92,11 @@
     top: -10px;
     left:-10px;
 }
+
+.bigNFTSlider_left_bidding_box_icon{
+    font-size: 30px;
+}
+
 
 .bigNFTSlider_left_buttons{
     display: flex;
@@ -144,9 +158,21 @@
     height: 580;
 }
 
-/* removed: .bigNFTSlider_right_box_like (unused) */
+.bigNFTSlider_right_box_like{
+    position: relative;
+    top: -550px;
+    height: 35px;
+    width: 70px;
+    left: 480px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 25px;
+    display: flex;
+    background-color: white;
+    color: black;
+    font-size: large;
+}
 
-/* responsive */
 @media (max-width: 1100px){
     .bigNFTSlider{
         grid-template-rows: repeat(12, 1fr);
@@ -181,60 +207,89 @@
         margin-top: 0px;
         margin-bottom: 0px;
     }
+    
+    .bigNFTSlider_left_bidding_box_auction{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .bigNFTSlider_left_bidding_box small{
+        padding: 10px 20px;
+    }
 
-    /* removed: *_auction, *_timer, *_timer_item p, .bigNFTSlider_left_button (unused) */
-
+    .bigNFTSlider_left_bidding_box_timer{
+        padding: 0px 0px 10px;
+        margin-top: -10px;
+    }
+    
+    
+    .bigNFTSlider_left_bidding_box_timer_item p{
+        font-size: 20px;
+    }
+    
+    .bigNFTSlider_left_button{
+        margin-top: 10px;
+    }
+    
+    .bigNFTSlider_left_sliderBtn_icon{
+        margin-inline: 15px;
+    }
     .bigNFTSlider_right_box_img{
         border-radius: 2rem;
         width: 100%;
         height: 430;
     }
-
-    /* removed: .bigNFTSlider_right_box_like (unused) */
-
-    .bigNFTSlider_left_sliderBtn{
-        gap: 50px;
-        margin-top: 20px;
-        justify-self: center;
+    .bigNFTSlider_right_box_like{
+        top: -410px;
+        left: 320px;
     }
+    .bigNFTSlider_left_sliderBtn{
+    gap: 50px;
+    margin-top: 20px;
+    justify-self: center;
+}
 }
 
 /* ---------- TEXT + ROW BEHAVIOR FIXES (<1480px) ---------- */
 @media (max-width: 1480px){
+  /* make the creator row a 2-column text grid so items never collide */
   .bigNFTSlider_left_creator{
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto;   /* wallet (flexible) | category (auto) */
     align-items: center;
     column-gap: 12px;
     row-gap: 6px;
-    min-width: 0;
+    min-width: 0;                       /* allow shrinking */
   }
 
+  /* allow the wallet block to shrink and elide */
   .bigNFTSlider_left_creator_profile,
   .bigNFTSlider_left_creator_profile_info{
     min-width: 0;
   }
   .bigNFTSlider_left_creator_profile_info{
-    line-height: 1.1;
+    line-height: 1.1;                   /* was 0 → clipping */
   }
   .bigNFTSlider_left_creator_profile_info p{
-    margin-bottom: 2px;
+    margin-bottom: 2px;                 /* undo -5px */
   }
   .bigNFTSlider_left_creator_profile_info h4{
     margin: 0;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: nowrap;                 /* long wallet → … */
   }
 
+  /* category stays on the right but won’t overlap; elide if long */
   .bigNFTSlider_left_creator_Category{
     min-width: 0;
     justify-self: end;
   }
   .bigNFTSlider_left_creator_Category_info{
     min-width: 0;
-    line-height: 1.1;
+    line-height: 1.1;                   /* was 0 */
     text-align: right;
   }
   .bigNFTSlider_left_creator_Category_info h4{
@@ -245,6 +300,7 @@
     white-space: nowrap;
   }
 
+  /* scale heading & icon so text doesn’t crush */
   .bigNFTSlider_left h2{
     font-size: clamp(24px, 2.4vw, 34px);
     line-height: 1.15;
@@ -255,6 +311,7 @@
     font-size: clamp(26px, 2.2vw, 34px);
   }
 
+  /* price text won’t clip */
   .bigNFTSlider_left_bidding_box p{
     font-size: clamp(13px, 1.3vw, 15px);
     line-height: 1.25;
@@ -262,22 +319,25 @@
   }
   .bigNFTSlider_left_bidding_box small{
     line-height: 1;
-    padding: 8px 14px;
+    padding: 8px 14px;  /* smaller so it doesn’t collide with text */
   }
 
+  /* keep button labels readable without changing your layout */
   .bigNFTSlider_left_buttons_button{
     font-size: clamp(14px, 1.2vw, 15px);
   }
 }
 
+/* stack the two text blocks on narrower widths, still without
+   touching the hero’s overall layout */
 @media (max-width: 1100px){
   .bigNFTSlider_left_creator{
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr;   /* wallet on row 1, category on row 2 */
     justify-items: start;
   }
 }
 
-/* ===== Narrow phones (≤560px) ===== */
+/* ===== Hard fix for narrow phones (≤560px). Theme/layout unchanged. ===== */
 @media (max-width: 560px){
   .bigNFTSlider{
     justify-items: stretch;   
@@ -285,16 +345,17 @@
 
   .bigNFTSlider_left{
     grid-row: 4 / -1;
-    width: auto;
-    margin: 0 25px;
-    height: 48%;
-  }
+    width: auto;                       /* override 350px */
+    margin: 0 25px;                  /* prevent edge-to-edge */
+    height: 48%;                     /* override 400px */
+}
 
   .bigNFTSlider_left_bidding{
     margin-top: 20px;
   }
-
-  .bigNFTSlider_right{
-    width: auto;  
-  }
+    .bigNFTSlider_right{
+        width: auto;  
+    }
+    
 }
+

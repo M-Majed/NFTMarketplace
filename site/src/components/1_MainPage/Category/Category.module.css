@@ -1,4 +1,3 @@
-/* src/components/1_MainPage/Category/Category.module.css */
 .category{
     width: 80%;
     margin: 0 auto;
@@ -16,7 +15,7 @@
     margin-top: 0px;
 }
 
-/* responsive grid */
+/* CHANGED: flex -> responsive grid */
 .category_categories{
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -29,6 +28,7 @@
     border-radius: 10px;
     cursor: pointer;
     padding-bottom: 10px;
+    /* keep your original min width semantics via the grid minmax above */
 }
 
 .category_categories_box:hover{
@@ -39,6 +39,7 @@
 .category_categories_box_img{
     border-radius: 10px;
     width: 100%;
+    /* height stays auto, so no cropping */
 }
 
 .category_categories_box_title{
@@ -53,12 +54,13 @@
     margin-top: 10px;
 }
 
-/* phones */
+/* Phone tweaks: smaller cards, 2-up grid, full-width container */
 @media (max-width: 560px){
   .category{
     width: 100%;
     padding: 10px 12px;
   }
+  /* force two columns so images aren’t huge */
   .category_categories{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

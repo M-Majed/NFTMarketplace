@@ -1,6 +1,4 @@
-// src/app/nftdetails/[nftId]/NFTDetailsImg/NFTDetailsImg.jsx
-"use client";
-
+'use client'
 import React from "react";
 import Image from "next/image";
 import Style from "./NFTDetailsImg.module.css";
@@ -16,7 +14,7 @@ export default function NFTDetailsImg({ nft, listing }) {
         height={nft.height}
         sizes="(max-width: 1024px) 100vw, 60vw"
         className={Style.NFTDetailsImg_NFT_img}
-        style={{ objectFit: "cover" }}
+        style={{ objectFit: "cover" }}  // replaces non-supported objectFit prop
         priority
       />
       <div className={Style.NFTDetailsImg_description}>
@@ -33,4 +31,4 @@ export default function NFTDetailsImg({ nft, listing }) {
       </div>
     </div>
   );
-}
+};

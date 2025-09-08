@@ -1,45 +1,40 @@
 // src/app/profile/page.jsx
 "use client";
-
 import React, { useState, useEffect, useContext } from "react";
+import Style from "./page.module.css";
+import img from "@/lib/img";
 import Image from "next/image";
-import Link from "next/link";
 import { MdDeleteForever, MdEdit } from "react-icons/md";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
+import Link from "next/link";
+import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
 import { formatEther } from "viem";
 
-import style from "./page.module.css";
-import img from "@/lib/img";
-import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
-
 const Profile = () => {
-  const [active_tab, set_active_tab] = useState("MyNFTs");
-  const { address, isConnected: is_connected } = useAccount();
-
-  const [profile_data, set_profile_data] = useState({
+  const [activeTab, setActiveTab] = useState("MyNFTs");
+  const { address, isConnected } = useAccount();
+  const { data: balanceData } = useBalance({ addressOrName: address });
+  const [profileData, setProfileData] = useState({
     nfts: [],
     listings: [],
     transactions: [],
   });
 
   const {
-    cancelListing: cancel_listing,
-    fetchMyNFTsOrListedNFTs: fetch_mynfts_or_listednfts,
-    resellNFT: resell_nft,
-    getPendingBalance: get_pending_balance,
-    withdraw: withdraw_funds,
+    cancelListing,
+    fetchMyNFTsOrListedNFTs,
+    resellNFT,
+    getPendingBalance,
+    withdraw,
   } = useContext(NFTMarketplaceContext);
-
-  const [chain_nfts, set_chain_nfts] = useState([]);
-  const [loading_chain, set_loading_chain] = useState(false);
-  const [cancelling_id, set_cancelling_id] = useState(null);
-  const [reselling_id, set_reselling_id] = useState(null);
-
-  const [show_price_modal, set_show_price_modal] = useState(false);
-  const [price_input, set_price_input] = useState("");
-  const [selected_nft, set_selected_nft] = useState(null);
-  const [selected_category, set_selected_category] = useState("Art");
-
+  const [chainNFTs, setChainNFTs] = useState([]);
+  const [loadingChain, setLoadingChain] = useState(false);
+  const [cancellingId, setCancellingId] = useState(null);
+  const [resellingId, setResellingId] = useState(null);
+  const [showPriceModal, setShowPriceModal] = useState(false);
+  const [priceInput, setPriceInput] = useState("");
+  const [selectedNFT, setSelectedNFT] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("Art");
   const CATEGORY_OPTIONS = [
     "Art",
     "Game",
@@ -47,75 +42,76 @@ const Profile = () => {
     "Sport",
     "Portrait",
     "Animal",
-  ];
+  ]; // Prisma enum
 
-  const [tx_page, set_tx_page] = useState(1);
-  const [tx_page_size, set_tx_page_size] = useState(10);
+  // pagination for transactions
+  const [txPage, setTxPage] = useState(1);
+  const [txPageSize, setTxPageSize] = useState(10);
 
-  const [pending_wei, set_pending_wei] = useState(0n);
-  const [loading_pending, set_loading_pending] = useState(false);
-  const [withdrawing, set_withdrawing] = useState(false);
+  // withdrawable earnings (on-chain)
+  const [pendingWei, setPendingWei] = useState(0n);
+  const [loadingPending, setLoadingPending] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
 
-  const refresh_pending = async () => {
-    if (!is_connected) return;
+  const refreshPending = async () => {
+    if (!isConnected) return;
     try {
-      set_loading_pending(true);
-      const wei = await get_pending_balance(address);
-      set_pending_wei(wei ?? 0n);
+      setLoadingPending(true);
+      const wei = await getPendingBalance(address);
+      setPendingWei(wei ?? 0n);
     } catch (e) {
       console.warn("getPendingBalance failed:", e);
     } finally {
-      set_loading_pending(false);
+      setLoadingPending(false);
     }
   };
 
   useEffect(() => {
-    refresh_pending();
-  }, [address, is_connected]);
+    refreshPending();
+  }, [address, isConnected]);
 
   useEffect(() => {
-    const total_pages = Math.max(
+    const totalPages = Math.max(
       1,
-      Math.ceil((profile_data.transactions?.length || 0) / tx_page_size)
+      Math.ceil((profileData.transactions?.length || 0) / txPageSize)
     );
-    if (tx_page > total_pages) set_tx_page(total_pages);
-  }, [profile_data.transactions, tx_page, tx_page_size]);
-
-  const open_resell_dialog = (nft, e) => {
+    if (txPage > totalPages) setTxPage(totalPages);
+  }, [profileData.transactions, txPage, txPageSize]);
+  const openResellDialog = (nft, e) => {
     e?.stopPropagation?.();
-    set_selected_nft(nft);
-    set_price_input("");
-    set_selected_category("Art");
-    set_show_price_modal(true);
+    setSelectedNFT(nft);
+    setPriceInput("");
+    setSelectedCategory("Art");
+    setShowPriceModal(true);
   };
 
-  const close_resell_dialog = () => {
-    if (reselling_id) return;
-    set_show_price_modal(false);
-    set_selected_nft(null);
-    set_price_input("");
+  const closeResellDialog = () => {
+    if (resellingId) return; // prevent closing while submitting
+    setShowPriceModal(false);
+    setSelectedNFT(null);
+    setPriceInput("");
   };
 
-  const confirm_resell = async () => {
-    if (!selected_nft) return;
-    const price = String(price_input).trim();
+  const confirmResell = async () => {
+    if (!selectedNFT) return;
+    const price = String(priceInput).trim();
     if (!/^\d+(\.\d+)?$/.test(price) || Number(price) <= 0) {
-      alert("Enter a valid positive number (ETH).");
+      alert("Please enter a valid positive number (ETH).");
       return;
     }
     try {
-      set_reselling_id(selected_nft.tokenId);
-      await resell_nft({
-        tokenId: selected_nft.tokenId,
+      setResellingId(selectedNFT.tokenId);
+      await resellNFT({
+        tokenId: selectedNFT.tokenId,
         priceEth: price,
-        category: selected_category,
+        category: selectedCategory,
       });
       const res = await fetch(`/api/profile?address=${address}`);
       const data = await res.json();
-      set_profile_data(data);
-      const updated = await fetch_mynfts_or_listednfts("MyNFTs");
-      set_chain_nfts(updated || []);
-      close_resell_dialog();
+      setProfileData(data);
+      const updated = await fetchMyNFTsOrListedNFTs("MyNFTs");
+      setChainNFTs(updated || []);
+      closeResellDialog();
     } catch (err) {
       console.error("Resell failed:", err);
       alert(
@@ -123,42 +119,45 @@ const Profile = () => {
           (err?.shortMessage || err?.message || "Unknown error")
       );
     } finally {
-      set_reselling_id(null);
+      setResellingId(null);
     }
   };
 
   useEffect(() => {
-    if (!is_connected) return;
+    if (!isConnected) return;
     fetch(`/api/profile?address=${address}`)
       .then((res) => res.json())
-      .then((data) => set_profile_data(data));
-  }, [address, is_connected]);
+      .then((data) => setProfileData(data));
+  }, [address, isConnected]);
 
+  // Load *on-chain* NFTs for the "My NFTs" tab
   useEffect(() => {
-    if (!is_connected || active_tab !== "MyNFTs") return;
+    if (!isConnected || activeTab !== "MyNFTs") return;
     let alive = true;
-    set_loading_chain(true);
-    fetch_mynfts_or_listednfts("MyNFTs")
+    setLoadingChain(true);
+    fetchMyNFTsOrListedNFTs("MyNFTs")
       .then((items) => {
-        if (alive) set_chain_nfts(items || []);
+        if (alive) setChainNFTs(items || []);
       })
       .catch(console.error)
       .finally(() => {
-        if (alive) set_loading_chain(false);
+        if (alive) setLoadingChain(false);
       });
     return () => {
       alive = false;
     };
-  }, [is_connected, address, active_tab, fetch_mynfts_or_listednfts]);
+  }, [isConnected, address, activeTab, fetchMyNFTsOrListedNFTs]);
 
-  const handle_cancel = async (listing, e) => {
+  const handleCancel = async (listing, e) => {
     e?.stopPropagation?.();
     try {
-      set_cancelling_id(listing.id);
-      await cancel_listing({ tokenId: listing.tokenId, price: listing.price });
+      setCancellingId(listing.id);
+      // On-chain cancel (pays fee to contract) + DB update (inside context->API call)
+      await cancelListing({ tokenId: listing.tokenId, price: listing.price });
+      // Refresh profile data
       const res = await fetch(`/api/profile?address=${address}`);
       const data = await res.json();
-      set_profile_data(data);
+      setProfileData(data);
     } catch (err) {
       console.error("Cancel failed:", err);
       alert(
@@ -166,129 +165,123 @@ const Profile = () => {
           (err?.shortMessage || err?.message || "Unknown error")
       );
     } finally {
-      refresh_pending();
+      refreshPending();
     }
   };
 
-  const handle_withdraw_all = async () => {
-    const eth = Number(formatEther(pending_wei));
+  const handleWithdrawAll = async () => {
+    const eth = Number(formatEther(pendingWei));
     if (!eth || eth <= 0) return;
     try {
-      set_withdrawing(true);
-      await withdraw_funds({ amountEth: eth });
-      await refresh_pending();
+      setWithdrawing(true);
+      await withdraw({ amountEth: eth });
+      await refreshPending();
       alert("Withdraw successful.");
     } catch (err) {
       console.error("Withdraw failed:", err);
-      alert(
-        "Withdraw failed: " +
-          (err?.shortMessage || err?.message || "Unknown error")
-      );
+      alert("Withdraw failed: " + (err?.shortMessage || err?.message || "Unknown error"));
     } finally {
-      set_withdrawing(false);
+      setWithdrawing(false);
     }
   };
 
-  if (!is_connected) {
+  if (!isConnected) {
     return <p>Please connect your wallet to view your profile.</p>;
   }
 
   return (
-    <div className={style.Profile}>
-      <div className={style.Profile_header}>
-        <div className={style.Profile_header_avatar}>
+    <div className={Style.Profile}>
+      <div className={Style.Profile_header}>
+        <div className={Style.Profile_header_avatar}>
           <Image
             src={img.user1}
-            className={style.Profile_header_avatar_img}
+            className={Style.Profile_header_avatar_img}
             alt="NFT image"
             width={70}
             height={70}
             sizes="(max-width: 600px) 56px, 70px"
           />
         </div>
-        <div className={style.Profile_info}>
+        <div className={Style.Profile_info}>
           <h2>{address}</h2>
-          <div className={style.Profile_info_wallet}>
+          <div className={Style.Profile_info_wallet}>
             <p>Wallet Address: {address}</p>
-            <div className={style.Profile_info_actions}>
+            <div className={Style.Profile_info_actions}>
               <span>
                 Balance:&nbsp;
-                {loading_pending
+                {loadingPending
                   ? "…"
-                  : `${Number(formatEther(pending_wei)).toFixed(4)} ETH`}
+                  : `${Number(formatEther(pendingWei)).toFixed(4)} ETH`}
               </span>
               <button
-                className={`${style.Button} ${style.ButtonPrimary}`}
-                onClick={handle_withdraw_all}
-                disabled={withdrawing || pending_wei === 0n}
-                title={
-                  pending_wei === 0n
-                    ? "No earnings to withdraw"
-                    : "Withdraw all earnings"
-                }>
+                className={`${Style.Button} ${Style.ButtonPrimary}`}
+                onClick={handleWithdrawAll}
+                disabled={withdrawing || pendingWei === 0n}
+                title={pendingWei === 0n ? "No earnings to withdraw" : "Withdraw all earnings"}
+              >
                 {withdrawing ? "Withdrawing…" : "Withdraw"}
               </button>
             </div>
           </div>
         </div>
       </div>
-
-      <div className={style.Profile_summery}>
-        <div className={style.Profile_summery_card}>
-          <h2>{profile_data.nfts.length}</h2>
+      <div className={Style.Profile_summery}>
+        <div className={Style.Profile_summery_card}>
+          <h2>{profileData.nfts.length}</h2>
           <p>Owned NFTs</p>
         </div>
-        <div className={style.Profile_summery_card}>
-          <h2>{profile_data.listings.length}</h2>
+        <div className={Style.Profile_summery_card}>
+          <h2>{profileData.listings.length}</h2>
           <p>Active Listings</p>
         </div>
-        <div className={style.Profile_summery_card}>
+        <div className={Style.Profile_summery_card}>
           <h2>
             $
-            {profile_data.listings
+            {profileData.listings
               .reduce((sum, listing) => sum + parseFloat(listing.price), 0)
               .toFixed(2)}
           </h2>
           <p>Portfolio Value</p>
         </div>
       </div>
-
-      <div className={style.Profile_tabs}>
+      <div className={Style.Profile_tabs}>
         <button
-          className={style.Profile_tabs_btn}
-          onClick={() => set_active_tab("MyNFTs")}>
+          className={Style.Profile_tabs_btn}
+          onClick={() => setActiveTab("MyNFTs")}>
           My NFTs
         </button>
         <button
-          className={style.Profile_tabs_btn}
-          onClick={() => set_active_tab("ActiveListings")}>
+          className={Style.Profile_tabs_btn}
+          onClick={() => setActiveTab("ActiveListings")}>
+          {" "}
           Active Listings
         </button>
         <button
-          className={style.Profile_tabs_btn}
-          onClick={() => set_active_tab("TransactionHistory")}>
+          className={Style.Profile_tabs_btn}
+          onClick={() => setActiveTab("TransactionHistory")}>
+          {" "}
           Transaction history
         </button>
       </div>
 
-      {active_tab == "MyNFTs" && (
-        <div className={style.Profile_MyNFTs}>
+      {activeTab == "MyNFTs" && (
+        <div className={Style.Profile_MyNFTs}>
           <h2>Owned NFTs</h2>
-          {loading_chain ? (
+          {loadingChain ? (
             <p>Loading your on-chain NFTs…</p>
-          ) : chain_nfts.length > 0 ? (
-            <div className={style.Profile_MyNFTs_NFTGrid}>
-              {chain_nfts.map((nft) => (
+          ) : chainNFTs.length > 0 ? (
+            <div className={Style.Profile_MyNFTs_NFTGrid}>
+              {chainNFTs.map((nft) => (
                 <div
                   key={nft.tokenId}
-                  className={`${style.Profile_MyNFTs_NFTGrid_card} ${
-                    reselling_id === nft.tokenId ? style.isBusy : ""
+                  className={`${Style.Profile_MyNFTs_NFTGrid_card} ${
+                    resellingId === nft.tokenId ? Style.isBusy : ""
                   }`}
                   onClick={(e) =>
-                    reselling_id ? null : open_resell_dialog(nft, e)
+                    resellingId ? null : openResellDialog(nft, e)
                   }
                   title={
-                    reselling_id === nft.tokenId
+                    resellingId === nft.tokenId
                       ? "Listing…"
                       : "Click to list this NFT"
                   }>
@@ -297,13 +290,13 @@ const Profile = () => {
                     width={200}
                     height={200}
                     alt={nft.name || `Token #${nft.tokenId}`}
-                    className={style.Profile_MyNFTs_NFTGrid_card_img}
+                    className={Style.Profile_MyNFTs_NFTGrid_card_img}
                     sizes="(max-width: 600px) 45vw, 200px"
                   />
-                  <div className={style.Profile_MyNFTs_NFTGrid_card_info}>
+                  <div className={Style.Profile_MyNFTs_NFTGrid_card_info}>
                     <h3>{nft.name || `Token #${nft.tokenId}`}</h3>
                     <small>
-                      {reselling_id === nft.tokenId
+                      {resellingId === nft.tokenId
                         ? "Listing…"
                         : "Click to list for sale"}
                     </small>
@@ -317,35 +310,36 @@ const Profile = () => {
         </div>
       )}
 
-      {active_tab === "ActiveListings" && (
-        <div className={style.Profile_MyNFTs}>
+      {activeTab === "ActiveListings" && (
+        <div className={Style.Profile_MyNFTs}>
           <h2>Active Listings</h2>
-          {profile_data.listings.length > 0 ? (
-            <div className={style.Profile_MyNFTs_list}>
-              {profile_data.listings.map((listing) => (
+          {profileData.listings.length > 0 ? (
+            <div className={Style.Profile_MyNFTs_list}>
+              {profileData.listings.map((listing) => (
                 <Link
                   key={listing.id}
                   href={`/nftdetails/${listing.tokenId}`}
-                  className={style.Profile_MyNFTs_list_item}>
+                  className={Style.Profile_MyNFTs_list_item}>
                   {listing.nft.name} - Price: {listing.price} ETH
-                  <div className={style.Profile_MyNFTs_list_item_btns}>
+                  <div className={Style.Profile_MyNFTs_list_item_btns}>
                     <MdDeleteForever
-                      className={`${style.Profile_MyNFTs_list_item_btns_btn} ${
-                        cancelling_id === listing.id ? style.isBusyIcon : ""
+                      className={`${Style.Profile_MyNFTs_list_item_btns_btn} ${
+                        cancellingId === listing.id ? Style.isBusyIcon : ""
                       }`}
                       title={
-                        cancelling_id === listing.id
+                        cancellingId === listing.id
                           ? "Cancelling..."
                           : "Cancel listing"
                       }
                       onClick={(e) => {
+                        // prevent navigating to details when clicking delete
                         e.preventDefault();
                         e.stopPropagation();
-                        handle_cancel(listing, e);
+                        handleCancel(listing, e);
                       }}
                     />
                     <MdEdit
-                      className={style.Profile_MyNFTs_list_item_btns_btn}
+                      className={Style.Profile_MyNFTs_list_item_btns_btn}
                     />
                   </div>
                 </Link>
@@ -357,83 +351,83 @@ const Profile = () => {
         </div>
       )}
 
-      {active_tab == "TransactionHistory" && (
-        <div className={style.Profile_MyNFTs}>
+      {activeTab == "TransactionHistory" && (
+        <div className={Style.Profile_MyNFTs}>
           <h2>Transaction History</h2>
-          {profile_data.transactions.length > 0 ? (
+          {profileData.transactions.length > 0 ? (
             (() => {
-              const start = (tx_page - 1) * tx_page_size;
-              const end = start + tx_page_size;
-              const paginated = profile_data.transactions.slice(start, end);
-              const total_pages = Math.max(
+              const start = (txPage - 1) * txPageSize;
+              const end = start + txPageSize;
+              const paginated = profileData.transactions.slice(start, end);
+              const totalPages = Math.max(
                 1,
-                Math.ceil(profile_data.transactions.length / tx_page_size)
+                Math.ceil(profileData.transactions.length / txPageSize)
               );
 
               return (
                 <>
-                  <div className={style.Profile_TransactionHistory_list}>
+                  <div className={Style.Profile_TransactionHistory_list}>
                     {paginated.map((tx) => {
-                      const is_seller = tx.seller.walletAddress === address;
+                      const isSeller = tx.seller.walletAddress === address;
                       return (
                         <div
                           key={tx.id}
                           className={
-                            style.Profile_TransactionHistory_list_item
+                            Style.Profile_TransactionHistory_list_item
                           }>
-                          {is_seller ? "Sold" : "Bought"} {tx.nft.name} - Price:{" "}
+                          {isSeller ? "Sold" : "Bought"} {tx.nft.name} - Price:{" "}
                           {tx.price} ETH
                         </div>
                       );
                     })}
                   </div>
 
-                  <div className={style.Pagination}>
-                    <div className={style.Pagination_controls}>
+                  <div className={Style.Pagination}>
+                    <div className={Style.Pagination_controls}>
                       <button
-                        className={style.Button}
-                        onClick={() => set_tx_page(1)}
-                        disabled={tx_page === 1}
+                        className={Style.Button}
+                        onClick={() => setTxPage(1)}
+                        disabled={txPage === 1}
                         aria-label="First page">
                         « First
                       </button>
                       <button
-                        className={style.Button}
-                        onClick={() => set_tx_page((p) => Math.max(1, p - 1))}
-                        disabled={tx_page === 1}
+                        className={Style.Button}
+                        onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+                        disabled={txPage === 1}
                         aria-label="Previous page">
                         ‹ Prev
                       </button>
-                      <span className={style.Pagination_info}>
-                        Page {tx_page} of {total_pages}
+                      <span className={Style.Pagination_info}>
+                        Page {txPage} of {totalPages}
                       </span>
                       <button
-                        className={style.Button}
+                        className={Style.Button}
                         onClick={() =>
-                          set_tx_page((p) => Math.min(total_pages, p + 1))
+                          setTxPage((p) => Math.min(totalPages, p + 1))
                         }
-                        disabled={tx_page === total_pages}
+                        disabled={txPage === totalPages}
                         aria-label="Next page">
                         Next ›
                       </button>
                       <button
-                        className={style.Button}
-                        onClick={() => set_tx_page(total_pages)}
-                        disabled={tx_page === total_pages}
+                        className={Style.Button}
+                        onClick={() => setTxPage(totalPages)}
+                        disabled={txPage === totalPages}
                         aria-label="Last page">
                         Last »
                       </button>
                     </div>
 
-                    <label className={style.Pagination_pageSize}>
+                    <label className={Style.Pagination_pageSize}>
                       <span>Rows per page</span>
                       <select
-                        className={style.PageSizeSelect}
-                        value={tx_page_size}
+                        className={Style.PageSizeSelect}
+                        value={txPageSize}
                         onChange={(e) => {
-                          const new_size = Number(e.target.value);
-                          set_tx_page_size(new_size);
-                          set_tx_page(1);
+                          const newSize = Number(e.target.value);
+                          setTxPageSize(newSize);
+                          setTxPage(1); // reset to first page when size changes
                         }}>
                         {[5, 10, 20, 50].map((n) => (
                           <option key={n} value={n}>
@@ -451,55 +445,49 @@ const Profile = () => {
           )}
         </div>
       )}
-
-      {show_price_modal && (
-        <div className={style.ModalOverlay} onClick={close_resell_dialog}>
-          <div className={style.Modal} onClick={(e) => e.stopPropagation()}>
-            <h3 className={style.ModalTitle}>List NFT</h3>
-            <p className={style.ModalSubtitle}>
-              Token #{selected_nft?.tokenId}
-            </p>
-
-            <label className={style.ModalLabel}>Price (ETH)</label>
+      {showPriceModal && (
+        <div className={Style.ModalOverlay} onClick={closeResellDialog}>
+          <div className={Style.Modal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={Style.ModalTitle}>List NFT</h3>
+            <p className={Style.ModalSubtitle}>Token #{selectedNFT?.tokenId}</p>
+            <label className={Style.ModalLabel}>Price (ETH)</label>
             <input
-              className={style.ModalInput}
+              className={Style.ModalInput}
               type="number"
               min="0"
               step="0.0001"
               placeholder="0.00"
-              value={price_input}
-              onChange={(e) => set_price_input(e.target.value)}
+              value={priceInput}
+              onChange={(e) => setPriceInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") confirm_resell();
-                if (e.key === "Escape") close_resell_dialog();
+                if (e.key === "Enter") confirmResell();
+                if (e.key === "Escape") closeResellDialog();
               }}
             />
-
-            <label className={style.ModalLabel}>Category</label>
+            <label className={Style.ModalLabel}>Category</label>
             <select
-              className={style.ModalSelect}
-              value={selected_category}
-              onChange={(e) => set_selected_category(e.target.value)}>
+              className={Style.ModalSelect}
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}>
               {CATEGORY_OPTIONS.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
               ))}
             </select>
-
-            <div className={style.ModalActions}>
+            <div className={Style.ModalActions}>
               <button
-                className={style.Button}
-                onClick={close_resell_dialog}
-                disabled={!!reselling_id}>
+                className={Style.Button}
+                onClick={closeResellDialog}
+                disabled={!!resellingId}>
                 Cancel
               </button>
               <button
-                className={`${style.Button} ${style.ButtonPrimary}`}
-                onClick={confirm_resell}
-                disabled={!!reselling_id || !price_input || !selected_category}
-                title={!price_input ? "Enter a price" : "List NFT"}>
-                {reselling_id === selected_nft?.tokenId ? "Listing…" : "List"}
+                className={`${Style.Button} ${Style.ButtonPrimary}`}
+                onClick={confirmResell}
+                disabled={!!resellingId || !priceInput || !selectedCategory}
+                title={!priceInput ? "Enter a price" : "List NFT"}>
+                {resellingId === selectedNFT?.tokenId ? "Listing…" : "List"}
               </button>
             </div>
           </div>
@@ -508,5 +496,4 @@ const Profile = () => {
     </div>
   );
 };
-
 export default Profile;

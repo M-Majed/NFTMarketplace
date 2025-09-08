@@ -98,3 +98,25 @@
 }
 
 .active{ background-color: #012c2a; }
+
+/* (kept your preview overlay styles for future use) */
+.previewOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  z-index: 1000;
+}
+.previewOverlay :global(.NFTDetailsImg),
+.previewOverlay :global(.NFTDescription){
+  background: #fff;
+  padding: 1rem;
+  border-radius: 1rem;
+  max-width: 500px;
+  width: 100%;
+}

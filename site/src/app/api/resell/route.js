@@ -1,72 +1,53 @@
-// route.js
+// src/app/api/resell/route.js
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-
 export const runtime = "nodejs";
 
 const prisma = new PrismaClient();
 
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const {
-      tokenId: token_id,
-      price,
-      walletAddress: wallet_address,
-      txHash: tx_hash,
-      category,
-      marketplaceAddress: marketplace_address,
-    } = await request.json();
-
-    const allowed_categories = [
-      "Art",
-      "Game",
-      "Nature",
-      "Sport",
-      "Portrait",
-      "Animal",
-    ];
+    const { tokenId, price, walletAddress, txHash, category, marketplaceAddress  } =
+      await req.json();
+    // Optional category validation (must match Prisma enum if provided)
+    const ALLOWED = ["Art", "Game", "Nature", "Sport", "Portrait", "Animal"];
     if (category !== undefined && category !== null) {
-      if (
-        typeof category !== "string" ||
-        !allowed_categories.includes(category)
-      ) {
+      if (typeof category !== "string" || !ALLOWED.includes(category)) {
         return NextResponse.json(
           { error: "Invalid category" },
           { status: 400 }
         );
       }
     }
-
+    // Basic validation
     if (
-      token_id === undefined ||
-      token_id === null ||
-      isNaN(Number(token_id)) ||
-      Number(token_id) <= 0
+      tokenId === undefined ||
+      tokenId === null ||
+      isNaN(Number(tokenId)) ||
+      Number(tokenId) <= 0
     ) {
       return NextResponse.json({ error: "Invalid tokenId" }, { status: 400 });
     }
-
     if (!price || !/^\d+(\.\d+)?$/.test(String(price))) {
       return NextResponse.json(
         { error: "Invalid price (expected stringified ETH amount)" },
         { status: 400 }
       );
     }
-
-    if (!wallet_address || typeof wallet_address !== "string") {
+    if (!walletAddress || typeof walletAddress !== "string") {
       return NextResponse.json(
         { error: "walletAddress required" },
         { status: 400 }
       );
     }
 
-    const token_id_int = Number(token_id);
-
-    const nft_record = await prisma.nFT.findUnique({
-      where: { tokenId: token_id_int },
+    const tokenIdInt = Number(tokenId);
+    // Load NFT + current DB owner (must exist)
+    const nft = await prisma.nFT.findUnique({
+      where: { tokenId: tokenIdInt },
       include: { owner: true },
     });
-    if (!nft_record) {
+    if (!nft) {
       return NextResponse.json(
         {
           error:
@@ -75,79 +56,78 @@ export async function POST(request) {
         { status: 404 }
       );
     }
-    if (!nft_record.owner) {
+    if (!nft.owner) {
       return NextResponse.json(
         { error: "NFT has no owner in DB. Cannot list." },
         { status: 409 }
       );
     }
-
-    if (
-      nft_record.owner.walletAddress.toLowerCase() !==
-      wallet_address.toLowerCase()
-    ) {
+    // Verify caller matches DB owner (case-insensitive)
+    if (nft.owner.walletAddress.toLowerCase() !== walletAddress.toLowerCase()) {
       return NextResponse.json(
         { error: "This wallet does not own the NFT in DB." },
         { status: 403 }
       );
     }
-    const seller_record = nft_record.owner;
+    const seller = nft.owner;
 
-    const market_addr_raw =
-      marketplace_address ||
+    // Resolve marketplace (contract) address: body override or env
+    const marketAddrRaw =
+      marketplaceAddress ||
       process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS ||
       process.env.MARKETPLACE_ADDRESS ||
       process.env.NEXT_PUBLIC_NFT_MARKETPLACE_ADDRESS ||
       process.env.NFT_MARKETPLACE_ADDRESS;
-
-    if (!market_addr_raw || typeof market_addr_raw !== "string") {
+    if (!marketAddrRaw || typeof marketAddrRaw !== "string") {
       return NextResponse.json(
-        {
-          error:
-            "Marketplace (contract) address missing. Pass `marketplaceAddress` in body or set an env var.",
-        },
+        { error: "Marketplace (contract) address missing. Pass `marketplaceAddress` in body or set an env var." },
         { status: 500 }
       );
     }
-    const market_addr = market_addr_raw.toLowerCase();
+    const marketAddr = marketAddrRaw.toLowerCase();
 
-    const contract_user = await prisma.user.upsert({
-      where: { walletAddress: market_addr },
-      create: { walletAddress: market_addr },
+    // Ensure a User row exists for the contract address
+    const contractUser = await prisma.user.upsert({
+      where: { walletAddress: marketAddr },
+      create: { walletAddress: marketAddr },
       update: {},
     });
 
-    const [updated_nft, listing_record] = await prisma.$transaction([
+    // Atomically: set NFT owner to contract + upsert listing
+    const [updatedNFT, listing] = await prisma.$transaction([
       prisma.nFT.update({
-        where: { tokenId: token_id_int },
-        data: { ownerId: contract_user.id },
+        where: { tokenId: tokenIdInt },
+        data: { ownerId: contractUser.id },
         select: { tokenId: true, ownerId: true },
       }),
       prisma.listing.upsert({
-        where: { tokenId: token_id_int },
+        where: { tokenId: tokenIdInt },
         update: {
           price: String(price),
           active: true,
-          sellerId: seller_record.id,
+          sellerId: seller.id,
           ...(category ? { category } : {}),
         },
         create: {
-          tokenId: token_id_int,
+          tokenId: tokenIdInt,
           price: String(price),
           active: true,
-          sellerId: seller_record.id,
+          sellerId: seller.id,
           ...(category ? { category } : {}),
         },
         include: { nft: true, seller: true },
       }),
     ]);
 
+    // NOTE: Not creating a Transaction here due to schema constraints (needs buyerId).
+    // We'll create a SALE/RESALE transaction after purchase.
+
     return NextResponse.json(
       {
         ok: true,
-        listing: listing_record,
-        nft: updated_nft,
-        txHash: tx_hash || null,
+        listing,
+        nft: updatedNFT,
+        txHash: txHash || null,
       },
       { status: 201 }
     );
