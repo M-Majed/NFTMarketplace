@@ -44,8 +44,10 @@ contract NFTMarketplace is
     event Withdrawn(address indexed seller, uint256 amount); //* withdraw log
 
     //$ constructor
-    constructor() ERC721("MRMNFTMarketPlace", "MNMP") Ownable(msg.sender) {} //* NFT collection name and symbol
-
+    constructor()
+        ERC721("MRMNFTMarketPlace", "MNMP")
+        Ownable(msg.sender)
+    {}
     //$ Admin: Pause / Unpause
     function pause() external onlyOwner { _pause(); }
     function unpause() external onlyOwner { _unpause(); }

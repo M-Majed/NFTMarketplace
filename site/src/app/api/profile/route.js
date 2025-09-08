@@ -1,13 +1,13 @@
-// src/app/api/profile/route.js
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-
 export const runtime = "nodejs";
 const prisma = new PrismaClient();
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
+
+    //* validations
     const address = searchParams.get("address");
     if (!address) {
       return NextResponse.json(
@@ -16,7 +16,7 @@ export async function GET(request) {
       );
     }
 
-    // 1) Find the user by walletAddress
+    //* Find the user by walletAddress
     const user = await prisma.user.findUnique({
       where: { walletAddress: address },
       select: { id: true },
@@ -28,22 +28,13 @@ export async function GET(request) {
       );
     }
 
-    // 2) Fetch NFTs they own
-    const nfts = await prisma.nFT.findMany({
-      where: { ownerId: user.id },
-      // Pull in the metadata JSON so the client can read title/image/etc.
-      select: { id: true, name: true, imageUrl: true, tokenId:true  },
-    });
-
-    // 3) Fetch their active listings
+    //* Fetch user listings and transactions
     const listings = await prisma.listing.findMany({
       where: { sellerId: user.id, active: true },
       include: {
         nft: { select: { id: true, name:true  } },
       },
     });
-
-    // 4) Fetch all transactions (bought or sold)
     const transactions = await prisma.transaction.findMany({
       where: {
         OR: [
@@ -59,7 +50,7 @@ export async function GET(request) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ nfts, listings, transactions });
+    return NextResponse.json({listings, transactions });
   } catch (err) {
     console.error("Profile API error:", err);
     return NextResponse.json(

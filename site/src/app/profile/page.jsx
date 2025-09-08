@@ -15,7 +15,6 @@ const Profile = () => {
   const { address, isConnected } = useAccount();
   const { data: balanceData } = useBalance({ addressOrName: address });
   const [profileData, setProfileData] = useState({
-    nfts: [],
     listings: [],
     transactions: [],
   });
@@ -227,7 +226,7 @@ const Profile = () => {
       </div>
       <div className={Style.Profile_summery}>
         <div className={Style.Profile_summery_card}>
-          <h2>{profileData.nfts.length}</h2>
+          <h2>{loadingChain ? "…" : chainNFTs.length}</h2>
           <p>Owned NFTs</p>
         </div>
         <div className={Style.Profile_summery_card}>

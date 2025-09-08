@@ -28,7 +28,7 @@ export default function MarketplacePage() {
     (async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/marketplace?${buildApiQS()}`, { cache: "no-store" });
+        const res = await fetch(`/api/fetch-market-items?${buildApiQS()}`, { cache: "no-store" });
         const data = await res.json();
         if (!alive) return;
         setItems(data.items || []);

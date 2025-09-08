@@ -44,10 +44,12 @@ export const NFTMarketplaceProvider = ({ children }) => {
       throw new Error("tokenId required");
     if (!priceEth) throw new Error("priceEth required");
 
-    const listingPrice = await publicClient.readContract({
+    const priceWei = parseEther(String(priceEth));
+    const listingFee = await publicClient.readContract({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "getListingPrice",
+      functionName: "listingFeeFor",
+      args: [priceWei],
     });
 
     await ensureApprovalForAll();
@@ -56,8 +58,8 @@ export const NFTMarketplaceProvider = ({ children }) => {
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
       functionName: "resellToken",
-      args: [BigInt(tokenId), parseEther(String(priceEth))],
-      value: listingPrice,
+      args: [BigInt(tokenId), priceWei],
+      value: listingFee,
     });
     await publicClient.waitForTransactionReceipt({ hash });
 
@@ -82,10 +84,11 @@ export const NFTMarketplaceProvider = ({ children }) => {
     if (!address) throw new Error("Please connect a wallet first.");
     const price = parseEther(String(formInputPrice));
 
-    const listingPrice = await publicClient.readContract({
+    const listingFee = await publicClient.readContract({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "getListingPrice",
+      functionName: "listingFeeFor",
+      args: [price],
     });
 
     const hash = await writeContractAsync({
@@ -93,7 +96,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
       abi: NFTMarketplaceABI,
       functionName: "createToken",
       args: [url, price],
-      value: listingPrice,
+      value: listingFee,
     });
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -123,7 +126,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
   const fetchMyNFTsOrListedNFTs = async (type = "MyNFTs") => {
     try {
       if (type === "ListedNFTs") {
-        const res = await fetch("/api/fetch-nfts", { cache: "no-store" });
+        const res = await fetch("/api/fetch-user-nfts", { cache: "no-store" });
         return await res.json();
       }
 
@@ -195,7 +198,8 @@ export const NFTMarketplaceProvider = ({ children }) => {
     const fee = await publicClient.readContract({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "getListingPrice",
+      functionName: "listingFeeFor",
+      args: [parseEther(String(nft.price))],
     });
 
     const hash = await writeContractAsync({

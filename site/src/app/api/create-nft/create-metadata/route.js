@@ -1,17 +1,16 @@
-// src/app/api/create-nft/create-metadata/route.js
 import axios from 'axios';
 export const runtime = "nodejs";
 
 export async function POST(request) {
   try {
     const { name, description, image } = await request.json();
-
+    //* Validation
     if (!name || !description || !image) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
     }
-
+    //* Create metadata object
     const data = JSON.stringify({ name, description, image });
-
+    //* Pin metadata to IPFS via Pinata
     const response = await axios.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', data, {
       headers: {
         'pinata_api_key': process.env.PINATA_API_KEY,
@@ -19,7 +18,7 @@ export async function POST(request) {
         'Content-Type': 'application/json',
       },
     });
-
+    //* return IPFS URL
     const url = `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
     return new Response(JSON.stringify({ url }), { status: 200 });
   } catch (error) {
