@@ -3,10 +3,10 @@ import React, { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { FaFilter, FaAngleDown, FaAngleUp } from "react-icons/fa";
 import Style from "./Filter.module.css";
-
+import { categories } from "@/app/constants";
 
 const Filter = ({}) => {
-  const categories = ["Art", "Game", "Nature", "Sport", "Portrait", "Animal"];
+  const categoryNames = categories.map(c => c.category);
 
   const [filterOpen, setFilterOpen] = useState(false);
   const [minPrice, setMinPrice] = useState("");
@@ -56,7 +56,7 @@ const Filter = ({}) => {
     <div className={Style.filter}>
       <div className={Style.filter_box}>
         <div className={Style.filter_box_left}>
-          {categories.map((cat) => {
+          {categoryNames.map((cat) => {
             const selected = params.getAll("category").includes(cat);
             return (
               <button

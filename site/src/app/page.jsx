@@ -7,20 +7,14 @@ import Category from "@/components/1_MainPage/Category/Category";
 import { prisma } from "@/lib/prisma";
 export const revalidate = 60; // optional ISR
 import { fetchNFTs } from "@/context/NFTMarketplaceContext";
+import { categories } from "./constants";
 
 export default async function Home() {
   // 1) Define your categories
-  const categoryNames = [
-    "Art",
-    "Game",
-    "Nature",
-    "Sport",
-    "Portrait",
-    "Animal",
-  ];
+  const categoryNames = categories.map(c => c.category);
 
   // 2) For each, count ACTIVE listings whose related NFT has that category
-  const categories = await Promise.all(
+  const countCategoriesNfts = await Promise.all(
     categoryNames.map(async (name) => {
       const count = await prisma.listing.count({
         where: {
@@ -62,7 +56,7 @@ export default async function Home() {
       <Introduction />
       <Service />
       <BigNFTSilder listings={enriched} />
-      <Category items={categories}/>
+      <Category items={countCategoriesNfts}/>
     </div>
   );
 }

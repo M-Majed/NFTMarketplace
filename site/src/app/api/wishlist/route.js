@@ -1,7 +1,8 @@
-// src/app/api/wishlist/route.js
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
+//$ Check if in wishlist
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -13,12 +14,15 @@ export async function GET(req) {
         { status: 400 }
       );
     }
+
+    //* check if user exists
     const user = await prisma.user.findUnique({
       where: { walletAddress },
       select: { id: true },
     });
     if (!user) return NextResponse.json({ inWishlist: false });
 
+    //* Check if wishlist item exists
     const existing = await prisma.wishlistItem.findFirst({
       where: { userId: user.id, listingId },
       select: { id: true },
@@ -34,15 +38,10 @@ export async function GET(req) {
   }
 }
 
-
-
-const prisma = globalThis.prisma ?? new PrismaClient();
-if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
-
+//$ Add to wishlist 
 export async function POST(req) {
   try {
     const { listingId, walletAddress } = await req.json();
-
     if (!listingId || !walletAddress) {
       return NextResponse.json(
         { error: "listingId and walletAddress are required" },
@@ -50,12 +49,11 @@ export async function POST(req) {
       );
     }
 
-    // Enforce: only allow active listings to be wishlisted
+    //* Ensure listing exists and is active
     const listing = await prisma.listing.findUnique({
       where: { id: listingId },
       select: { id: true, active: true },
     });
-
     if (!listing || !listing.active) {
       return NextResponse.json(
         { error: "Listing is not active or not found" },
@@ -63,7 +61,7 @@ export async function POST(req) {
       );
     }
 
-    // Ensure user exists (by wallet)
+    //* add user if not exists
     const user = await prisma.user.upsert({
       where: { walletAddress },
       update: {},
@@ -71,7 +69,7 @@ export async function POST(req) {
       select: { id: true },
     });
 
-    // Upsert to avoid duplicates (relies on @@unique([userId, listingId]))
+    //* add to wishlist item if not exists
     const wishlistItem = await prisma.wishlistItem.upsert({
       where: {
         userId_listingId: { userId: user.id, listingId },
@@ -84,10 +82,14 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, id: wishlistItem.id });
   } catch (err) {
     console.error("wishlist:POST error", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 
+//$ Remove from wishlist
 export async function DELETE(req) {
   try {
     const { listingId, walletAddress } = await req.json();
@@ -97,17 +99,20 @@ export async function DELETE(req) {
         { status: 400 }
       );
     }
+
+    //* Ensure user exists
     const user = await prisma.user.findUnique({
       where: { walletAddress },
       select: { id: true },
     });
     if (!user) return NextResponse.json({ ok: true, removed: false });
 
-    // Use deleteMany to avoid depending on composite key alias
+    //* Remove wishlist item if exists
     const result = await prisma.wishlistItem.deleteMany({
       where: { userId: user.id, listingId },
     });
     return NextResponse.json({ ok: true, removed: result.count > 0 });
+    
   } catch (err) {
     console.error("wishlist:DELETE error", err);
     const body =

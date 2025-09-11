@@ -1,4 +1,3 @@
-// src/app/createnft/DropZone/DropZone.jsx
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Style from "./DropZone.module.css";
@@ -8,42 +7,45 @@ import img from "@/lib/img";
 export default function DropZone({ setImage }) {
   const [fileUrl, setFileUrl] = useState(null);
 
+  //$ Handle file drop
   const onDrop = useCallback(
     async (acceptedFiles) => {
       const file = acceptedFiles[0];
       if (!file) return;
 
+      //* validate file size before upload
       if (file.size > 50 * 1024 * 1024) {
         alert("File too large. Maximum size is 50MB.");
         return;
       }
 
+      //* Upload file to pinata and get IPFS url
       const formData = new FormData();
       formData.append("file", file);
-
       try {
         const res = await fetch("/api/create-nft/upload-image", {
           method: "POST",
           body: formData,
-        });
+        }); //* api route to upload to pinata
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Upload failed");
-
         const url = data.url;
-        const probe = new window.Image();
-        probe.onload = () => {
+
+        //* Validate image dimensions
+        const probe = new window.Image(); //* create an image object to load the image
+        probe.onload = () => { //* runs when image is loaded in  (probe.src = url;)
           const { width, height } = probe;
           if (width < 512 || height < 512 || width > 4000 || height > 4000) {
             alert("Image must be between 512×512 and 4000×4000 pixels.");
             return;
           }
-          setFileUrl(url);
-          setImage({ url, width, height, size: file.size });
+          setFileUrl(url); //* set the file url to display preview
+          setImage({ url, width, height, size: file.size }); //* set image state in parent component(CreateNFT)
         };
         probe.onerror = () => {
           alert("Failed to load the image for validation.");
         };
-        probe.src = url;
+        probe.src = url; //* load the image from pinata
       } catch (error) {
         console.error("Error uploading image:", error);
         alert("Image upload failed: " + error.message);
@@ -56,7 +58,7 @@ export default function DropZone({ setImage }) {
     accept: "image/*",
     onDrop,
     multiple: false,
-  });
+  }); //* configure dropzone to accept only images and single file
 
   return (
     <div className={Style.dropzone} {...getRootProps()}>

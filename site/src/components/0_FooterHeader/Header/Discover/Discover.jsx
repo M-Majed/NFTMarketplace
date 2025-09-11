@@ -2,31 +2,27 @@
 import React from 'react'
 import Link from 'next/link'
 import style from "./Discover.module.css"
+import { categories } from "@/app/constants";
 
 const Discover = () => {
-
-  const discover = [
-    { name: "All", link: "marketplace", category: "" },
-    { name: "Art", link: "marketplace", category: "Art" },
-    { name: "Game", link: "marketplace", category: "Game" },
-    { name: "Nature", link: "marketplace", category: "Nature" },
-    { name: "Sport", link: "marketplace", category: "Sport" },
-    { name: "Portrait", link: "marketplace", category: "Portrait" },
-    { name: "Animal", link: "marketplace", category: "Animal" },
-  ]
+  const categoryNames = ["All", ...categories.map(c => c.category)];
 
   return (
     <div>
-      {discover.map((item, index) => (
-       <Link
-         key={item.name}
-         href={{
-           pathname: `/${item.link}`,
-           query: item.category ? { category: item.category } : {}
-         }}
-         className={style.discover}
-       >
-          {item.name}
+      {categoryNames.map((item) => (
+        <Link
+          key={item}
+          href={
+            item === "All"
+              ? "/marketplace"
+              : {
+                  pathname: "/marketplace",
+                  query: { category: item }
+                }
+          }
+          className={style.discover}
+        >
+          {item}
         </Link>
       ))}
     </div>

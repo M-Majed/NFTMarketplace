@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 export const runtime = "nodejs";
 const prisma = new PrismaClient();
+import { categories } from "@/app/constants";
 
 export async function POST(req) {
   try {
@@ -9,7 +10,7 @@ export async function POST(req) {
       await req.json();
 
     //* Validation
-    const ALLOWED = ["Art", "Game", "Nature", "Sport", "Portrait", "Animal"];
+    const ALLOWED = categories.map(c => c.category);
     if (category !== undefined && category !== null) {
       if (typeof category !== "string" || !ALLOWED.includes(category)) {
         return NextResponse.json(

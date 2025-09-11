@@ -9,6 +9,8 @@ import { useAccount, useBalance } from "wagmi";
 import Link from "next/link";
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
 import { formatEther } from "viem";
+import { categories } from "@/app/constants";
+
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("MyNFTs");
@@ -34,14 +36,8 @@ const Profile = () => {
   const [priceInput, setPriceInput] = useState("");
   const [selectedNFT, setSelectedNFT] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("Art");
-  const CATEGORY_OPTIONS = [
-    "Art",
-    "Game",
-    "Nature",
-    "Sport",
-    "Portrait",
-    "Animal",
-  ]; // Prisma enum
+  const categoryNames = categories.map(c => c.category);
+  
 
   // pagination for transactions
   const [txPage, setTxPage] = useState(1);
@@ -468,7 +464,7 @@ const Profile = () => {
               className={Style.ModalSelect}
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}>
-              {CATEGORY_OPTIONS.map((c) => (
+              {categoryNames.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>

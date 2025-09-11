@@ -3,7 +3,6 @@
   border-radius: 16px;
   cursor: pointer;
 
-  /* responsive box */
   width: 100%;
   max-width: clamp(220px, 40vw, 520px);
   min-height: clamp(180px, 30vw, 420px);

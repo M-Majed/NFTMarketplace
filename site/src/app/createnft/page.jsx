@@ -1,73 +1,67 @@
-// src/app/createnft/page.jsx
 "use client";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { TiTick } from "react-icons/ti";
 import Image from "next/image";
 import { useAccount } from "wagmi";
 import Style from "./page.module.css";
-import img from "@/lib/img";
 import DropZone from "./DropZone/DropZone";
 import Button from "@/components/_Shared/Button/Button";
 import { useRouter } from "next/navigation";
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
+import { categories } from "@/app/constants";
 
 const createnft = () => {
-  const [active, setActive] = useState(0);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(0);
-  const [price, setPrice] = useState("");
-  const [image, setImage] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [active, setActive] = useState(0); //* category active state
+  const [name, setName] = useState(""); //* item name
+  const [description, setDescription] = useState(""); //* item description
+  const [category, setCategory] = useState(0); //* item category
+  const [price, setPrice] = useState(""); //* item price
+  const [image, setImage] = useState(null); //* item image
+  const [isSubmitting, setIsSubmitting] = useState(false); //* form submission state
 
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useAccount(); //* user address from wagmi
   const { createSale } = useContext(NFTMarketplaceContext);
   const router = useRouter();
 
+  //$ price validation: only numbers - only one decimal point - no leading zeros unless "0." - update price state
   const handlePriceChange = (e) => {
     let v = e.target.value;
-
-    // Only digits and dots
     v = v.replace(/[^\d.]/g, "");
-
-    // Keep only the first dot
     const firstDot = v.indexOf(".");
     if (firstDot !== -1) {
       v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, "");
     }
-
-    // Strip leading zeros from integer part unless it's a "0." decimal
     if (!v.startsWith("0.") && /^0\d+$/.test(v)) {
       v = v.replace(/^0+/, "");
     }
-
     setPrice(v);
   };
-
+  //$ Handle form submission - upload metadata to IPFS - create sale on blockchain - save to database - redirect to home
   const handleUpload = async () => {
+    //* Prevent multiple submissions - check wallet, image and form fields
     if (isSubmitting) return;
     if (!isConnected) return alert("Connect your wallet first");
-    if (!image?.url) return alert("Please choose an image first"); // Updated check
+    if (!image?.url) return alert("Please choose an image first");
     if (!name || !description || !price)
       return alert("Please fill all required fields");
 
     try {
-      setIsSubmitting(true);
-      // Send to backend for metadata IPFS
+      setIsSubmitting(true); //* disable the button
       const res = await fetch("/api/create-nft/create-metadata", {
+        //* api route to upload metadata to pinata
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, image: image.url }), // Use image.url
+        body: JSON.stringify({ name, description, image: image.url }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Metadata creation failed");
 
       const metadataUrl = data.url;
-      console.log(metadataUrl);
 
-      // Now call createSale on frontend with metadata URL
+      //* Create sale on blockchain
       const tokenId = await createSale(metadataUrl, price, false, null);
-      // Save to database
+
+      //* Save to database
       const saveRes = await fetch("/api/create-nft/save-nft", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,7 +69,7 @@ const createnft = () => {
           tokenId: Number(tokenId),
           name,
           description,
-          imageUrl: image.url, // Use image.url
+          imageUrl: image.url,
           metadataUrl,
           width: image.width,
           height: image.height,
@@ -85,44 +79,17 @@ const createnft = () => {
           address,
         }),
       });
+
       const saveData = await saveRes.json();
       if (!saveRes.ok)
         throw new Error(saveData.error || "Save to database failed");
-
       router.push("/");
     } catch (err) {
       alert("Upload failed: " + err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); //* re-enable the button
     }
   };
-
-  const categoryArry = [
-    {
-      image: img.Art,
-      category: "Art",
-    },
-    {
-      image: img.Game,
-      category: "Game",
-    },
-    {
-      image: img.Nature,
-      category: "Nature",
-    },
-    {
-      image: img.Sport,
-      category: "Sport",
-    },
-    {
-      image: img.Portrait,
-      category: "Portrait",
-    },
-    {
-      image: img.Animal,
-      category: "Animal",
-    },
-  ];
 
   return (
     <div className={Style.upload}>
@@ -135,7 +102,7 @@ const createnft = () => {
           <h2>Item Name</h2>
           <input
             type="text"
-            placeholder="shoaib bhai"
+            placeholder="NFT name"
             className={Style.upload_box_input_itemName}
             onChange={(e) => setName(e.target.value)}
           />
@@ -145,7 +112,7 @@ const createnft = () => {
           <h2>Description</h2>
           <textarea
             rows="5"
-            placeholder="something about yourself in few words"
+            placeholder="Exaplain your NFT..."
             onChange={(e) => setDescription(e.target.value)}
             className={Style.upload_box_input_description}></textarea>
         </div>
@@ -153,27 +120,20 @@ const createnft = () => {
         <div className={Style.upload_box_category}>
           <h2>Choose category</h2>
           <div className={Style.upload_box_slider}>
-            {categoryArry.map((el, i) => (
+            {categories.map((el, i) => (
               <div
                 className={`${Style.upload_box_slider_item} ${
                   active == i + 1 ? Style.active : ""
                 }`}
                 key={i + 1}
                 onClick={() => (setActive(i + 1), setCategory(el.category))}>
-                <div className={Style.upload_box_slider_item_box}>
-                  <div className={Style.upload_box_slider_item_box_img}>
-                    <Image
-                      src={el.image}
-                      alt="background image"
-                      width={70}
-                      height={70}
-                      className={Style.upload_box_slider_item_box_img_img}
-                    />
-                  </div>
-                  <div className={Style.upload_box_slider_item_box_img_icon}>
-                    <TiTick />
-                  </div>
-                </div>
+                <Image
+                  src={el.image}
+                  alt="background image"
+                  width={70}
+                  height={70}
+                  className={Style.upload_box_slider_item_box_img}
+                />
                 <p>{el.category} </p>
               </div>
             ))}
@@ -181,28 +141,17 @@ const createnft = () => {
         </div>
 
         <div className={Style.upload_box_Price}>
-          <div className={Style.upload_box_Price_left}>
-            <h2>Buyer pays:</h2>
-            <input
-              type="number"
-              inputMode="decimal"
-              min="0"
-              step="any"
-              className={Style.upload_box_Price_itemPrice}
-              onChange={handlePriceChange}
-              value={price}
-              placeholder="e.g. 0.05"
-            />
-          </div>
-          {/* <div className={Style.upload_box_Price_right}>
-            <h2>You receive:</h2>
-            <input
-              type="text"
-              className={Style.upload_box_Price_itemPrice}
-              value={(price * 0.87).toFixed(5)}
-              readOnly
-            />
-          </div> */}
+          <h2>Buyer pays:</h2>
+          <input
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="any"
+            className={Style.upload_box_Price_itemPrice}
+            onChange={handlePriceChange}
+            value={price}
+            placeholder="e.g. 0.05"
+          />
         </div>
 
         <div className={Style.upload_box_btn}>
@@ -211,8 +160,7 @@ const createnft = () => {
             handleClick={isSubmitting ? undefined : handleUpload}
             disabled={isSubmitting}
             aria-disabled={isSubmitting}
-          />{" "}
-          {/* <Button btnName="Preview" /> */}
+          />
         </div>
       </div>
     </div>
