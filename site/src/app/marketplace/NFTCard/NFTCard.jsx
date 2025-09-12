@@ -1,4 +1,3 @@
-// src/app/marketplace/NFTCard/NFTCard.jsx
 "use client";
 import React from "react";
 import { BsImages } from "react-icons/bs";
@@ -11,7 +10,6 @@ import Link from "next/link";
 export default function NFTCard({ items = [] }) {
   return (
     <div className={Style.NFTCard}>
-      {/* Header section (NOT in the grid) */}
       <div className={Style.NFTHeader}>
         <Title
           heading="Discover NFTs"
@@ -20,39 +18,43 @@ export default function NFTCard({ items = [] }) {
         <Filter />
       </div>
 
-      {/* Cards grid */}
       <div className={Style.NFTGrid}>
-        {items.map((listing) => (
-          <div className={Style.NFTCard_box} key={listing.id}>
-            <Link href={`/nftdetails/${listing.nft.tokenId}`}>
-              <div className={Style.NFTCard_box_img}>
-                <Image
-                  src={listing.nft.imageUrl}
-                  alt={listing.nft.name}
-                  width={600}
-                  height={600}
-                  sizes="(max-width: 480px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className={Style.NFTCard_box_img_img}
-                  priority={false}
-                />
-                <div className={Style.NFTCard_box_overlay}>
-                  <div className={Style.NFTCard_box_overlay_update} />
-                  <div className={Style.NFTCard_box_overlay_update_details}>
-                    <div className={Style.NFTCard_box_overlay_update_details_price}>
-                      <div className={Style.NFTCard_box_overlay_update_details_price_box}>
-                        <h4>{listing.nft.name}</h4>
-                        <div className={Style.NFTCard_box_overlay_update_details_price_box_box}>
-                          <div className={Style.NFTCard_box_overlay_update_details_price_box_bid}>
-                            <small>Price</small>
-                            <p>Price: {listing.price} ETH</p>
-                          </div>
-                        </div>
+        {items.map((item) => (
+          <div className={Style.NFTCard_box} key={item.id}>
+            <Link
+              href={`/nftdetails/${item.nft.tokenId}`}
+              className={Style.NFTCard_box_img}>
+              <Image
+                src={item.nft.imageUrl}
+                alt={item.nft.name}
+                width={600}
+                height={600}
+                className={Style.NFTCard_box_img_img}
+                priority={false}
+              />
+              <div className={Style.NFTCard_box_overlay}>
+                <div className={Style.NFTCard_box_overlay_update_details}>
+                  <div
+                    className={Style.NFTCard_box_overlay_update_details_price}>
+                    <div
+                      className={
+                        Style.NFTCard_box_overlay_update_details_price_box
+                      }>
+                      <h4>{item.nft.name}</h4>
+                      <div
+                        className={
+                          Style.NFTCard_box_overlay_update_details_price_box_bid
+                        }>
+                        <small>Price</small>
+                        <p>Price: {item.price} ETH</p>
                       </div>
                     </div>
-                    <div className={Style.NFTCard_box_overlay_update_details_category}>
-                      <BsImages />
-                    </div>
                   </div>
+                  <BsImages
+                    className={
+                      Style.NFTCard_box_overlay_update_details_category
+                    }
+                  />
                 </div>
               </div>
             </Link>

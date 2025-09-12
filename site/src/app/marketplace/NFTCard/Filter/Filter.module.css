@@ -1,19 +1,21 @@
-.filter{
+.filter {
   margin: 0 auto;
   max-width: 1280px;
   padding-inline: clamp(16px, 3vw, 32px);
   width: 100%;
 }
 
-.filter_box{
+.filter_box {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap; /* allow wrap on small screens */
+  flex-wrap: wrap;
+  border-bottom: 1px solid white;
+  padding-bottom: 18px;
 }
 
-.filter_box_left{
+.filter_box_left {
   display: flex;
   gap: 10px;
   flex-wrap: wrap; /* categories wrap to new lines */
@@ -21,18 +23,18 @@
 
 .filter_box_left_button,
 .filter_box_items_button {
-  background-color: black;
   border: 2px solid white;
+  background-color: transparent;
   padding: 10px 20px;
   border-radius: 50px;
   font-size: 15px;
   font-weight: bold;
   cursor: pointer;
-  transition: all .2s;
+  transition: all 0.2s;
 }
 
-.filter_box_left_button:hover, 
-.filter_box_items_button:hover{
+.filter_box_left_button:hover,
+.filter_box_items_button:hover {
   background-color: white;
   border: 2px solid black;
   color: black;
@@ -44,8 +46,9 @@
   color: black;
 }
 
-.filter_box_right_box{
-  border:  1px solid white;
+.filter_box_right_box {
+  border: 1px solid white;
+  background-color: transparent;
   padding: 10px 20px;
   border-radius: 20px;
   cursor: pointer;
@@ -55,18 +58,19 @@
 }
 
 /* expanded row */
-.filter_box_items{
+.filter_box_items {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr auto; /* inputs block + button */
   gap: 12px;
-  margin-top: 18px;
-  border-top: 1px solid white;
+  margin-top: 5px;
   align-items: center;
   padding-top: 14px;
+  max-width: fit-content;
+  margin-left: 0px;
 }
 
-.filter_box_items_box{
+.filter_box_items_box {
   border: 1px solid white;
   padding-inline: 10px;
   border-radius: 20px;
@@ -74,28 +78,29 @@
   grid-template-columns: auto minmax(70px, 120px) auto minmax(70px, 120px);
   gap: 10px;
   align-items: center;
+  max-width: fit-content;
 }
 
-.filter_box_items_box input{
+.filter_box_items_box input {
   border: none;
   outline: none;
   background-color: transparent;
   color: white;
   font-size: 15px;
-  width: 100%;   /* fluid width within minmax */
+  width: 100%; /* fluid width within minmax */
   min-width: 0;
 }
 
 /* mobile: stack filter rows nicely */
-@media (max-width: 560px){
-  .filter_box_items{
+@media (max-width: 560px) {
+  .filter_box_items {
     grid-template-columns: 1fr;
   }
-  .filter_box_items_box{
+  .filter_box_items_box {
     grid-template-columns: 1fr 1fr;
     gap: 8px 10px;
   }
-  .filter_box_items_button{
+  .filter_box_items_button {
     width: 100%;
     text-align: center;
   }

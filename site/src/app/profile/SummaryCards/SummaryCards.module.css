@@ -1,0 +1,13 @@
+.Profile_summery {
+  margin: 10px 0 25px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(12px, 2vw, 20px);
+}
+.Profile_summery_card {
+  margin: 0;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
+}

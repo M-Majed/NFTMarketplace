@@ -1,4 +1,3 @@
-// src/app/marketplace/NFTCard/Filter/Filter.jsx
 import React, { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { FaFilter, FaAngleDown, FaAngleUp } from "react-icons/fa";
@@ -6,50 +5,48 @@ import Style from "./Filter.module.css";
 import { categories } from "@/app/constants";
 
 const Filter = ({}) => {
-  const categoryNames = categories.map(c => c.category);
-
+  const categoryNames = categories.map((c) => c.category);
   const [filterOpen, setFilterOpen] = useState(false);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-
   const router = useRouter();
   const path = usePathname();
   const params = useSearchParams();
 
-  //FUNCTION SECTION
+  //$ Toggle filter dropdown
   const openFilter = () => {
     setFilterOpen(!filterOpen);
   };
 
+  //$ validate and set price
   const handleInputChange = (e, setter) => {
     const value = e.target.value;
-    // allow empty or valid positive number with up to 18 decimals (for ETH precision)
-    if (value === '' || /^(\d+(\.\d{0,18})?|\.\d{0,18})$/.test(value)) {
-      setter(value);
+    if (value === "" || /^(\d+(\.\d{0,18})?|\.\d{0,18})$/.test(value)) {
+      //* Removes all characters except digits and decimal point
+      setter(value); //* update price if valid input
     }
   };
 
-  const handleCategoryClick = (cat) => {
-    // read all existing category params
-    const existing = params.getAll("category");
-    // compute next set: toggle this cat
-    const next = existing.includes(cat)
-      ? existing.filter((c) => c !== cat)
-      : [...existing, cat];
-    // rebuild URLSearchParams
-    const sp = new URLSearchParams(params.toString());
-    sp.delete("category");
-    next.forEach((c) => sp.append("category", c));
-    router.push(`${path}?${sp.toString()}`);
+  //$ Handle price filter
+  const handlePriceFilter = () => {
+    const sp = new URLSearchParams(params.toString()); //* create new search params object
+    if (minPrice) sp.set("minPrice", minPrice); //* set minPrice if exists
+    else sp.delete("minPrice"); //* remove minPrice if empty
+    if (maxPrice) sp.set("maxPrice", maxPrice);
+    else sp.delete("maxPrice");
+    router.push(`${path}?${sp.toString()}`); //* push new url with updated prices
   };
 
-  const handlePriceFilter = () => {
-    const sp = new URLSearchParams(params.toString());
-    if (minPrice) sp.set('minPrice', minPrice);
-    else sp.delete('minPrice');
-    if (maxPrice) sp.set('maxPrice', maxPrice);
-    else sp.delete('maxPrice');
-    router.push(`${path}?${sp.toString()}`);
+  //$ Handle category filter
+  const handleCategoryClick = (cat) => {
+    const existing = params.getAll("category"); //* current selected categories from url
+    const next = existing.includes(cat) //* toggle category
+      ? existing.filter((c) => c !== cat)
+      : [...existing, cat];
+    const sp = new URLSearchParams(params.toString()); //* create new search params object
+    sp.delete("category"); //* clear existing categories
+    next.forEach((c) => sp.append("category", c)); //* add new categories
+    router.push(`${path}?${sp.toString()}`); //* push new url with updated categories
   };
 
   return (
@@ -71,14 +68,14 @@ const Filter = ({}) => {
             );
           })}
         </div>
-        <div className={Style.filter_box_right}>
-          <div
-            className={Style.filter_box_right_box}
-            onClick={() => openFilter()}>
-            <FaFilter />
-            <span>Filter</span> {filterOpen ? <FaAngleUp /> : <FaAngleDown />}
-          </div>
-        </div>
+        <button
+          type="button"
+          className={Style.filter_box_right_box}
+          onClick={openFilter}
+          aria-pressed={filterOpen}>
+          <FaFilter />
+          <span>Filter</span> {filterOpen ? <FaAngleUp /> : <FaAngleDown />}
+        </button>
       </div>
 
       {filterOpen && (

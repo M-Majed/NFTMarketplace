@@ -1,0 +1,41 @@
+/* Responsive NFT grid (used in My NFTs) */
+.Profile_MyNFTs_NFTGrid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(220px, 1fr)
+  ); /* was 5 fixed columns */
+  gap: 20px;
+}
+@media (max-width: 380px) {
+  .Profile_MyNFTs_NFTGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.Profile_MyNFTs_NFTGrid_card {
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+.Profile_MyNFTs_NFTGrid_card_img {
+  border-radius: 10px;
+}
+.Profile_MyNFTs_NFTGrid_card_info {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+/* Section wrapper */
+.Profile_MyNFTs {
+  padding: clamp(12px, 2vw, 20px);
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
+}
+.Profile_MyNFTs h2 {
+  font-size: clamp(18px, 3vw, 28px);
+}

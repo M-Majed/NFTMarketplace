@@ -1,0 +1,60 @@
+/* Header */
+.Profile_header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(12px, 2vw, 20px);
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  margin-bottom: 25px;
+}
+
+.Profile_header_avatar_img {
+  margin-left: 0; /* was 15px */
+  border-radius: 50px;
+  background-color: white;
+  margin-left: 5px;
+}
+.Profile_info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 0; /* was 10px */
+  line-height: 1.1;
+}
+
+.Profile_info h2 {
+  font-size: clamp(18px, 2.6vw, 25px);
+  word-break: break-all; /* long addresses */
+}
+
+.Profile_info_wallet {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 5vw, 40px); /* was 100px fixed */
+  flex-wrap: wrap;
+  font-size: clamp(14px, 2.2vw, 20px);
+}
+.Profile_info_actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+/* Buttons + states (kept) */
+.Button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.ButtonPrimary {
+  border: none;
+  background: rgb(9, 77, 77);
+}
+.Button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}

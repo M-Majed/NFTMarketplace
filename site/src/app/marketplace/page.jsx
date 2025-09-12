@@ -8,27 +8,33 @@ import Style from "./page.module.css";
 
 export default function MarketplacePage() {
   const searchParams = useSearchParams();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useAccount(); //* user address from wagmi
+  const [items, setItems] = useState([]); //* fetched items
+  const [page, setPage] = useState(Number(searchParams.get("page") || "1")); //* current page
+  const [pages, setPages] = useState(1); //* total pages
+  const [loading, setLoading] = useState(true); //* loading state
 
-  const [items, setItems] = useState([]);
-  const [page, setPage] = useState(Number(searchParams.get("page") || "1"));
-  const [pages, setPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-
+  //$ gets url query(filters, wishlist, page) and builds api query string for fetching items
   const buildApiQS = () => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams.toString()); //* copy search params
+
+    //* if wishlist is set and user is connected, add address to params
     const wishlist = params.get("wishlist");
     if (wishlist && isConnected && address) params.set("address", address);
     else params.delete("address");
+
     return params.toString();
   };
 
+  //$ Fetch items when search params, address or connection status changes
   useEffect(() => {
-    let alive = true;
+    let alive = true; //* to prevent state updates if component unmounts(e.g., user navigates away)
     (async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/fetch-market-items?${buildApiQS()}`, { cache: "no-store" });
+        const res = await fetch(`/api/fetch-market-items?${buildApiQS()}`, {
+          cache: "no-store",
+        }); //* fetch items from api
         const data = await res.json();
         if (!alive) return;
         setItems(data.items || []);
@@ -45,17 +51,25 @@ export default function MarketplacePage() {
         if (alive) setLoading(false);
       }
     })();
-    return () => { alive = false; };
-  }, [searchParams, address, isConnected]);
+    return () => {
+      alive = false;
+    };
+  }, [searchParams, address, isConnected]); //* run again if any of these change
 
+  //$ Build href for pagination links, keeping current search params
   const buildHref = (n) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", String(n));
-    return `/marketplace?${params.toString()}`;
+    const params = new URLSearchParams(searchParams.toString()); //* copy current search params
+    params.set("page", String(n)); //* add page param
+    return `/marketplace?${params.toString()}`; //* return full href
   };
 
+  //$ wishlist requested but user not connected
   if (searchParams.get("wishlist") && !isConnected) {
-    return <p className={Style.marketplace}>Please connect your wallet to view your wishlist.</p>;
+    return (
+      <p className={Style.marketplace}>
+        Please connect your wallet to view your wishlist.
+      </p>
+    );
   }
 
   return (
@@ -66,7 +80,12 @@ export default function MarketplacePage() {
         {Array.from({ length: pages }, (_, i) => {
           const n = i + 1;
           return (
-            <Link key={n} href={buildHref(n)} className={`${Style.pageLink} ${n === page ? Style.activePage : ""}`}>
+            <Link
+              key={n}
+              href={buildHref(n)}
+              className={`${Style.pageLink} ${
+                n === page ? Style.activePage : ""
+              }`}>
               {n}
             </Link>
           );

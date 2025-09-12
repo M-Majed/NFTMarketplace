@@ -32,6 +32,7 @@ model User {
   transactionsBought Transaction[] @relation("BoughtTransactions")
   transactionsSold   Transaction[] @relation("SoldTransactions")
   wishlist           WishlistItem[]
+  reports            Report[]
 }
 
 model NFT {
@@ -68,6 +69,7 @@ model Listing {
 
   createdAt    DateTime      @default(now())
   wishlistedBy WishlistItem[]
+  reports      Report[]
 }
 
 model Transaction {
@@ -101,4 +103,18 @@ model WishlistItem {
   createdAt DateTime @default(now())
 
   @@unique([userId, listingId])
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  reporterId String
+  reporter   User     @relation(fields: [reporterId], references: [id])
+
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  reason   String?
+  createdAt DateTime @default(now())
+
+  @@unique([reporterId, listingId]) // one report per user per listing
 }

@@ -5,153 +5,26 @@
   padding-inline: clamp(16px, 3vw, 32px);
 }
 
-/* Header */
-.Profile_header {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: clamp(12px, 2vw, 20px);
-  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
-  border-radius: 10px;
-  margin-bottom: 25px;
-}
 
-.Profile_header_avatar_img {
-  margin-left: 0; /* was 15px */
-  border-radius: 50px;
-  background-color: white;
-  margin-left: 5px;
-}
 
-.Profile_info {
-  display: flex;
-  flex-direction: column;
-  margin-left: 0; /* was 10px */
-  line-height: 1.1;
-}
 
-.Profile_info h2 {
-  font-size: clamp(18px, 2.6vw, 25px);
-  word-break: break-all; /* long addresses */
-}
-
-.Profile_info_wallet {
-  display: flex;
-  align-items: center;
-  gap: clamp(10px, 5vw, 40px); /* was 100px fixed */
-  flex-wrap: wrap;
-  font-size: clamp(14px, 2.2vw, 20px);
-}
 
 /* Summary cards */
-.Profile_summery {
-  margin: 10px 0 25px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: clamp(12px, 2vw, 20px);
-}
-.Profile_summery_card {
-  margin: 0;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
-}
+
 
 /* Tabs */
-.Profile_tabs {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap; /* allow multiple rows on small screens */
-  margin-bottom: 20px;
-}
-.Profile_tabs_btn {
-  flex: 1 1 180px; /* grow, but not too tiny */
-  padding: 10px;
-  cursor: pointer;
-  background-color: #010f10;
-  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
-  border-radius: 10px;
-}
-.Profile_tabs_btn:hover {
-  background: #002021;
-}
+
 
 /* Section wrapper */
-.Profile_MyNFTs {
-  padding: clamp(12px, 2vw, 20px);
-  margin-bottom: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
-}
-.Profile_MyNFTs h2 {
-  font-size: clamp(18px, 3vw, 28px);
-}
 
-/* Responsive NFT grid (used in My NFTs) */
-.Profile_MyNFTs_NFTGrid {
-  display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(220px, 1fr)
-  ); /* was 5 fixed columns */
-  gap: 20px;
-}
-@media (max-width: 380px) {
-  .Profile_MyNFTs_NFTGrid {
-    grid-template-columns: 1fr;
-  }
-}
 
-.Profile_MyNFTs_NFTGrid_card {
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-}
-.Profile_MyNFTs_NFTGrid_card_img {
-  border-radius: 10px;
-}
-.Profile_MyNFTs_NFTGrid_card_info {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
+
 
 /* Active listings list */
-.Profile_MyNFTs_list {
-  display: grid;
-  gap: 10px;
-}
-.Profile_MyNFTs_list_item {
-  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
-  padding: 10px;
-  border-radius: 10px;
-  display: flex;
-  width: 100%;
-  background-color: transparent;
-  font-size: clamp(16px, 2.2vw, 20px);
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap; /* don’t overflow on phones */
-}
-.Profile_MyNFTs_list_item_btns {
-  display: flex;
-  gap: 10px;
-  font-size: 25px;
-}
-.Profile_MyNFTs_list_item_btns_btn {
-  cursor: pointer;
-}
+
 
 /* Transaction history */
-.Profile_TransactionHistory_list_item {
-  margin-bottom: 10px;
-  padding: 10px;
-  font-size: clamp(14px, 2vw, 18px);
-}
+
 
 /* Modal (unchanged, already responsive) */
 .ModalOverlay {
@@ -232,60 +105,6 @@
   cursor: not-allowed;
   opacity: 0.7;
 }
-.isBusy {
-  cursor: default !important;
-  opacity: 0.6 !important;
-  pointer-events: none;
-}
-.isBusyIcon {
-  opacity: 0.5;
-  pointer-events: none;
-  cursor: default;
-}
 
-/* Pagination */
-.Pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-  flex-wrap: wrap;
-}
 
-.Pagination_controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-.Pagination_info {
-  padding: 6px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  opacity: 0.9;
-}
-
-.Pagination_pageSize {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: clamp(14px, 2vw, 16px);
-}
-
-.PageSizeSelect {
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: black;
-  color: white;
-  outline: none;
-}
-
-.Profile_info_actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}

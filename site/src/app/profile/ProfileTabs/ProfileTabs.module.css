@@ -1,0 +1,17 @@
+.Profile_tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap; /* allow multiple rows on small screens */
+  margin-bottom: 20px;
+}
+.Profile_tabs_btn {
+  flex: 1 1 180px; /* grow, but not too tiny */
+  padding: 10px;
+  cursor: pointer;
+  background-color: #010f10;
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+}
+.Profile_tabs_btn:hover {
+  background: #002021;
+}
