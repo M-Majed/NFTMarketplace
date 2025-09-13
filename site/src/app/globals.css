@@ -22,7 +22,8 @@ a {
 }
 
 ::selection{
-  color: cyan;
+  color: rgb(4, 40, 36);
+  background-color: cyan
 }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

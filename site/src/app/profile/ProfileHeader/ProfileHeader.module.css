@@ -27,19 +27,13 @@
   word-break: break-all; /* long addresses */
 }
 
-.Profile_info_wallet {
-  display: flex;
-  align-items: center;
-  gap: clamp(10px, 5vw, 40px); /* was 100px fixed */
-  flex-wrap: wrap;
-  font-size: clamp(14px, 2.2vw, 20px);
-}
 .Profile_info_actions {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 10px;
+  font-size: clamp(14px, 2.2vw, 20px);
 }
 /* Buttons + states (kept) */
 .Button {

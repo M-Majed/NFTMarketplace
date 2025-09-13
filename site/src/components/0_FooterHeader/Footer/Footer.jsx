@@ -1,19 +1,64 @@
-// src/components/0_FooterHeader/Footer/Footer.jsx
-import React from "react";
+"use client";
+import React, { useCallback, useState } from "react";
 import Image from "next/image";
 import {
-  TiSocialFacebook,
-  TiSocialLinkedin,
   TiSocialTwitter,
   TiSocialYoutube,
   TiSocialInstagram,
 } from "react-icons/ti";
+import { FaTelegramPlane } from "react-icons/fa";
 import { RiSendPlaneFill } from "react-icons/ri";
-
 import style from "./Footer.module.css";
 import img from "@/lib/img";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("idle"); //* idle | loading | success | error
+  const [message, setMessage] = useState("");
+
+  //$ subscribe
+  const onSubmit = useCallback(
+    async (e) => {
+      e.preventDefault(); //* prevent page navigation
+      
+      //* validation
+      if (!email) {
+        setStatus("error");
+        setMessage("Please enter your email.");
+        return;
+      }
+      //* status
+      setStatus("loading");
+      setMessage("");
+
+      //* send email to api
+      try {
+        const res = await fetch("/api/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+
+        //* Safely attempt JSON (avoid the "<!DOCTYPE ..." parse error)
+        let data = null;
+        const ct = res.headers.get("content-type") || "";
+        if (ct.includes("application/json")) {
+          data = await res.json();
+        }
+        if (!res.ok) {
+          throw new Error(data?.error || "Failed to subscribe");
+        }
+        setStatus("success");
+        setMessage("Subscribed!");
+        setEmail("");
+      } catch (err) {
+        setStatus("error");
+        setMessage(err?.message || "Something went wrong.");
+      }
+    },
+    [email]
+  );
+
   return (
     <footer className={style.footer} role="contentinfo">
       <div className={style.footer_box}>
@@ -26,55 +71,55 @@ const Footer = () => {
             sizes="(max-width: 900px) 80px, 100px"
             priority
           />
-
           <p>
-            The world’s first and largest digital marketplace for crypto
-            collectibles and non-fungible tokens (NFTs). Buy, sell, and discover
-            exclusive digital items.
+            Welcome to my NFT Marketplace! browse, create, Buy, sell, and trade
+            NFTs with ease using our platform. This is a project for learning
+            purpose
           </p>
-
           <div className={style.footer_social}>
-            <a href="#" aria-label="Facebook">
-              <TiSocialFacebook />
-            </a>
-            <a href="#" aria-label="LinkedIn">
-              <TiSocialLinkedin />
-            </a>
-            <a href="#" aria-label="Twitter">
+            <a href="https://www.x.com" aria-label="Twitter">
               <TiSocialTwitter />
             </a>
-            <a href="#" aria-label="YouTube">
+            <a href="https://www.youtube.com" aria-label="YouTube">
               <TiSocialYoutube />
             </a>
-            <a href="#" aria-label="Instagram">
+            <a href="https://www.instagram.com" aria-label="Instagram">
               <TiSocialInstagram />
+            </a>
+            <a href="https://www.telegram.org" aria-label="Telegram">
+              <FaTelegramPlane />
             </a>
           </div>
         </div>
-
         <div className={style.subscribe}>
           <h3>Subscribe</h3>
-
-          <div className={style.subscribe_box}>
+          <form className={style.subscribe_box} onSubmit={onSubmit}>
             <input
               type="email"
               placeholder="Enter your email *"
               aria-label="Email address"
               autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={status === "loading"}
             />
             <button
-              type="button"
+              type="submit"
               className={style.subscribe_box_button}
               aria-label="Submit email"
-            >
+              disabled={status === "loading"}
+              title="Subscribe">
               <RiSendPlaneFill />
             </button>
-          </div>
-
+          </form>
           <div className={style.subscribe_box_info}>
-            <p>
-              Discover, collect, and sell extraordinary NFTs. OpenSea is the
-              world’s first and largest NFT marketplace.
+            <p>Subscribe so you recieve the latest NFTs.</p>
+            <p
+              role="status"
+              aria-live="polite"
+              style={{ minHeight: 20, marginTop: 8 }}>
+              {message}
             </p>
           </div>
         </div>

@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useAccount } from "wagmi";
 import Style from "./page.module.css";
 import DropZone from "./DropZone/DropZone";
-import Button from "@/components/_Shared/Button/Button";
 import { useRouter } from "next/navigation";
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
 import { categories } from "@/app/constants";
@@ -155,12 +154,15 @@ const createnft = () => {
         </div>
 
         <div className={Style.upload_box_btn}>
-          <Button
-            btnName={isSubmitting ? "Processing..." : "Create and list NFT"}
-            handleClick={isSubmitting ? undefined : handleUpload}
+          <button
+            type="button"
+            className={Style.button}
+            onClick={handleUpload}
             disabled={isSubmitting}
             aria-disabled={isSubmitting}
-          />
+          >
+            {isSubmitting ? "Processing..." : "Create and list NFT"}
+          </button>
         </div>
       </div>
     </div>

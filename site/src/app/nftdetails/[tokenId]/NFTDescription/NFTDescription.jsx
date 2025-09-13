@@ -18,8 +18,11 @@ import { useRouter } from "next/navigation";
 import { FaTelegramPlane } from "react-icons/fa";
 
 export default function NFTDescription({
+  nft,
+  seller,
+  price,
   usdPrice,
-  listing,
+  listingId,
 }) {
   const [social, setSocial] = useState(false); //* social menu
   const [NFTMenu, setNFTMenu] = useState(false); //* three dot menu
@@ -38,10 +41,10 @@ export default function NFTDescription({
   //$ Check if in wishlist
   useEffect(() => {
     const run = async () => {
-      if (!isConnected || !listing.id || !address) return;
+      if (!isConnected || !listingId || !address) return;
       const res = await fetch(
-        `/api/wishlist?listing.id=${encodeURIComponent(
-          listing.id
+        `/api/wishlist?listingId=${encodeURIComponent(
+          listingId
         )}&walletAddress=${encodeURIComponent(address)}`,
         { cache: "no-store" }
       );
@@ -49,7 +52,7 @@ export default function NFTDescription({
       if (res.ok) setInWishlist(!!data.inWishlist);
     };
     run();
-  }, [isConnected, listing.id, address]); //* run again if connection, listing.id, or address changes
+  }, [isConnected, listingId, address]); //* run again if connection, listingId, or address changes
 
   //$ hover gap protection
   const clearTimer = (key) => {
@@ -88,17 +91,17 @@ export default function NFTDescription({
     if (!isConnected) return alert("Connect your wallet first");
 
     try {
-      const txHash = await buyNFT({ tokenId: listing.nft.tokenId, price: listing.price }); //* call buyNFT from SC
+      const txHash = await buyNFT({ tokenId: nft.tokenId, price }); //* call buyNFT from SC
       if (!txHash) throw new Error("Transaction failed");
 
-      const res = await fetch("/api/buy-listing.nft", {
+      const res = await fetch("/api/buy-nft", {
         //* add required changes to DB
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tokenId: listing.nft.tokenId,
+          tokenId: nft.tokenId,
           buyerAddress: address,
-          price: listing.price,
+          price,
           txHash,
         }),
       });
@@ -120,7 +123,7 @@ export default function NFTDescription({
   const handleAddToWishlist = async (e) => {
     e.preventDefault(); //* don't follow link -> no #
     if (!isConnected) return alert("Connect your wallet first");
-    if (!listing.id) return alert("Listing is missing");
+    if (!listingId) return alert("Listing is missing");
 
     setIsAdding(true);
     try {
@@ -128,7 +131,7 @@ export default function NFTDescription({
         //* add to wishlist in DB
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: listing.id, walletAddress: address }),
+        body: JSON.stringify({ id: listingId, walletAddress: address }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add to wishlist");
@@ -144,7 +147,7 @@ export default function NFTDescription({
   const handleRemoveFromWishlist = async (e) => {
     e.preventDefault();
     if (!isConnected) return alert("Connect your wallet first");
-    if (!listing.id) return alert("Listing is missing");
+    if (!listingId) return alert("Listing is missing");
 
     setIsAdding(true);
     try {
@@ -152,7 +155,7 @@ export default function NFTDescription({
         //* remove from wishlist in DB
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: listing.id, walletAddress: address }),
+        body: JSON.stringify({ id: listingId, walletAddress: address }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to remove");
@@ -215,13 +218,13 @@ export default function NFTDescription({
   const handleReport = async (e) => {
     e.preventDefault(); //* don't follow link -> no #
     if (!isConnected) return alert("Connect your wallet first");
-    if (!listing.id) return alert("Listing is missing");
+    if (!listingId) return alert("Listing is missing");
 
     try {
       //* check if already reported
       const checkRes = await fetch(
-        `/api/report?listing.id=${encodeURIComponent(
-          listing.id
+        `/api/report?listingId=${encodeURIComponent(
+          listingId
         )}&walletAddress=${encodeURIComponent(address)}`
       );
       const checkData = await checkRes.json();
@@ -245,7 +248,7 @@ export default function NFTDescription({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: listing.id,
+          id: listingId,
           walletAddress: address,
           reason: (reason || "").slice(0, 500),
         }),
@@ -317,11 +320,11 @@ export default function NFTDescription({
       </div>
 
       <div className={Style.NFTDescription_profile}>
-        <h1>{listing.nft.name}</h1>
+        <h1>{nft.name}</h1>
         <div className={Style.NFTDescription_profile_box_info}>
           <small>Creator</small> <br />
           <span>
-            {listing.seller.walletAddress}
+            {seller.walletAddress}
           </span>
         </div>
 
@@ -329,7 +332,7 @@ export default function NFTDescription({
           <div className={Style.NFTDescription_profile_biding_box_price}>
             <small>Price</small>
             <p>
-              {listing.price} ETH &nbsp;<span>(${usdPrice})</span>
+              {price} ETH &nbsp;<span>(${usdPrice})</span>
             </p>
           </div>
 

@@ -14,14 +14,13 @@ export default function TransactionHistory({
   onLast,
   onPageSizeChange,
 }) {
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
-  const paginated = transactions.slice(start, end);
+  const start = (page - 1) * pageSize; //* Calculate start page
+  const end = start + pageSize; //* Calculate end page
+  const paginated = transactions.slice(start, end); //* Get current page transactions
 
   return (
     <div className={Style.Profile_MyNFTs}>
       <h2>Transaction History</h2>
-
       {transactions.length > 0 ? (
         <>
           <div className={Style.Profile_TransactionHistory_list}>
@@ -32,9 +31,9 @@ export default function TransactionHistory({
               return (
                 <div
                   key={tx.id}
-                  className={Style.Profile_TransactionHistory_list_item}
-                >
-                  {isSeller ? "Sold" : "Bought"} {tx.nft?.name} - Price: {tx.price} ETH
+                  className={Style.Profile_TransactionHistory_list_item}>
+                  {isSeller ? "Sold" : "Bought"} {tx.nft?.name} - Price:{" "}
+                  {tx.price} ETH
                 </div>
               );
             })}
@@ -46,16 +45,14 @@ export default function TransactionHistory({
                 className={Style.Button}
                 onClick={onFirst}
                 disabled={page === 1}
-                aria-label="First page"
-              >
+                aria-label="First page">
                 « First
               </button>
               <button
                 className={Style.Button}
                 onClick={onPrev}
                 disabled={page === 1}
-                aria-label="Previous page"
-              >
+                aria-label="Previous page">
                 ‹ Prev
               </button>
               <span className={Style.Pagination_info}>
@@ -65,16 +62,14 @@ export default function TransactionHistory({
                 className={Style.Button}
                 onClick={onNext}
                 disabled={page === totalPages}
-                aria-label="Next page"
-              >
+                aria-label="Next page">
                 Next ›
               </button>
               <button
                 className={Style.Button}
                 onClick={onLast}
                 disabled={page === totalPages}
-                aria-label="Last page"
-              >
+                aria-label="Last page">
                 Last »
               </button>
             </div>
@@ -84,8 +79,9 @@ export default function TransactionHistory({
               <select
                 className={Style.PageSizeSelect}
                 value={pageSize}
-                onChange={(e) => onPageSizeChange?.(parseInt(e.target.value, 10))}
-              >
+                onChange={(e) =>
+                  onPageSizeChange?.(parseInt(e.target.value, 10))
+                }>
                 {[5, 10, 20, 50].map((n) => (
                   <option key={n} value={n}>
                     {n}

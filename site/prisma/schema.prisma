@@ -118,3 +118,9 @@ model Report {
 
   @@unique([reporterId, listingId]) // one report per user per listing
 }
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}

@@ -7,22 +7,22 @@ import ActiveListings from "./ActiveListings/ActiveListings";
 import TransactionHistory from "./TransactionHistory/TransactionHistory";
 
 export default function ProfileTabs({
-  // tabs
+  //$ for profile tabs
   active,
   onChange,
 
-  // MyNFTs props
+  //$ for MyNFTs
   myNftsItems,
   myNftsLoading,
   resellingId,
   onResellClick,
 
-  // Active Listings props
+  //$ for ActiveListings
   listings,
   cancellingId,
   onCancelListing,
 
-  // Transaction History props
+  //$ for TransactionHistory
   transactions,
   address,
   txPage,
@@ -35,24 +35,27 @@ export default function ProfileTabs({
   onPageSizeChange,
 }) {
   return (
-    <>
+    <div>
       <div className={Style.Profile_tabs}>
         <button
-          className={`${Style.Profile_tabs_btn} ${active === "MyNFTs" ? Style.Active : ""}`}
-          onClick={() => onChange("MyNFTs")}
-        >
+          className={`${Style.Profile_tabs_btn} ${
+            active === "MyNFTs" ? Style.Active : ""
+          }`}
+          onClick={() => onChange("MyNFTs")}>
           My NFTs
         </button>
         <button
-          className={`${Style.Profile_tabs_btn} ${active === "ActiveListings" ? Style.Active : ""}`}
-          onClick={() => onChange("ActiveListings")}
-        >
+          className={`${Style.Profile_tabs_btn} ${
+            active === "ActiveListings" ? Style.Active : ""
+          }`}
+          onClick={() => onChange("ActiveListings")}>
           Active listings
         </button>
         <button
-          className={`${Style.Profile_tabs_btn} ${active === "TransactionHistory" ? Style.Active : ""}`}
-          onClick={() => onChange("TransactionHistory")}
-        >
+          className={`${Style.Profile_tabs_btn} ${
+            active === "TransactionHistory" ? Style.Active : ""
+          }`}
+          onClick={() => onChange("TransactionHistory")}>
           Transaction history
         </button>
       </div>
@@ -88,6 +91,6 @@ export default function ProfileTabs({
           onPageSizeChange={onPageSizeChange}
         />
       )}
-    </>
+    </div>
   );
 }

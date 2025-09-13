@@ -1,17 +1,16 @@
-// src/app/profile/ProfileHeader/ProfileHeader.jsx
 "use client";
 import React from "react";
-import Style from "./ProfileHeader.module.css"; // reserved for overrides if needed
+import Style from "./ProfileHeader.module.css";
 import Image from "next/image";
 import img from "@/lib/img";
 import { formatEther } from "viem";
 
 export default function ProfileHeader({
   address,
-  loadingPending,
+  loadingBalance,
   pendingWei,
   withdrawing,
-  onWithdrawAll,
+  onWithdraw,
 }) {
   return (
     <div className={Style.Profile_header}>
@@ -28,29 +27,24 @@ export default function ProfileHeader({
 
       <div className={Style.Profile_info}>
         <h2>{address}</h2>
-
-        <div className={Style.Profile_info_wallet}>
-          <p>Wallet Address: {address}</p>
-
-          <div className={Style.Profile_info_actions}>
-            <span>
-              Balance:&nbsp;
-              {loadingPending
-                ? "…"
-                : `${Number(formatEther(pendingWei)).toFixed(4)} ETH`}
-            </span>
-
-            <button
-              className={`${Style.Button} ${Style.ButtonPrimary}`}
-              onClick={onWithdrawAll}
-              disabled={withdrawing || pendingWei === 0n}
-              title={
-                pendingWei === 0n ? "No earnings to withdraw" : "Withdraw all earnings"
-              }
-            >
-              {withdrawing ? "Withdrawing…" : "Withdraw"}
-            </button>
-          </div>
+        <div className={Style.Profile_info_actions}>
+          <span>
+            Balance:&nbsp;
+            {loadingBalance
+              ? "…"
+              : `${Number(formatEther(pendingWei)).toFixed(4)} ETH`}
+          </span>
+          <button
+            className={`${Style.Button} ${Style.ButtonPrimary}`}
+            onClick={onWithdraw}
+            disabled={withdrawing || pendingWei === 0n}
+            title={
+              pendingWei === 0n
+                ? "No earnings to withdraw"
+                : "Withdraw all earnings"
+            }>
+            {withdrawing ? "Withdrawing…" : "Withdraw"}
+          </button>
         </div>
       </div>
     </div>

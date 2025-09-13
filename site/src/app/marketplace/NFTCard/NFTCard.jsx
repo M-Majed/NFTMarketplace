@@ -4,17 +4,14 @@ import { BsImages } from "react-icons/bs";
 import Image from "next/image";
 import Filter from "./Filter/Filter";
 import Style from "./NFTCard.module.css";
-import Title from "../../../components/_Shared/Title/Title";
 import Link from "next/link";
 
 export default function NFTCard({ items = [] }) {
   return (
     <div className={Style.NFTCard}>
       <div className={Style.NFTHeader}>
-        <Title
-          heading="Discover NFTs"
-          paragraph="Explore the latest and greatest NFTs"
-        />
+          <h2>Discover NFTs</h2>
+
         <Filter />
       </div>
 

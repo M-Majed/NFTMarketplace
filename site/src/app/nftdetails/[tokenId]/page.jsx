@@ -4,8 +4,7 @@ import NFTDetailsImg from "./NFTDetailsImg/NFTDetailsImg";
 import NFTDescription from "./NFTDescription/NFTDescription";
 import { prisma } from "@/lib/prisma";
 
-
-export default async function NFTDetailsPage({ params }){
+export default async function NFTDetailsPage({ params }) {
   const { tokenId } = params;
 
   //$ find the active listing for this tokenId
@@ -16,7 +15,7 @@ export default async function NFTDetailsPage({ params }){
     },
     include: {
       nft: true,
-      seller: true
+      seller: true,
     },
   });
 
@@ -27,7 +26,7 @@ export default async function NFTDetailsPage({ params }){
 
   //$ Fetch the ETH->USD price - compute NFT price in USD
   const priceRes = await fetch(
-    'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
+    "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
     { next: { revalidate: 60 } }
   );
   const priceData = await priceRes.json();
@@ -38,9 +37,12 @@ export default async function NFTDetailsPage({ params }){
     <div className={Style.NFTDetailsPage}>
       <NFTDetailsImg listing={listing} />
       <NFTDescription
+        nft={listing.nft}
+        seller={listing.seller}
+        price={listing.price}
         usdPrice={usdPrice}
-        listing={listing}
+        listingId={listing.id}
       />
     </div>
   );
-};
+}

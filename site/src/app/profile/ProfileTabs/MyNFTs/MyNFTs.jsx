@@ -6,13 +6,12 @@ import Style from "./MyNFTs.module.css";
 export default function MyNFTs({
   items = [],
   loading = false,
-  resellingId = null, // tokenId currently being listed
-  onResellClick,      // (nft, event) => void
+  resellingId = null,
+  onResellClick,
 }) {
   return (
     <div className={Style.Profile_MyNFTs}>
       <h2>Owned NFTs</h2>
-
       {loading ? (
         <p>Loading your on-chain NFTs…</p>
       ) : items.length > 0 ? (
@@ -25,17 +24,18 @@ export default function MyNFTs({
               }`}
               onClick={(e) => (resellingId ? null : onResellClick?.(nft, e))}
               title={
-                resellingId === nft.tokenId ? "Listing…" : "Click to list for sale"
+                resellingId === nft.tokenId
+                  ? "Listing…"
+                  : "Click to list for sale"
               }
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
+                  e.preventDefault(); //* prevent scrolling on space
                   resellingId ? null : onResellClick?.(nft, e);
                 }
-              }}
-            >
+              }}>
               <Image
                 src={nft.image}
                 width={200}
@@ -47,7 +47,9 @@ export default function MyNFTs({
               <div className={Style.Profile_MyNFTs_NFTGrid_card_info}>
                 <h3>{nft.name || `Token #${nft.tokenId}`}</h3>
                 <small>
-                  {resellingId === nft.tokenId ? "Listing…" : "Click to list for sale"}
+                  {resellingId === nft.tokenId
+                    ? "Listing…"
+                    : "Click to list for sale"}
                 </small>
               </div>
             </div>

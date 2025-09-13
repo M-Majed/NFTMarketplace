@@ -16,12 +16,12 @@
 /* LEFT column (logo + text + socials) */
 .footer_box_social{
     grid-column: span 7;
+    border-right: 1px solid white;
 }
 
 /* RIGHT column (subscribe) */
 .subscribe{
     grid-column: span 5;
-    border-left: 1px solid white;
     padding-left: clamp(16px, 3vw, 32px);
 }
 
@@ -108,6 +108,7 @@
     .footer_box_social,
     .subscribe{
         grid-column: 1 / -1;
+        border-right: none;
     }
     .subscribe{
         border-left: none;

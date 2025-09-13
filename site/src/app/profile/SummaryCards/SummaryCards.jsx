@@ -1,12 +1,11 @@
-// src/app/profile/SummaryCards/SummaryCards.jsx
 "use client";
 import React from "react";
-import Style from "./SummaryCards.module.css"; // for future overrides
+import Style from "./SummaryCards.module.css";
 
 export default function SummaryCards({
-  ownedCount,        // number | null (null => show loading ellipsis)
-  activeCount,       // number
-  portfolioValueUsd, // string | number
+  ownedCount,
+  activeCount,
+  activeListingsValueUsd,
 }) {
   return (
     <div className={Style.Profile_summery}>
@@ -21,8 +20,8 @@ export default function SummaryCards({
       </div>
 
       <div className={Style.Profile_summery_card}>
-        <h2>${portfolioValueUsd}</h2>
-        <p>Portfolio Value</p>
+        <h2>${activeListingsValueUsd}</h2>
+        <p>Active listings Value</p>
       </div>
     </div>
   );

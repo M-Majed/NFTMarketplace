@@ -1,4 +1,3 @@
-// src/app/profile/ProfileTabs/ActiveListings/ActiveListings.jsx
 "use client";
 import React from "react";
 import Link from "next/link";
@@ -8,19 +7,18 @@ import Style from "./ActiveListings.module.css";
 export default function ActiveListings({
   listings = [],
   cancellingId = null,
-  onCancel, // (listing, event) => void
+  onCancel,
 }) {
   return (
     <div className={Style.Profile_MyNFTs}>
       <h2>Active Listings</h2>
-
       {listings.length > 0 ? (
         <div className={Style.Profile_MyNFTs_list}>
           {listings.map((listing) => (
             <Link
-                  key={listing.id}
-                  href={`/nftdetails/${listing.tokenId}`}
-                  className={Style.Profile_MyNFTs_list_item}>
+              key={listing.id}
+              href={`/nftdetails/${listing.tokenId}`}
+              className={Style.Profile_MyNFTs_list_item}>
               {listing.nft?.name ?? `Token #${listing.tokenId}`} - Price:{" "}
               {listing.price} ETH
               <div className={Style.Profile_MyNFTs_list_item_btns}>
@@ -29,12 +27,14 @@ export default function ActiveListings({
                     cancellingId === listing.id ? Style.isBusyIcon : ""
                   }`}
                   onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault(); //* prevent navigation
+                    e.stopPropagation(); //* prevent parent navigation
                     onCancel?.(listing, e);
                   }}
                   title={
-                    cancellingId === listing.id ? "Cancelling…" : "Cancel listing"
+                    cancellingId === listing.id
+                      ? "Cancelling…"
+                      : "Cancel listing"
                   }
                 />
               </div>
