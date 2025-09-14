@@ -1,5 +1,4 @@
-// src/components/1_MainPage/Category/Category.jsx
-import React from "react";
+import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BsCircleFill } from "react-icons/bs";
@@ -7,8 +6,8 @@ import Style from "./Category.module.css";
 import { categories } from "@/app/constants";
 
 export default function Category({ items }) {
-  // Build a quick lookup for counts if "items" was passed in: [{ name, count }, ...]
-  const countsByCategory = React.useMemo(() => {
+  //$ count NFTs by category
+  const countsByCategory = useMemo(() => { //* runs function when items change
     if (!items || !Array.isArray(items)) return {};
     const map = {};
     for (const { name, count } of items) map[name] = count;
@@ -21,7 +20,6 @@ export default function Category({ items }) {
         <h2>categories</h2>
         <p>Explore the categories</p>
       </div>
-
       <div className={Style.category_categories}>
         {categories.map(({ image, category }) => {
           const count = countsByCategory[category];

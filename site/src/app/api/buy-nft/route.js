@@ -13,7 +13,7 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    
+
     //* Fetch the listing
     const listing = await prisma.listing.findUnique({
       where: { tokenId },
@@ -26,7 +26,19 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    
+
+    //* prevent self-purchase
+    if (
+      listing?.seller?.walletAddress &&
+      buyerAddress &&
+      listing.seller.walletAddress.toLowerCase() === buyerAddress.toLowerCase()
+    ) {
+      return new Response(
+        JSON.stringify({ error: "You cannot buy your own listing." }),
+        { status: 400 }
+      );
+    }
+
     //* add buyer if not exists
     const buyer = await prisma.user.upsert({
       where: { walletAddress: buyerAddress },

@@ -18,9 +18,9 @@ const Profile = () => {
   }); //* listings and transactions of current user - fetched from db next
   const {
     cancelListing,
-    fetchMyNFTsOrListedNFTs,
+    fetchMyNFTs,
     resellNFT,
-    getPendingBalance,
+    getBalance,
     withdraw,
   } = useContext(NFTMarketplaceContext);
 
@@ -53,10 +53,10 @@ const Profile = () => {
     if (!isConnected) return;
     try {
       setloadingBalance(true);
-      const wei = await getPendingBalance(address); //* get balance on-chain
+      const wei = await getBalance(); //* get balance on-chain
       setPendingWei(wei ?? 0n); //* value ?? default
     } catch (e) {
-      console.warn("getPendingBalance failed:", e);
+      console.warn("getBalance failed:", e);
     } finally {
       setloadingBalance(false);
     }
@@ -128,7 +128,7 @@ const Profile = () => {
       const res = await fetch(`/api/profile?address=${address}`);
       const data = await res.json();
       setProfileData(data);  //* refresh DB + on-chain view after resell
-      const updated = await fetchMyNFTsOrListedNFTs("MyNFTs"); //* refresh on-chain NFTs
+      const updated = await fetchMyNFTs(); //* refresh on-chain NFTs
       setChainNFTs(updated || []); //* refresh on-chain NFTs
       closeResellDialog();
     } catch (err) {
@@ -141,7 +141,7 @@ const Profile = () => {
     }
   };
 
-  //$ fetch profile data from db
+  //$ fetch user listings and transactions
   useEffect(() => {
     if (!isConnected) return;
     fetch(`/api/profile?address=${address}`)
@@ -154,7 +154,7 @@ const Profile = () => {
     if (!isConnected || activeTab !== "MyNFTs") return;
     let alive = true; //* to prevent state updates if component unmounts(e.g., user navigates away)
     setLoadingChain(true);
-    fetchMyNFTsOrListedNFTs("MyNFTs")
+    fetchMyNFTs()
       .then((items) => {
         if (alive) setChainNFTs(items || []);
       })
@@ -165,7 +165,7 @@ const Profile = () => {
     return () => {
       alive = false;
     };
-  }, [isConnected, activeTab, fetchMyNFTsOrListedNFTs]);
+  }, [isConnected, activeTab, fetchMyNFTs]);
 
   //$ handle withdraw
   const handleWithdraw = async () => {

@@ -25,9 +25,7 @@ export default function TransactionHistory({
         <>
           <div className={Style.Profile_TransactionHistory_list}>
             {paginated.map((tx) => {
-              const isSeller =
-                String(tx.seller || "").toLowerCase() ===
-                String(address || "").toLowerCase();
+              const isSeller = tx.seller.walletAddress === address;
               return (
                 <div
                   key={tx.id}
@@ -44,15 +42,13 @@ export default function TransactionHistory({
               <button
                 className={Style.Button}
                 onClick={onFirst}
-                disabled={page === 1}
-                aria-label="First page">
+                disabled={page === 1}>
                 « First
               </button>
               <button
                 className={Style.Button}
                 onClick={onPrev}
-                disabled={page === 1}
-                aria-label="Previous page">
+                disabled={page === 1}>
                 ‹ Prev
               </button>
               <span className={Style.Pagination_info}>
@@ -61,15 +57,13 @@ export default function TransactionHistory({
               <button
                 className={Style.Button}
                 onClick={onNext}
-                disabled={page === totalPages}
-                aria-label="Next page">
+                disabled={page === totalPages}>
                 Next ›
               </button>
               <button
                 className={Style.Button}
                 onClick={onLast}
-                disabled={page === totalPages}
-                aria-label="Last page">
+                disabled={page === totalPages}>
                 Last »
               </button>
             </div>

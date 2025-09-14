@@ -59,7 +59,7 @@ contract NFTMarketplace is
     function protocolBalance() public view returns (uint256) { //* SC Balance by fees
         return protocolAccrued;
     }
-    function pendingBalanceOf(address account) public view returns (uint256) { //* seller balance
+    function getUserBalanceOf(address account) public view returns (uint256) { //* seller balance
         return balances[account];
     }
     function getBalance() public view returns (uint256) { //* raw SC balance
@@ -157,6 +157,7 @@ contract NFTMarketplace is
     function createMarketSale( //* selling NFT
         uint256 tokenId
     ) public payable nonReentrant whenNotPaused {
+        require(idMarketItem[tokenId].seller != msg.sender, "Seller can't buy own NFT");
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
         MarketItem storage item = idMarketItem[tokenId];
         require(item.seller != address(0), "Listing not found");

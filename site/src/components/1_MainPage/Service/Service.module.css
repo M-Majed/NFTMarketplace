@@ -20,3 +20,36 @@
   background-color: white;
   color: black;
 }
+
+.secrets { display: grid; gap: .5rem; margin-top: .5rem; }
+.secrets_title { font-weight: 600; }
+
+.secret_row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+}
+
+.secret_label { opacity: .85; font-size: .9rem; }
+.secret_value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy_btn {
+  cursor: pointer;
+  border: 0;
+  border-radius: 10px;
+  padding: .35rem .6rem;
+  background: rgba(255,255,255,0.12);
+  color: inherit;
+}
+.copy_btn:hover { background: rgba(255,255,255,0.18); }
+
+.secrets_note { opacity: .7; font-size: .8rem; }

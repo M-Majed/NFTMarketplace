@@ -1,10 +1,10 @@
-'use client'
+"use client";
 import React from "react";
 import Image from "next/image";
 import Style from "./NFTDetailsImg.module.css";
 import { NFTMarketplaceAddress } from "@/context/constants";
 
-export default function NFTDetailsImg( {listing} ) {
+export default function NFTDetailsImg({ listing }) {
   return (
     <div className={Style.NFTDetailsImg}>
       <Image
@@ -18,18 +18,25 @@ export default function NFTDetailsImg( {listing} ) {
         priority
       />
       <div className={Style.NFTDetailsImg_description}>
-        <p>{listing.nft.description ? listing.nft.description : "No description available."}</p>
-        <small>category: {listing.category}</small><br />
-        <small>{listing.nft.width} x {listing.nft.height} px</small>
+        <p style={{ whiteSpace: "pre-wrap" }}>
+          {listing.nft.description || "No description available."}
+        </p>{" "}
+        <small>category: {listing.category}</small>
+        <br />
+        <small>
+          {listing.nft.width} x {listing.nft.height} px
+        </small>
         <p>
-          <small>Contract Address</small><br />
+          <small>Contract Address</small>
+          <br />
           {NFTMarketplaceAddress}
         </p>
         <p>
-          <small>Token ID</small><br />
+          <small>Token ID</small>
+          <br />
           {listing.nft.tokenId}
         </p>
       </div>
     </div>
   );
-};
+}

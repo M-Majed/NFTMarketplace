@@ -9,6 +9,7 @@ run local blockchain:
 deploy smartcontract in another terminal:
     npx hardhat run scripts/deploy.cjs --network localhost
 
-const [owner, seller, buyer, other] = await ethers.getSigners();const addr = "0x5FbDB2315678afecb367f032d93F642f64180aa3";const abi  = (await artifacts.readArtifact("NFTMarketplace")).abi;const market = new ethers.Contract(addr, abi, owner);
-await market.pause();await market.paused();
-await market.unpause();await market.paused();
+npx hardhat console --network localhost
+    const [owner, seller, buyer, other] = await ethers.getSigners();const addr = "0x5FbDB2315678afecb367f032d93F642f64180aa3";const abi  = (await artifacts.readArtifact("NFTMarketplace")).abi;const market = new ethers.Contract(addr, abi, owner);
+    await market.pause();await market.paused();
+    await market.unpause();await market.paused();

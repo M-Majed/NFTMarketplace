@@ -71,8 +71,7 @@ const Filter = ({}) => {
         <button
           type="button"
           className={Style.filter_box_right_box}
-          onClick={openFilter}
-          aria-pressed={filterOpen}>
+          onClick={openFilter}>
           <FaFilter />
           <span>Filter</span> {filterOpen ? <FaAngleUp /> : <FaAngleDown />}
         </button>

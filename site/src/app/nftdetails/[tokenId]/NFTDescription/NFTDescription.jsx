@@ -38,6 +38,12 @@ export default function NFTDescription({
   const OPEN_DELAY = 0; // open immediately
   const CLOSE_DELAY = 300; // close a beat later
 
+  //$ Check if owner is viewing
+  const isOwnerViewing =
+    !!address && //* !!: convert to boolean
+    !!seller?.walletAddress && //* ?: ensure not null
+    address.toLowerCase() === seller.walletAddress.toLowerCase();
+
   //$ Check if in wishlist
   useEffect(() => {
     const run = async () => {
@@ -88,25 +94,16 @@ export default function NFTDescription({
 
   //$ Handle Buy
   const handleBuy = async () => {
+    //* validation
+    if (isOwnerViewing) {
+      alert("You can’t buy your own NFT.");
+      return;
+    }
     if (!isConnected) return alert("Connect your wallet first");
 
     try {
-      const txHash = await buyNFT({ tokenId: nft.tokenId, price }); //* call buyNFT from SC
+      const txHash = await buyNFT({ tokenId: nft.tokenId, price }); //* call buyNFT from SC + db changes
       if (!txHash) throw new Error("Transaction failed");
-
-      const res = await fetch("/api/buy-nft", {
-        //* add required changes to DB
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tokenId: nft.tokenId,
-          buyerAddress: address,
-          price,
-          txHash,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Update failed");
       router.push("/");
     } catch (err) {
       alert("Buy failed: " + err.message);
@@ -131,7 +128,7 @@ export default function NFTDescription({
         //* add to wishlist in DB
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: listingId, walletAddress: address }),
+        body: JSON.stringify({ listingId, walletAddress: address }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add to wishlist");
@@ -155,7 +152,7 @@ export default function NFTDescription({
         //* remove from wishlist in DB
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: listingId, walletAddress: address }),
+        body: JSON.stringify({ listingId, walletAddress: address }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to remove");
@@ -248,7 +245,7 @@ export default function NFTDescription({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: listingId,
+          listingId,
           walletAddress: address,
           reason: (reason || "").slice(0, 500),
         }),
@@ -323,9 +320,7 @@ export default function NFTDescription({
         <h1>{nft.name}</h1>
         <div className={Style.NFTDescription_profile_box_info}>
           <small>Creator</small> <br />
-          <span>
-            {seller.walletAddress}
-          </span>
+          <span>{seller.walletAddress}</span>
         </div>
 
         <div className={Style.NFTDescription_profile_biding}>
@@ -339,10 +334,11 @@ export default function NFTDescription({
           <div className={Style.NFTDescription_profile_biding_box_buttons}>
             <button
               onClick={handleBuy}
+              disabled={isOwnerViewing}
               className={
                 Style.NFTDescription_profile_biding_box_buttons_button
               }>
-              Buy Now
+              {isOwnerViewing ? "You can’t buy your own NFT" : "Buy NFT"}
             </button>
           </div>
         </div>

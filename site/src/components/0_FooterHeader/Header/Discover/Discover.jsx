@@ -1,4 +1,3 @@
-// src/components/0_FooterHeader/Header/Discover/Discover.jsx
 import React from 'react'
 import Link from 'next/link'
 import style from "./Discover.module.css"

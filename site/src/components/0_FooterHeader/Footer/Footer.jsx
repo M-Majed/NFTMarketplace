@@ -77,16 +77,16 @@ const Footer = () => {
             purpose
           </p>
           <div className={style.footer_social}>
-            <a href="https://www.x.com" aria-label="Twitter">
+            <a href="https://www.x.com">
               <TiSocialTwitter />
             </a>
-            <a href="https://www.youtube.com" aria-label="YouTube">
+            <a href="https://www.youtube.com">
               <TiSocialYoutube />
             </a>
-            <a href="https://www.instagram.com" aria-label="Instagram">
+            <a href="https://www.instagram.com">
               <TiSocialInstagram />
             </a>
-            <a href="https://www.telegram.org" aria-label="Telegram">
+            <a href="https://www.telegram.org">
               <FaTelegramPlane />
             </a>
           </div>
@@ -97,7 +97,6 @@ const Footer = () => {
             <input
               type="email"
               placeholder="Enter your email *"
-              aria-label="Email address"
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -107,7 +106,6 @@ const Footer = () => {
             <button
               type="submit"
               className={style.subscribe_box_button}
-              aria-label="Submit email"
               disabled={status === "loading"}
               title="Subscribe">
               <RiSendPlaneFill />
@@ -117,7 +115,6 @@ const Footer = () => {
             <p>Subscribe so you recieve the latest NFTs.</p>
             <p
               role="status"
-              aria-live="polite"
               style={{ minHeight: 20, marginTop: 8 }}>
               {message}
             </p>

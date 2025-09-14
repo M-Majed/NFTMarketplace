@@ -57,31 +57,20 @@ const createnft = () => {
 
       const metadataUrl = data.url;
 
-      //* Create sale on blockchain
-      const tokenId = await createSale(metadataUrl, price, false, null);
-
-      //* Save to database
-      const saveRes = await fetch("/api/create-nft/save-nft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tokenId: Number(tokenId),
-          name,
-          description,
-          imageUrl: image.url,
-          metadataUrl,
-          width: image.width,
-          height: image.height,
-          size: image.size,
-          price,
-          category,
-          address,
-        }),
+      //* Create listing on-chain and db
+      await createSale(metadataUrl, price, {
+        name,
+        description,
+        imageUrl: image.url,
+        metadataUrl,
+        width: image.width,
+        height: image.height,
+        size: image.size,
+        price,
+        category,
+        address,
       });
 
-      const saveData = await saveRes.json();
-      if (!saveRes.ok)
-        throw new Error(saveData.error || "Save to database failed");
       router.push("/");
     } catch (err) {
       alert("Upload failed: " + err.message);
@@ -158,9 +147,7 @@ const createnft = () => {
             type="button"
             className={Style.button}
             onClick={handleUpload}
-            disabled={isSubmitting}
-            aria-disabled={isSubmitting}
-          >
+            disabled={isSubmitting}>
             {isSubmitting ? "Processing..." : "Create and list NFT"}
           </button>
         </div>

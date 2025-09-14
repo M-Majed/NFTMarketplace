@@ -133,3 +133,9 @@
         text-align: center;
     }
 }
+
+.NFTDescription_profile_biding_box_buttons_button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none; /* prevent hover/active styles */
+}

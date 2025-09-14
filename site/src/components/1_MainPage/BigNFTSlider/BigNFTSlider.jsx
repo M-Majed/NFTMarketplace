@@ -1,43 +1,40 @@
-// src/components/1_MainPage/BigNFTSlider/BigNFTSlider.jsx
-'use client'
-import React, { useState, useEffect, useCallback } from "react";
+"use client";
+import React, { useState, useCallback } from "react";
 import Image from "next/image";
-import { AiFillFire, AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-import { MdVerified, MdTimer } from "react-icons/md";
+import { AiFillFire } from "react-icons/ai";
 import { TbArrowBigLeftLines, TbArrowBigRightLine } from "react-icons/tb";
-
-//INTERNAL IMPORT
 import Style from "./BigNFTSilder.module.css";
 import { useContext } from "react";
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
+
 export default function BigNFTSilder({ listings }) {
-    const { buyNFT } = useContext(NFTMarketplaceContext);
-  const { address, isConnected } = useAccount();
+  const { buyNFT } = useContext(NFTMarketplaceContext);
+  const { address, isConnected } = useAccount(); //* get account from wagmi
   const router = useRouter();
 
   const handleBuy = async () => {
     if (!isConnected) return alert("Connect your wallet first");
+    const listing = listings[idx]; //* get current listing
 
-    const listing = listings[idx];
+    //* alert if owner wants to buy
+    const isOwnerBuying =
+      !!address &&
+      !!listing?.seller?.walletAddress &&
+      address.toLowerCase() === listing.seller.walletAddress.toLowerCase();
+    if (isOwnerBuying) {
+      alert("You can’t buy your own NFT.");
+      return;
+    }
 
     try {
-      const txHash = await buyNFT({ tokenId: listing.nft.tokenId, price: listing.price });
-      if (!txHash) throw new Error("Transaction failed");
-
-      const res = await fetch("/api/buy-nft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tokenId: listing.nft.tokenId,
-          buyerAddress: address,
-          price: listing.price,
-          txHash,
-        }),
+      //* on-chain + db buy function
+      const txHash = await buyNFT({
+        tokenId: listing.nft.tokenId,
+        price: listing.price,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Update failed");
+      if (!txHash) throw new Error("Transaction failed");
       router.push("/");
     } catch (err) {
       alert("Buy failed: " + err.message);
@@ -45,30 +42,35 @@ export default function BigNFTSilder({ listings }) {
   };
   const [idx, setIdx] = useState(0);
 
- // include both ETH and USD in each slide
- const sliderData = listings.map(item => ({
-   title:    item.nft.name,
-   name:     item.seller.walletAddress,
-   Category: item.category,
-   priceEth: item.price,
-   priceUsd: item.usdPrice,
-   image: item.nft.imageUrl,
- }));
+  //$ get slider data
+  const sliderData = listings.map((item) => ({
+    title: item.nft.name,
+    name: item.seller.walletAddress,
+    Category: item.category,
+    priceEth: item.price,
+    priceUsd: item.usdPrice,
+    image: item.nft.imageUrl,
+  }));
 
+  //$ next/prev NFT
   const inc = useCallback(() => {
     if (idx + 1 < sliderData.length) setIdx(idx + 1);
   }, [idx, sliderData.length]);
-
   const dec = useCallback(() => {
     if (idx > 0) setIdx(idx - 1);
   }, [idx]);
 
   if (sliderData.length === 0) {
-    return <p>No listings found.</p>;
+    return null;
   }
 
+  //$ current NFT data
   const current = sliderData[idx];
 
+  const isOwnerViewing =
+    !!address &&
+    !!listings[idx]?.seller?.walletAddress &&
+    address.toLowerCase() === listings[idx].seller.walletAddress.toLowerCase();
 
 
   return (
@@ -78,19 +80,8 @@ export default function BigNFTSilder({ listings }) {
 
         <div className={Style.bigNFTSlider_left_creator}>
           <div className={Style.bigNFTSlider_left_creator_profile}>
-            {/* <Image
-              className={Style.bigNFTSlider_left_creator_profile_img}
-              src={current.image}
-              alt="creator avatar"
-              width={50}
-              height={50}
-            /> */}
-            <div className={Style.bigNFTSlider_left_creator_profile_info}>
-              <p>Creator</p>
-              <h4>
-                {current.name}{" "}
-              </h4>
-            </div>
+            <p>Creator</p>
+            <h4>{current.name} </h4>
           </div>
           <div className={Style.bigNFTSlider_left_creator_Category}>
             <AiFillFire
@@ -111,13 +102,18 @@ export default function BigNFTSilder({ listings }) {
           </div>
 
           <div className={Style.bigNFTSlider_left_buttons}>
-            <button className={Style.bigNFTSlider_left_buttons_button} onClick={handleBuy}> Buy </button>
+            <button
+              className={Style.bigNFTSlider_left_buttons_button}
+              onClick={handleBuy}
+              disabled={isOwnerViewing}
+            >
+              {isOwnerViewing ? "You can’t buy your own NFT" : "Buy"}
+            </button>
             <button
               className={Style.bigNFTSlider_left_buttons_button}
               onClick={() => {
                 window.location.href = `/nftdetails/${listings[idx].nft.tokenId}`;
-              }}
-            >
+              }}>
               View
             </button>
           </div>
@@ -136,16 +132,14 @@ export default function BigNFTSilder({ listings }) {
       </div>
 
       <div className={Style.bigNFTSlider_right}>
-        <div className={Style.bigNFTSlider_right_box}>
-          <Image
-            src={current.image}
-            alt={current.name}
-            width={400}
-            height={400}
-            className={Style.bigNFTSlider_right_box_img}
-          />
-        </div>
+        <Image
+          src={current.image}
+          alt={current.name}
+          width={400}
+          height={400}
+          className={Style.bigNFTSlider_right_box_img}
+        />
       </div>
     </div>
   );
-};
+}

@@ -28,16 +28,8 @@
     justify-content: space-between;
 }
 
+
 .bigNFTSlider_left_creator_profile{
-    display: flex;
-    gap: 10px;
-}
-
-.bigNFTSlider_left_creator_profile_img{
-    border-radius: 50px;
-}
-
-.bigNFTSlider_left_creator_profile_info{
     line-height: 0;
 }
 
@@ -359,3 +351,8 @@
     
 }
 
+.bigNFTSlider_left_buttons_button[disabled]{
+  opacity: .5;
+  cursor: not-allowed;
+  pointer-events: none; /* keep hover effects from firing */
+}
