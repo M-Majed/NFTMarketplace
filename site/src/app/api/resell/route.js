@@ -6,11 +6,16 @@ import { categories } from "@/app/constants";
 
 export async function POST(req) {
   try {
-    const { tokenId, price, walletAddress, txHash, category, marketplaceAddress  } =
-      await req.json();
+    const {
+      tokenId,
+      price,
+      walletAddress,
+      txHash,
+      category,
+    } = await req.json();
 
     //* Validation
-    const ALLOWED = categories.map(c => c.category);
+    const ALLOWED = categories.map((c) => c.category);
     if (category !== undefined && category !== null) {
       if (typeof category !== "string" || !ALLOWED.includes(category)) {
         return NextResponse.json(
@@ -27,7 +32,8 @@ export async function POST(req) {
     ) {
       return NextResponse.json({ error: "Invalid tokenId" }, { status: 400 });
     }
-    if (!price || !/^\d+(\.\d+)?$/.test(String(price))) { //* simple regex for decimal numbers
+    if (!price || !/^\d+(\.\d+)?$/.test(String(price))) {
+      //* simple regex for decimal numbers
       return NextResponse.json(
         { error: "Invalid price (expected stringified ETH amount)" },
         { status: 400 }
@@ -73,15 +79,13 @@ export async function POST(req) {
     const seller = nft.owner;
 
     //* get marketplace address
-    const marketAddrRaw =
-      marketplaceAddress ||
-      process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS ||
-      process.env.MARKETPLACE_ADDRESS ||
-      process.env.NEXT_PUBLIC_NFT_MARKETPLACE_ADDRESS ||
-      process.env.NFT_MARKETPLACE_ADDRESS;
+    const marketAddrRaw = process.env.NEXT_NFT_MARKETPLACE_ADDRESS;
     if (!marketAddrRaw || typeof marketAddrRaw !== "string") {
       return NextResponse.json(
-        { error: "Marketplace (contract) address missing. Pass `marketplaceAddress` in body or set an env var." },
+        {
+          error:
+            "Marketplace (contract) address missing. Pass `marketplaceAddress` in body or set an env var.",
+        },
         { status: 500 }
       );
     }
