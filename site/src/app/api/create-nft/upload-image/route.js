@@ -1,9 +1,16 @@
 import axios from 'axios';
 import FormData from 'form-data';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export const runtime = "nodejs";
 
 export async function POST(request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.address) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file');
 
@@ -11,9 +18,16 @@ export async function POST(request) {
     if (!file) {
       return new Response(JSON.stringify({ error: 'No file provided' }), { status: 400 });
     }
+    if (typeof file.name !== "string" || !file.type?.startsWith("image/")) {
+      return new Response(JSON.stringify({ error: "Only image files are allowed" }), { status: 400 });
+    }
 
     //* read file as buffer(nodejs compatiblity)
     const buffer = Buffer.from(await file.arrayBuffer());
+    const sizeBytes = buffer.length;
+    if (sizeBytes > 50 * 1024 * 1024) {
+      return new Response(JSON.stringify({ error: "File too large (max 50MB)" }), { status: 400 });
+    }
 
     //* upload to pinata
     const pinataFormData = new FormData();

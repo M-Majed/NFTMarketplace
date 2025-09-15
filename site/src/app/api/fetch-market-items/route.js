@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export const runtime = "nodejs";
 const prisma = new PrismaClient();
 
@@ -28,7 +30,7 @@ export async function GET(req) {
     const wishlist = ["1", "true", "yes"].includes(
       (searchParams.get("wishlist") || "").toLowerCase()
     );
-    const address = searchParams.get("address"); //* wallet address for wishlist mode
+
 
     //* base non-price filters
     const whereBase = {
@@ -47,19 +49,15 @@ export async function GET(req) {
 
     //* Wishlist-only mode
     if (wishlist) {
-      if (!address) {
-        //* no address provided
-        return NextResponse.json({
-          items: [],
-          total: 0,
-          page,
-          pageSize: take,
-          pages: 0,
-        });
+      // Require a signed-in session and take the wallet from it.
+      const session = await getServerSession(authOptions);
+      const sessionAddr = session?.user?.address?.toLowerCase?.();
+      if (!sessionAddr) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
       const user = await prisma.user.findUnique({
         //* find user
-        where: { walletAddress: address },
+        where: { walletAddress: sessionAddr },
         select: { id: true },
       });
       if (!user) {

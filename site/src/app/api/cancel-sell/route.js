@@ -2,25 +2,29 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 export const runtime = "nodejs";
 const prisma = new PrismaClient();
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req) {
   try {
-    const { tokenId, walletAddress, txHash } = await req.json();
+    const { tokenId, txHash } = await req.json();
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.address) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const sessionAddress = session.user.address.toLowerCase();
 
     //* Basic validation
     if (typeof tokenId !== "number")
       return NextResponse.json({ ok: false, error: "tokenId (number) required" }, { status: 400 });
-    if (!walletAddress)
-      return NextResponse.json({ ok: false, error: "walletAddress required" }, { status: 400 });
 
-    //* Find the user calling cancel
-    const user = await prisma.user.findUnique({
-      where: { walletAddress },
-      select: { id: true },
+    //* Ensure the caller (session wallet) exists in DB
+    const user = await prisma.user.upsert({
+      where: { walletAddress: sessionAddress },
+      update: {},
+      create: { walletAddress: sessionAddress },
+      select: { id: true, walletAddress: true },
     });
-    if (!user) {
-      return NextResponse.json({ ok: false, error: "User not found" }, { status: 404 });
-    }
 
     //* Find the listing to be canceled
     const listing = await prisma.listing.findUnique({
@@ -35,8 +39,9 @@ export async function POST(req) {
     if (listing.sellerId !== user.id) {
       return NextResponse.json({ ok: false, error: "Not the listing seller" }, { status: 403 });
     }
+    // Idempotency: if already inactive, treat as success to avoid double-fails on refresh
     if (!listing.active) {
-      return NextResponse.json({ ok: false, error: "Listing is already inactive" }, { status: 400 });
+      return NextResponse.json({ ok: true, already: true, txHash: txHash ?? null }, { status: 200 });
     }
 
     //* Update listing to inactive and transfer NFT ownership back to seller

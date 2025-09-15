@@ -74,7 +74,7 @@ const Profile = () => {
       Math.ceil((profileData.transactions?.length || 0) / txPageSize)
     );
     if (txPage > totalPages) setTxPage(totalPages);
-  }, [profileData.transactions, txPageSize, txPage]);
+  }, [profileData.transactions, txPageSize, txPage, address]);
 
   //$ handle cancel listing
   const handleCancel = async (listing, e) => {
@@ -82,7 +82,7 @@ const Profile = () => {
     try {
       setCancellingId(listing.id);
       await cancelListing({ tokenId: listing.tokenId, price: listing.price }); //* cancel listing on-chain and db
-      const res = await fetch(`/api/profile?address=${address}`);
+      const res = await fetch(`/api/profile`);
       const data = await res.json();
       setProfileData(data); //* refresh DB + on-chain view after cancelation
     } catch (err) {
@@ -125,7 +125,7 @@ const Profile = () => {
         priceEth: price,
         category: selectedCategory,
       }); //* resell NFT on-chain and db
-      const res = await fetch(`/api/profile?address=${address}`);
+      const res = await fetch(`/api/profile`);
       const data = await res.json();
       setProfileData(data);  //* refresh DB + on-chain view after resell
       const updated = await fetchMyNFTs(); //* refresh on-chain NFTs
@@ -144,7 +144,7 @@ const Profile = () => {
   //$ fetch user listings and transactions
   useEffect(() => {
     if (!isConnected) return;
-    fetch(`/api/profile?address=${address}`)
+    fetch(`/api/profile`)
       .then((res) => res.json())
       .then((data) => setProfileData(data));
   }, [address, isConnected]);
@@ -188,7 +188,7 @@ const Profile = () => {
   };
 
   //$ calculate active listings value
-  const activeListingsValueUsd = profileData.listings
+  const activeListingsValue = profileData.listings
     .reduce((sum, listing) => sum + parseFloat(listing.price), 0)
     .toFixed(2);
 
@@ -212,7 +212,7 @@ const Profile = () => {
       <SummaryCards
         ownedCount={loadingChain ? null : chainNFTs.length}
         activeCount={profileData.listings.length}
-        activeListingsValueUsd={activeListingsValueUsd}
+        activeListingsValue={activeListingsValue}
       />
 
       {/* Tabs + content */}

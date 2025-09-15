@@ -12,10 +12,10 @@ import {
   darkTheme,
 } from "@rainbow-me/rainbowkit"; //* rainbowkit UI
 //* Wallet connections, public client, chain metadata.
-import { WagmiProvider } from "wagmi"; 
+import { WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; //* Declarative data fetching + caching
+import { SessionProvider } from "next-auth/react"; // <-- IMPORT THIS
 
 //$ Define Hardhat test-chain
 const hardhatLocal = {
@@ -42,11 +42,19 @@ const queryClient = new QueryClient();
 
 export default function Providers({ children }) {
   return (
-    <QueryClientProvider client={queryClient} > {/* Makes React Query available to entire app */}
-      <WagmiProvider config={wagmiConfig}> {/* Makes EVM clinet/connectors available to entire app */}
-        <RainbowKitProvider chains={wagmiConfig.chains} theme={darkTheme()}> {/* Makes RainbowKit UI available to entire app */}
-          {children}
-        </RainbowKitProvider>
+    <QueryClientProvider client={queryClient}>
+      {" "}
+      {/* Makes React Query available to entire app */}
+      <WagmiProvider config={wagmiConfig}>
+        {" "}
+        {/* Makes EVM clinet/connectors available to entire app */}
+        <SessionProvider refetchOnWindowFocus={false}>
+          <RainbowKitProvider chains={wagmiConfig.chains} theme={darkTheme()}>
+            {" "}
+            {/* Makes RainbowKit UI available to entire app */}
+            {children}
+          </RainbowKitProvider>
+        </SessionProvider>
       </WagmiProvider>
     </QueryClientProvider>
   );

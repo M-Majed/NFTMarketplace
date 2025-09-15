@@ -47,13 +47,8 @@ export default function NFTDescription({
   //$ Check if in wishlist
   useEffect(() => {
     const run = async () => {
-      if (!isConnected || !listingId || !address) return;
-      const res = await fetch(
-        `/api/wishlist?listingId=${encodeURIComponent(
-          listingId
-        )}&walletAddress=${encodeURIComponent(address)}`,
-        { cache: "no-store" }
-      );
+      if (!isConnected || !listingId) return;
+      const res = await fetch(`/api/wishlist?listingId=${encodeURIComponent(listingId)}`, { cache: "no-store" });
       const data = await res.json();
       if (res.ok) setInWishlist(!!data.inWishlist);
     };
@@ -128,7 +123,7 @@ export default function NFTDescription({
         //* add to wishlist in DB
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listingId, walletAddress: address }),
+        body: JSON.stringify({ listingId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add to wishlist");
@@ -152,7 +147,7 @@ export default function NFTDescription({
         //* remove from wishlist in DB
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listingId, walletAddress: address }),
+        body: JSON.stringify({ listingId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to remove");
@@ -220,9 +215,7 @@ export default function NFTDescription({
     try {
       //* check if already reported
       const checkRes = await fetch(
-        `/api/report?listingId=${encodeURIComponent(
-          listingId
-        )}&walletAddress=${encodeURIComponent(address)}`
+        `/api/report?listingId=${encodeURIComponent(listingId)}`
       );
       const checkData = await checkRes.json();
       //* handle errors and status
@@ -246,7 +239,6 @@ export default function NFTDescription({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           listingId,
-          walletAddress: address,
           reason: (reason || "").slice(0, 500),
         }),
       });

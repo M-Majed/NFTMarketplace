@@ -11,7 +11,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
   const publicClient = usePublicClient(); //* read-only EVM client for readContract
   const { writeContractAsync } = useWriteContract(); //* writeContract
 
-    //$ get users balance
+  //$ get users balance
   const getBalance = async () => {
     //* validation
     if (!address) throw new Error("Please connect a wallet first.");
@@ -35,12 +35,12 @@ export const NFTMarketplaceProvider = ({ children }) => {
       abi: NFTMarketplaceABI,
       functionName: "withdraw",
       args: [parseEther(String(amountEth))], //* convert eth to wei
-    });//* call on-chain function
+    }); //* call on-chain function
     await publicClient.waitForTransactionReceipt({ hash }); //* wait for transaction to finish
     return hash;
   };
 
-    //$ fetch user NFTs/listings
+  //$ fetch user NFTs/listings
   const fetchMyNFTs = async () => {
     try {
       //* validation
@@ -93,7 +93,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
     }
   };
 
-    //$ create listing
+  //$ create listing
   const createSale = async (url, formInputPrice, dbPayload) => {
     //* Validation
     if (!address) throw new Error("Please connect a wallet first.");
@@ -153,8 +153,6 @@ export const NFTMarketplaceProvider = ({ children }) => {
             size,
             price: String(formInputPrice),
             category,
-            address: address,
-            marketplaceAddress: NFTMarketplaceAddress,
             txHash: hash,
           }),
         });
@@ -179,7 +177,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
     throw new Error("Failed to parse tokenId from MarketItemCreated event");
   };
 
-    //$ buy NFT
+  //$ buy NFT
   const buyNFT = async ({ tokenId, price }) => {
     //* validation
     if (!address) throw new Error("Please connect a wallet first.");
@@ -203,7 +201,6 @@ export const NFTMarketplaceProvider = ({ children }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         tokenId: Number(tokenId),
-        buyerAddress: address,
         price: String(price),
         txHash: hash,
       }),
@@ -237,19 +234,20 @@ export const NFTMarketplaceProvider = ({ children }) => {
     await publicClient.waitForTransactionReceipt({ hash });
 
     //* DB update
-    await fetch("/api/cancel-sell", {
+    const res = await fetch("/api/cancel-sell", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         tokenId: Number(nft.tokenId),
-        walletAddress: address,
         txHash: hash,
       }),
-    }).catch(console.error);
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok)
+      throw new Error(data?.error || "Failed to update DB after cancel");
 
     return hash;
   };
-
 
   //$ check if contract can get users NFTs
   const ensureApprovalForAll = async () => {
@@ -304,17 +302,18 @@ export const NFTMarketplaceProvider = ({ children }) => {
     await publicClient.waitForTransactionReceipt({ hash }); //* wait for transaction to finish
 
     //* make changes to db via api
-    await fetch("/api/resell", {
+    const res = await fetch("/api/resell", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         tokenId: Number(tokenId),
         price: String(priceEth),
-        walletAddress: address,
         txHash: hash,
         category,
       }),
-    }).catch(console.error);
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || "Failed to update DB after resell");
     return hash;
   };
 

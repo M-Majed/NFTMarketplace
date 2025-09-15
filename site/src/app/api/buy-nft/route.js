@@ -1,13 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 export const runtime = "nodejs";
 const prisma = new PrismaClient();
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(request) {
   try {
-    const { tokenId, buyerAddress, price, txHash } = await request.json();
-
+    const { tokenId, price, txHash } = await request.json();
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.address) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+    const buyerAddress = session.user.address.toLowerCase();
     //* Basic validation
-    if (!tokenId || !buyerAddress || !price) {
+    if (!tokenId || !price) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400 }
@@ -30,7 +36,6 @@ export async function POST(request) {
     //* prevent self-purchase
     if (
       listing?.seller?.walletAddress &&
-      buyerAddress &&
       listing.seller.walletAddress.toLowerCase() === buyerAddress.toLowerCase()
     ) {
       return new Response(
@@ -39,33 +44,47 @@ export async function POST(request) {
       );
     }
 
-    //* add buyer if not exists
-    const buyer = await prisma.user.upsert({
-      where: { walletAddress: buyerAddress },
-      update: {},
-      create: { walletAddress: buyerAddress },
+    if (txHash) {
+      const existing = await prisma.transaction.findFirst({ where: { txHash } });
+      if (existing) {
+        return new Response(JSON.stringify({ success: true, already: true }), { status: 200 });
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Ensure buyer exists (SIWE should already have created them, but upsert is safe)
+      const buyer = await tx.user.upsert({
+        where: { walletAddress: buyerAddress },
+        update: {},
+        create: { walletAddress: buyerAddress },
+      });
+
+      // Update owner
+      await tx.nFT.update({
+        where: { tokenId },
+        data: { ownerId: buyer.id },
+      });
+
+      // Deactivate listing
+      await tx.listing.update({
+        where: { tokenId },
+       data: { active: false },
+      });
+
+      // Record transaction using the server-side listing price
+      await tx.transaction.create({
+        data: {
+          tokenId,
+          listingId: listing.id,
+          buyerId: buyer.id,
+          sellerId: listing.sellerId,
+          price: String(listing.price ?? price), // prefer DB price
+          type: "SALE",
+          txHash,
+        },
+      });
     });
 
-    //* Update NFT ownership, deactivate listing, and record transaction
-    await prisma.nFT.update({
-      where: { tokenId },
-      data: { ownerId: buyer.id },
-    });
-    await prisma.listing.update({
-      where: { tokenId },
-      data: { active: false },
-    });
-    await prisma.transaction.create({
-      data: {
-        tokenId,
-        listingId: listing.id,
-        buyerId: buyer.id,
-        sellerId: listing.sellerId,
-        price,
-        type: "SALE",
-        txHash,
-      },
-    });
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {

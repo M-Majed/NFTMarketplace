@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 const prisma = new PrismaClient();
 
 //$ Check if in wishlist
@@ -7,17 +9,21 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const listingId = searchParams.get("listingId");
-    const walletAddress = searchParams.get("walletAddress");
-    if (!listingId || !walletAddress) {
+    const session = await getServerSession(authOptions);
+    const sessionAddr = session?.user?.address?.toLowerCase?.();
+    if (!listingId) {
       return NextResponse.json(
-        { error: "listingId and walletAddress are required" },
+        { error: "listingId is required" },
         { status: 400 }
       );
+    }
+    if (!sessionAddr) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     //* check if user exists
     const user = await prisma.user.findUnique({
-      where: { walletAddress },
+      where: { walletAddress: sessionAddr },
       select: { id: true },
     });
     if (!user) return NextResponse.json({ inWishlist: false });
@@ -38,15 +44,20 @@ export async function GET(req) {
   }
 }
 
-//$ Add to wishlist 
+//$ Add to wishlist
 export async function POST(req) {
   try {
-    const { listingId, walletAddress } = await req.json();
-    if (!listingId || !walletAddress) {
+    const { listingId } = await req.json();
+    const session = await getServerSession(authOptions);
+    const sessionAddr = session?.user?.address?.toLowerCase?.();
+    if (!listingId) {
       return NextResponse.json(
-        { error: "listingId and walletAddress are required" },
+        { error: "listingId is required" },
         { status: 400 }
       );
+    }
+    if (!sessionAddr) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     //* Ensure listing exists and is active
@@ -63,9 +74,9 @@ export async function POST(req) {
 
     //* add user if not exists
     const user = await prisma.user.upsert({
-      where: { walletAddress },
+      where: { walletAddress: sessionAddr },
       update: {},
-      create: { walletAddress },
+      create: { walletAddress: sessionAddr },
       select: { id: true },
     });
 
@@ -92,17 +103,22 @@ export async function POST(req) {
 //$ Remove from wishlist
 export async function DELETE(req) {
   try {
-    const { listingId, walletAddress } = await req.json();
-    if (!listingId || !walletAddress) {
+    const { listingId } = await req.json();
+    const session = await getServerSession(authOptions);
+    const sessionAddr = session?.user?.address?.toLowerCase?.();
+    if (!listingId) {
       return NextResponse.json(
-        { error: "listingId and walletAddress are required" },
+        { error: "listingId is required" },
         { status: 400 }
       );
+    }
+    if (!sessionAddr) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     //* Ensure user exists
     const user = await prisma.user.findUnique({
-      where: { walletAddress },
+      where: { walletAddress: sessionAddr },
       select: { id: true },
     });
     if (!user) return NextResponse.json({ ok: true, removed: false });
@@ -112,7 +128,6 @@ export async function DELETE(req) {
       where: { userId: user.id, listingId },
     });
     return NextResponse.json({ ok: true, removed: result.count > 0 });
-    
   } catch (err) {
     console.error("wishlist:DELETE error", err);
     const body =

@@ -17,12 +17,6 @@ export default function MarketplacePage() {
   //$ gets url query(filters, wishlist, page) and builds api query string for fetching items
   const buildApiQS = () => {
     const params = new URLSearchParams(searchParams.toString()); //* copy search params
-
-    //* if wishlist is set and user is connected, add address to params
-    const wishlist = params.get("wishlist");
-    if (wishlist && isConnected && address) params.set("address", address);
-    else params.delete("address");
-
     return params.toString();
   };
 

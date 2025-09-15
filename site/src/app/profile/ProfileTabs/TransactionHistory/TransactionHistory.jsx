@@ -25,13 +25,16 @@ export default function TransactionHistory({
         <>
           <div className={Style.Profile_TransactionHistory_list}>
             {paginated.map((tx) => {
-              const isSeller = tx.seller.walletAddress === address;
+              const me = address?.toLowerCase?.();
+              const seller = tx?.seller?.walletAddress?.toLowerCase?.();
+              const buyer = tx?.buyer?.walletAddress?.toLowerCase?.();
+              const label =
+                seller === me ? "Sold" : buyer === me ? "Bought" : "—";
               return (
                 <div
                   key={tx.id}
                   className={Style.Profile_TransactionHistory_list_item}>
-                  {isSeller ? "Sold" : "Bought"} {tx.nft?.name} - Price:{" "}
-                  {tx.price} ETH
+                  {label} {tx.nft?.name} — Price: {tx.price} ETH
                 </div>
               );
             })}

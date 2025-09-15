@@ -3,16 +3,17 @@ import { PrismaClient } from "@prisma/client";
 export const runtime = "nodejs";
 const prisma = new PrismaClient();
 import { categories } from "@/app/constants";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req) {
   try {
-    const {
-      tokenId,
-      price,
-      walletAddress,
-      txHash,
-      category,
-    } = await req.json();
+    const { tokenId, price, txHash, category } = await req.json();
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.address) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const sessionAddress = session.user.address.toLowerCase();
 
     //* Validation
     const ALLOWED = categories.map((c) => c.category);
@@ -36,12 +37,6 @@ export async function POST(req) {
       //* simple regex for decimal numbers
       return NextResponse.json(
         { error: "Invalid price (expected stringified ETH amount)" },
-        { status: 400 }
-      );
-    }
-    if (!walletAddress || typeof walletAddress !== "string") {
-      return NextResponse.json(
-        { error: "walletAddress required" },
         { status: 400 }
       );
     }
@@ -70,7 +65,7 @@ export async function POST(req) {
     }
 
     //* Ensure requester owns the NFT
-    if (nft.owner.walletAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+    if (nft.owner.walletAddress.toLowerCase() !== sessionAddress) {
       return NextResponse.json(
         { error: "This wallet does not own the NFT in DB." },
         { status: 403 }
@@ -97,6 +92,25 @@ export async function POST(req) {
       create: { walletAddress: marketAddr },
       update: {},
     });
+
+    //* Idempotency: if already listed (owner already contract + same seller/price/category), return success
+    const existing = await prisma.listing.findUnique({
+      where: { tokenId: tokenIdInt },
+      include: { nft: true },
+    });
+    if (
+      existing &&
+      existing.active === true &&
+      existing.sellerId === seller.id &&
+      String(existing.price) === String(price) &&
+      (!category || existing.category === category) &&
+      nft.ownerId === contractUser.id
+    ) {
+      return NextResponse.json(
+        { ok: true, already: true, listing: existing, txHash: txHash || null },
+        { status: 200 }
+      );
+    }
 
     //* set NFT owner to contract + add or update listing
     const [updatedNFT, listing] = await prisma.$transaction([

@@ -2,18 +2,15 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 export const runtime = "nodejs";
 const prisma = new PrismaClient();
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url);
-
-    //* validations
-    const address = searchParams.get("address");
+    const session = await getServerSession(authOptions);
+    const address = session?.user?.address?.toLowerCase?.();
     if (!address) {
-      return NextResponse.json(
-        { error: "Wallet address is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     //* Find the user by walletAddress

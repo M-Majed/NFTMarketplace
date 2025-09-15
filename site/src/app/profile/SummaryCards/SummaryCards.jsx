@@ -5,7 +5,7 @@ import Style from "./SummaryCards.module.css";
 export default function SummaryCards({
   ownedCount,
   activeCount,
-  activeListingsValueUsd,
+  activeListingsValue,
 }) {
   return (
     <div className={Style.Profile_summery}>
@@ -20,7 +20,7 @@ export default function SummaryCards({
       </div>
 
       <div className={Style.Profile_summery_card}>
-        <h2>${activeListingsValueUsd}</h2>
+        <h2>{activeListingsValue} ETH</h2>
         <p>Active listings Value</p>
       </div>
     </div>

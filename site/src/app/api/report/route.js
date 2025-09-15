@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 const prisma = globalThis.prisma || new PrismaClient();
-if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
 
 export async function POST(req) {
   try {
-    const { listingId, walletAddress, reason } = await req.json();
-
+    const { listingId, reason } = await req.json();
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.address) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const reporterAddress = session.user.address.toLowerCase();
     //$ validation
-    if (!listingId || !walletAddress) {
+    if (!listingId) {
       return NextResponse.json(
-        { error: "listingId and walletAddress are required" },
+        { error: "listingId is required" },
         { status: 400 }
       );
     }
@@ -23,18 +28,19 @@ export async function POST(req) {
       return NextResponse.json({ error: "Listing not found" }, { status: 404 });
     }
 
-    //$ find or create user
-    let user = await prisma.user.findUnique({ where: { walletAddress } });
-    if (!user) {
-      user = await prisma.user.create({ data: { walletAddress } });
-    }
+    //$ find or create reporter
+    const user = await prisma.user.upsert({
+      where: { walletAddress: reporterAddress },
+      update: {},
+      create: { walletAddress: reporterAddress },
+    });
 
     //$ create report
     const report = await prisma.report.create({
       data: {
         reporterId: user.id,
         listingId,
-        reason: reason ?? null,
+        reason: typeof reason === "string" ? reason.slice(0, 500) : null,
       },
     });
 
@@ -59,17 +65,21 @@ export async function POST(req) {
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const listingId = searchParams.get("listingId");
-  const walletAddress = searchParams.get("walletAddress");
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.address) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const reporterAddress = session.user.address.toLowerCase();
 
   //$ validation
-  if (!listingId || !walletAddress) {
+  if (!listingId) {
     return NextResponse.json(
-      { error: "listingId and walletAddress are required" },
+      { error: "listingId is required" },
       { status: 400 }
     );
   }
   //$ find user
-  const user = await prisma.user.findUnique({ where: { walletAddress } });
+  const user = await prisma.user.findUnique({ where: { walletAddress: reporterAddress } });
   if (!user) return NextResponse.json({ reported: false });
   //$ check report
   const exists = await prisma.report.findFirst({
