@@ -74,7 +74,7 @@ const Profile = () => {
       Math.ceil((profileData.transactions?.length || 0) / txPageSize)
     );
     if (txPage > totalPages) setTxPage(totalPages);
-  }, [profileData.transactions, txPageSize, txPage, address]);
+  }, [profileData.transactions, txPageSize, txPage]);
 
   //$ handle cancel listing
   const handleCancel = async (listing, e) => {

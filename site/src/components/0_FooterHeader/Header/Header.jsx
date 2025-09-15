@@ -13,8 +13,8 @@ import { SiweMessage } from "siwe";
 const Header = () => {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  const { data: session, status } = useSession(); // status can be 'authenticated', 'unauthenticated', 'loading'
-  const { signMessageAsync } = useSignMessage();
+  const { data: session, status } = useSession(); //* status can be 'authenticated', 'unauthenticated', 'loading'
+  const { signMessageAsync } = useSignMessage(); //* shows sign window
 
   //$ discover/help menu state - searchTerm
   const [discover, setDiscover] = useState(false);
@@ -28,14 +28,14 @@ const Header = () => {
 
   const router = useRouter();
 
+  //$ SIWE handle
   const handleLogin = async () => {
     try {
-      // Fetch a unique nonce from our backend
-      const res = await fetch("/api/auth/csrf");
+      const res = await fetch("/api/auth/csrf"); //* get a nonce
       const { csrfToken } = await res.json();
       if (!csrfToken) throw new Error("Could not fetch nonce.");
 
-      // Create the message to be signed
+      //* Create the message to be signed
       const message = new SiweMessage({
         domain: window.location.host,
         address,
@@ -43,20 +43,23 @@ const Header = () => {
         uri: window.location.origin,
         version: "1",
         chainId,
-        nonce: csrfToken, // The unique nonce
+        nonce: csrfToken, //* The unique nonce
       });
 
-      // Prompt user to sign the message with their wallet
+      //* Prompt user to sign the message with their wallet
       const signature = await signMessageAsync({
         message: message.prepareMessage(),
       });
 
-      // Send the signed message to our backend for verification
-      const resSignin = await signIn("credentials", {
-        message: JSON.stringify(message),
-        redirect: false,
-        signature,
-      });
+      //* Send the signed message to our backend for verification
+      const resSignin = await signIn(
+        "credentials", //* name of provider
+        {
+          message: JSON.stringify(message),
+          redirect: false,
+          signature,
+        }
+      );
       if (resSignin?.error) throw new Error(resSignin.error);
     } catch (error) {
       console.error("Authentication failed", error);
@@ -75,28 +78,28 @@ const Header = () => {
   };
 
   //$ add or check for user in db when a user connects
- useEffect(() => {
-   // If not connected, nothing to do
-   if (!isConnected || status === "loading") return;
+  useEffect(() => {
+    //* If not connected, do nothing
+    if (!isConnected || status === "loading") return;
 
-   // If authenticated with a *different* wallet, sign out first to drop the old session/cookies
-   const sessionAddr = session?.user?.address?.toLowerCase?.();
-   const walletAddr  = address?.toLowerCase?.();
-   const mismatch = sessionAddr && walletAddr && sessionAddr !== walletAddr;
+    const sessionAddr = session?.user?.address?.toLowerCase?.(); //* from session(next-auth)
+    const walletAddr = address?.toLowerCase?.(); //* from wagmi
+    const mismatch = sessionAddr && walletAddr && sessionAddr !== walletAddr; //* check if session != connected wallet
 
-   (async () => {
-     try {
-       if (status === "authenticated" && mismatch) {
-         await signOut({ redirect: false });
-       }
-       if (status !== "authenticated") {
-         await handleLogin();
-       }
-     } catch (e) {
-       console.error(e);
-     }
-   })();
- }, [isConnected, status, address, session?.user?.address]);
+    (async () => {
+      try {
+        //* authenticated with another wallet -> sign out first
+        if (status === "authenticated" && mismatch) {
+          await signOut({ redirect: false });
+        }
+        if (status !== "authenticated") {
+          await handleLogin();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, [isConnected, status, address, session?.user?.address]);
 
   //$ lock scroll when drawer is open
   useEffect(() => {
@@ -135,7 +138,6 @@ const Header = () => {
       mobileHelpOpen={mobileHelpOpen}
       setMobileHelpOpen={setMobileHelpOpen}
 
-      // routing + wallet info
     />
   );
 };

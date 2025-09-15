@@ -44,6 +44,7 @@ export async function POST(request) {
       );
     }
 
+    //* transaction hash already exists
     if (txHash) {
       const existing = await prisma.transaction.findFirst({ where: { txHash } });
       if (existing) {
@@ -52,33 +53,34 @@ export async function POST(request) {
     }
 
     await prisma.$transaction(async (tx) => {
-      // Ensure buyer exists (SIWE should already have created them, but upsert is safe)
+
+      //* Ensure buyer exists
       const buyer = await tx.user.upsert({
         where: { walletAddress: buyerAddress },
         update: {},
         create: { walletAddress: buyerAddress },
       });
 
-      // Update owner
+      //* Update nft owner
       await tx.nFT.update({
         where: { tokenId },
         data: { ownerId: buyer.id },
       });
 
-      // Deactivate listing
+      //* Deactivate listing
       await tx.listing.update({
         where: { tokenId },
        data: { active: false },
       });
 
-      // Record transaction using the server-side listing price
+      //* add transaction to db
       await tx.transaction.create({
         data: {
           tokenId,
           listingId: listing.id,
           buyerId: buyer.id,
           sellerId: listing.sellerId,
-          price: String(listing.price ?? price), // prefer DB price
+          price: String(price),
           type: "SALE",
           txHash,
         },

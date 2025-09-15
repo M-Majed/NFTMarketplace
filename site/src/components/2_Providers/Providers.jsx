@@ -1,8 +1,8 @@
 //$ initialize:
-//$ Wagmi (EVM wallet/client + connectors)
-//$ RainbowKit (connect modal & wallet UI, theming)
-//$ React Query (network/cache layer for your API/data)
-//$ …and to register both Mainnet and a local Hardhat chain so you can switch between them.
+//$ Wagmi: collection of react hooks for EVM -> ex: chain, useAccount, ...
+//$ RainbowKit: UI to connect wallets
+//$ React Query: handle data fetching/caching/state - components use cached data
+//$ NextAuth: handle authentication, sessions, 
 
 "use client";
 import React from "react";
@@ -10,12 +10,11 @@ import {
   getDefaultConfig,
   RainbowKitProvider,
   darkTheme,
-} from "@rainbow-me/rainbowkit"; //* rainbowkit UI
-//* Wallet connections, public client, chain metadata.
+} from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; //* Declarative data fetching + caching
-import { SessionProvider } from "next-auth/react"; // <-- IMPORT THIS
+import { SessionProvider } from "next-auth/react";
 
 //$ Define Hardhat test-chain
 const hardhatLocal = {
@@ -37,21 +36,15 @@ const wagmiConfig = getDefaultConfig({
   ssr: true, //* enables Wagmi’s SSR-friendly for inconsistency with server
 });
 
-//* Create a React Query client - for cache stuff like data fetching
+//* Create a React Query client - for caching
 const queryClient = new QueryClient();
 
 export default function Providers({ children }) {
   return (
     <QueryClientProvider client={queryClient}>
-      {" "}
-      {/* Makes React Query available to entire app */}
       <WagmiProvider config={wagmiConfig}>
-        {" "}
-        {/* Makes EVM clinet/connectors available to entire app */}
-        <SessionProvider refetchOnWindowFocus={false}>
+        <SessionProvider refetchOnWindowFocus={false}> {/* false: no refetch when user returns to tab */}
           <RainbowKitProvider chains={wagmiConfig.chains} theme={darkTheme()}>
-            {" "}
-            {/* Makes RainbowKit UI available to entire app */}
             {children}
           </RainbowKitProvider>
         </SessionProvider>

@@ -50,14 +50,15 @@ export async function POST(request) {
     const marketAddr = marketAddrRaw.toLowerCase();
 
 
-    //* Idempotency: if listing already exists, succeed without re-writing
+    //* listing already exists
     const existing = await prisma.listing.findUnique({ where: { tokenId } });
     if (existing) {
       return new Response(JSON.stringify({ success: true, already: true }), { status: 200 });
     }
 
     await prisma.$transaction(async (tx) => {
-      // Ensure seller (session wallet) exists
+
+      //* Ensure seller exists
       const seller = await tx.user.upsert({
         where: { walletAddress: sellerAddr },
         update: {},
@@ -65,17 +66,18 @@ export async function POST(request) {
         select: { id: true },
       });
 
-      // Ensure marketplace “owner” exists
+      //* Ensure marketplace “owner” exists
       const contractUser = await tx.user.upsert({
         where: { walletAddress: marketAddr },
         create: { walletAddress: marketAddr },
         update: {},
         select: { id: true },
       });
-      // Create NFT if not present (idempotent)
+
+      //* Create NFT if not present
       await tx.nFT.upsert({
         where: { tokenId },
-        update: {}, // do not mutate if it already exists
+        update: {},
         create: {
           tokenId,
           name,
@@ -85,12 +87,12 @@ export async function POST(request) {
           width,
           height,
           size,
-          ownerId: contractUser.id, // escrowed by marketplace
+          ownerId: contractUser.id,
           txHash,
         },
       });
 
-      // Create listing (tokenId unique) – if duplicate, the earlier guard returns already:true
+      //* Create listing– duplicate => handled before
       await tx.listing.create({
         data: {
           tokenId,

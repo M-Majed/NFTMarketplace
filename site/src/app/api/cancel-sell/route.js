@@ -39,7 +39,7 @@ export async function POST(req) {
     if (listing.sellerId !== user.id) {
       return NextResponse.json({ ok: false, error: "Not the listing seller" }, { status: 403 });
     }
-    // Idempotency: if already inactive, treat as success to avoid double-fails on refresh
+    //* if already inactive
     if (!listing.active) {
       return NextResponse.json({ ok: true, already: true, txHash: txHash ?? null }, { status: 200 });
     }

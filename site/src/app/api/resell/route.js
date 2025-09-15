@@ -93,7 +93,7 @@ export async function POST(req) {
       update: {},
     });
 
-    //* Idempotency: if already listed (owner already contract + same seller/price/category), return success
+    //* if already listed (owner already contract + same seller/price/category), return success
     const existing = await prisma.listing.findUnique({
       where: { tokenId: tokenIdInt },
       include: { nft: true },
