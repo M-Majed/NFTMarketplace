@@ -65,12 +65,11 @@ contract NFTMarketplace is
     function getBalance() public view returns (uint256) { //* raw SC balance
         return address(this).balance;
     }
-
-    //$ Functions
     function listingFeeFor(uint256 price) public pure returns (uint256) { //* calculate Fee
         return (price * FEE_BPS) / 10_000;
     }
 
+    //$ Functions
     function createToken( //* create NFT
         string memory tokenURI,
         uint256 price

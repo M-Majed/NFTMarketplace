@@ -12,9 +12,11 @@ import { useRouter } from "next/navigation";
 export default function BigNFTSilder({ listings }) {
   const { buyNFT } = useContext(NFTMarketplaceContext);
   const { address, isConnected } = useAccount(); //* get account from wagmi
+  const [isBuying, setIsBuying] = useState(false);
   const router = useRouter();
 
   const handleBuy = async () => {
+    if (isBuying) return; //* prevent double-clicks
     if (!isConnected) return alert("Connect your wallet first");
     const listing = listings[idx]; //* get current listing
 
@@ -29,6 +31,7 @@ export default function BigNFTSilder({ listings }) {
     }
 
     try {
+      setIsBuying(true);
       //* on-chain + db buy function
       const txHash = await buyNFT({
         tokenId: listing.nft.tokenId,
@@ -38,6 +41,8 @@ export default function BigNFTSilder({ listings }) {
       router.push("/");
     } catch (err) {
       alert("Buy failed: " + err.message);
+    } finally {
+      setIsBuying(false);
     }
   };
   const [idx, setIdx] = useState(0);
@@ -72,7 +77,6 @@ export default function BigNFTSilder({ listings }) {
     !!listings[idx]?.seller?.walletAddress &&
     address.toLowerCase() === listings[idx].seller.walletAddress.toLowerCase();
 
-
   return (
     <div className={Style.bigNFTSlider}>
       <div className={Style.bigNFTSlider_left}>
@@ -105,8 +109,7 @@ export default function BigNFTSilder({ listings }) {
             <button
               className={Style.bigNFTSlider_left_buttons_button}
               onClick={handleBuy}
-              disabled={isOwnerViewing}
-            >
+              disabled={isOwnerViewing || isBuying}>
               {isOwnerViewing ? "You can’t buy your own NFT" : "Buy"}
             </button>
             <button

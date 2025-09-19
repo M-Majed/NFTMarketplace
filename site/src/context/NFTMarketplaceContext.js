@@ -40,7 +40,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
     return hash;
   };
 
-  //$ fetch user NFTs/listings
+  //$ fetch user NFTs
   const fetchMyNFTs = async () => {
     try {
       //* validation

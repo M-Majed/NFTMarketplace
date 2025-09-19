@@ -28,6 +28,7 @@ export default function NFTDescription({
   const [NFTMenu, setNFTMenu] = useState(false); //* three dot menu
   const [isAdding, setIsAdding] = useState(false); //* wishlist action state
   const [inWishlist, setInWishlist] = useState(false); //* is in wishlist
+  const [isBuying, setIsBuying] = useState(false); //* buying action state
 
   const { buyNFT } = useContext(NFTMarketplaceContext);
   const { address, isConnected } = useAccount();
@@ -90,6 +91,7 @@ export default function NFTDescription({
   //$ Handle Buy
   const handleBuy = async () => {
     //* validation
+    if (isBuying) return; //* prevent double-clicks
     if (isOwnerViewing) {
       alert("You can’t buy your own NFT.");
       return;
@@ -97,12 +99,16 @@ export default function NFTDescription({
     if (!isConnected) return alert("Connect your wallet first");
 
     try {
+      setIsBuying(true);
       const txHash = await buyNFT({ tokenId: nft.tokenId, price }); //* call buyNFT from SC + db changes
       if (!txHash) throw new Error("Transaction failed");
       router.push("/");
     } catch (err) {
       alert("Buy failed: " + err.message);
     }
+     finally {
+      setIsBuying(false);
+     }
   };
 
   //$ Handle Wishlist click (add or remove)
@@ -326,7 +332,7 @@ export default function NFTDescription({
           <div className={Style.NFTDescription_profile_biding_box_buttons}>
             <button
               onClick={handleBuy}
-              disabled={isOwnerViewing}
+              disabled={isOwnerViewing || isBuying}
               className={
                 Style.NFTDescription_profile_biding_box_buttons_button
               }>

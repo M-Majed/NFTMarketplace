@@ -16,6 +16,7 @@ CREATE TABLE "NFT" (
     "width" INTEGER,
     "height" INTEGER,
     "size" INTEGER,
+    "txHash" TEXT NOT NULL,
     "ownerId" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "NFT_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE

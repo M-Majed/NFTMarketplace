@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useContext } from "react";
-import { TiTick } from "react-icons/ti";
 import Image from "next/image";
 import { useAccount } from "wagmi";
 import Style from "./page.module.css";
