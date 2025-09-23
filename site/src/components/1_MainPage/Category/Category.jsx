@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BsCircleFill } from "react-icons/bs";
 import Style from "./Category.module.css";
 import { categories } from "@/app/constants";
 
@@ -21,7 +20,7 @@ export default function Category({ items }) {
         <p>Explore the categories</p>
       </div>
       <div className={Style.category_categories}>
-        {categories.map(({ image, category }) => {
+        {categories.map(({ image, category, icon: Icon }) => {
           const count = countsByCategory[category];
           return (
             <Link
@@ -39,7 +38,7 @@ export default function Category({ items }) {
               />
 
               <div className={Style.category_categories_box_title}>
-                <span><BsCircleFill /></span>
+                <span><Icon /></span>
                 <div className={Style.category_categories_box_title_info}>
                   <h4>{category}</h4>
                   {typeof count === "number" && <small>{count} NFTs</small>}

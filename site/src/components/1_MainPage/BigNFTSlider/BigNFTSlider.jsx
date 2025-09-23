@@ -1,13 +1,13 @@
 "use client";
 import React, { useState, useCallback } from "react";
 import Image from "next/image";
-import { AiFillFire } from "react-icons/ai";
 import { TbArrowBigLeftLines, TbArrowBigRightLine } from "react-icons/tb";
 import Style from "./BigNFTSilder.module.css";
 import { useContext } from "react";
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
+import { categories } from "@/app/constants";
 
 export default function BigNFTSilder({ listings }) {
   const { buyNFT } = useContext(NFTMarketplaceContext);
@@ -71,6 +71,8 @@ export default function BigNFTSilder({ listings }) {
 
   //$ current NFT data
   const current = sliderData[idx];
+  const Icon = categories.find((cat) => cat.category === current.Category).icon;
+
 
   const isOwnerViewing =
     !!address &&
@@ -88,7 +90,7 @@ export default function BigNFTSilder({ listings }) {
             <h4>{current.name} </h4>
           </div>
           <div className={Style.bigNFTSlider_left_creator_Category}>
-            <AiFillFire
+            <Icon
               className={Style.bigNFTSlider_left_creator_Category_icon}
             />
             <div className={Style.bigNFTSlider_left_creator_Category_info}>
