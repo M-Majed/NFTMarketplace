@@ -3,64 +3,50 @@
     margin: 0 auto;
     padding: 10px 0px;
 }
-
 .category_title h2{
     font-size: 40px;
     font-weight: 700;
     margin-bottom: 0px;
 }
-
 .category_title p{
     font-size: 15px;
     margin-top: 0px;
 }
-
-/* CHANGED: flex -> responsive grid */
 .category_categories{
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 15px;
 }
-
 .category_categories_box{
     line-height: 0;
     transition: all .2s;
     border-radius: 10px;
     cursor: pointer;
     padding-bottom: 10px;
-    /* keep your original min width semantics via the grid minmax above */
 }
-
 .category_categories_box:hover{
     color:black;
     background-color: white;
 }
-
 .category_categories_box_img{
     border-radius: 10px;
     width: 100%;
-    /* height stays auto, so no cropping */
 }
-
 .category_categories_box_title{
     display: flex;
     align-items: center;
     gap: 10px;
     margin-left: 15px;
 }
-
 .category_categories_box_title span{
     font-size: 35px;
     margin-top: 10px;
 }
-
-/* Phone tweaks: smaller cards, 2-up grid, full-width container */
 @media (max-width: 560px){
   .category{
     width: 100%;
     padding: 10px 12px;
   }
-  /* force two columns so images aren’t huge */
   .category_categories{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

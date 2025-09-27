@@ -1,11 +1,11 @@
 .Profile_tabs {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap; /* allow multiple rows on small screens */
+  flex-wrap: wrap;
   margin-bottom: 20px;
 }
 .Profile_tabs_btn {
-  flex: 1 1 180px; /* grow, but not too tiny */
+  flex: 1 1 180px;
   padding: 10px;
   cursor: pointer;
   background-color: #010f10;

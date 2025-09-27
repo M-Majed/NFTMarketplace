@@ -2,16 +2,13 @@
   margin: 0 auto;
   max-width: 1200px;
   padding-inline: clamp(16px, 3vw, 32px);
-
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: clamp(16px, 3vw, 40px);
   align-items: start;
 }
-
 .upload > :first-child { grid-column: span 5; }
 .upload > :last-child  { grid-column: span 7; }
-
 @media (max-width: 1024px){
   .upload{
     grid-template-columns: 1fr;
@@ -19,12 +16,18 @@
   .upload > :first-child,
   .upload > :last-child { grid-column: 1 / -1; }
 }
-
 .upload_box{
   max-width: 100%;
 }
-
-.upload_box_input_itemName,
+.upload_box_input{ margin: 12px 0; }
+.upload_box_input_itemName{
+  width: 100%;
+  border: 1px solid white;
+  padding: 1rem;
+  border-radius: 20px;
+  background-color: transparent;
+  outline: none;
+}
 .upload_box_input_description{
   width: 100%;
   border: 1px solid white;
@@ -33,17 +36,18 @@
   background-color: transparent;
   outline: none;
 }
-
-.upload_box_input{ margin: 12px 0; }
-
 .upload_box_category h2{ margin-bottom: 8px; }
-
 .upload_box_slider{
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
 }
-
+.upload_box_slider p{
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  margin-block: 8px;
+}
 .upload_box_slider_item{
   border: 1px solid white;
   border-radius: 10px;
@@ -51,21 +55,12 @@
   cursor: pointer;
   text-align: center;
 }
-
+.active{ background-color: #012c2a; }
 .upload_box_slider_item_box_img{ border-radius: 50px; }
-
-.upload_box_slider p{
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
-  margin-block: 8px;
-}
-
 .upload_box_Price{
   gap: clamp(16px, 3vw, 50px);
   flex-wrap: wrap;
 }
-
 .upload_box_Price_itemPrice{
   border: 1px solid white;
   padding: 1rem;
@@ -74,13 +69,24 @@
   outline: none;
   min-width: min(260px, 100%);
 }
-
 .upload_box_btn{
   margin-top: 20px;
 }
-
-.active{ background-color: #012c2a; }
-
+.button {
+    background-color: transparent;
+    border: 2px solid white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all .2s;
+}
+.button:hover{
+    background-color: white;
+    border: 2px solid black;
+    color: black;
+}
 .previewOverlay{
   position: fixed;
   inset: 0;
@@ -100,21 +106,4 @@
   border-radius: 1rem;
   max-width: 500px;
   width: 100%;
-}
-
-.button {
-    background-color: transparent;
-    border: 2px solid white;
-    padding: 10px 20px;
-    border-radius: 50px;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all .2s;
-}
-
-.button:hover{
-    background-color: white;
-    border: 2px solid black;
-    color: black;
 }

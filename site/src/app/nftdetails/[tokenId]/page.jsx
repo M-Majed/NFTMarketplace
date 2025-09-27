@@ -1,4 +1,5 @@
 import React from "react";
+import { redirect } from "next/navigation";
 import Style from "./page.module.css";
 import NFTDetailsImg from "./NFTDetailsImg/NFTDetailsImg";
 import NFTDescription from "./NFTDescription/NFTDescription";
@@ -21,7 +22,7 @@ export default async function NFTDetailsPage({ params }) {
 
   //$ Handle listing not found
   if (!listing) {
-    return <p>NFT not found.</p>;
+    redirect("/");
   }
 
   //$ Fetch the ETH->USD price - compute NFT price in USD

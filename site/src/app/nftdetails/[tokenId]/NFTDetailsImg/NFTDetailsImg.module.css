@@ -1,31 +1,24 @@
-/* added container class (was missing) */
 .NFTDetailsImg{
     display: grid;
     gap: clamp(10px, 2vw, 16px);
 }
-
-/* make image fluid and keep aspect ratio */
 .NFTDetailsImg_NFT_img{
     display: block;
     width: 100%;
     height: auto;
     border-radius: 15px;
 }
-
-/* readable card with fluid spacing */
 .NFTDetailsImg_description{
     padding: clamp(.5rem, 1.2vw, 1rem);
     border-radius: 10px;
     background-color: rgba(0, 20, 21, 0.8);
     border: 1px solid white;
 }
-
 .NFTDetailsImg_description p{
     margin: 0 0 .5rem 0;
     line-height: 1.4;
     font-size: clamp(.9rem, 1.6vw, 1rem);
 }
-
 .NFTDetailsImg_description small{
     opacity: .85;
     font-size: clamp(.8rem, 1.4vw, .9rem);

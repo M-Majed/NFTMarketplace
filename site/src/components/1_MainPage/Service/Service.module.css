@@ -4,26 +4,20 @@
   padding-inline: clamp(16px, 3vw, 32px);
   margin-top: clamp(24px, 5vw, 60px);
 }
-
 .service_box{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: clamp(16px, 3vw, 24px);
   text-align: center;
 }
-
 .service_box_item_step{ margin-block: 14px; }
-
 .service_box_item_step span{
   padding: 5px 10px;
   border-radius: 20px;
   background-color: white;
   color: black;
 }
-
 .secrets { display: grid; gap: .5rem; margin-top: .5rem; }
-.secrets_title { font-weight: 600; }
-
 .secret_row {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -33,7 +27,6 @@
   border-radius: 12px;
   background: rgba(255,255,255,0.04);
 }
-
 .secret_label { opacity: .85; font-size: .9rem; }
 .secret_value {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -41,7 +34,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .copy_btn {
   cursor: pointer;
   border: 0;
@@ -51,5 +43,5 @@
   color: inherit;
 }
 .copy_btn:hover { background: rgba(255,255,255,0.18); }
-
+.secrets_title { font-weight: 600; }
 .secrets_note { opacity: .7; font-size: .8rem; }

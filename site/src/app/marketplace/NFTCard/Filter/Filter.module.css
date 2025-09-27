@@ -4,7 +4,6 @@
   padding-inline: clamp(16px, 3vw, 32px);
   width: 100%;
 }
-
 .filter_box {
   display: flex;
   align-items: center;
@@ -14,15 +13,12 @@
   border-bottom: 1px solid white;
   padding-bottom: 18px;
 }
-
 .filter_box_left {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap; /* categories wrap to new lines */
+  flex-wrap: wrap;
 }
-
-.filter_box_left_button,
-.filter_box_items_button {
+.filter_box_left_button {
   border: 2px solid white;
   background-color: transparent;
   padding: 10px 20px;
@@ -32,20 +28,17 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .filter_box_left_button:hover,
 .filter_box_items_button:hover {
   background-color: white;
   border: 2px solid black;
   color: black;
 }
-
 .selected {
   background-color: white;
   border: 2px solid black;
   color: black;
 }
-
 .filter_box_right_box {
   border: 1px solid white;
   background-color: transparent;
@@ -56,12 +49,10 @@
   align-items: center;
   gap: 10px;
 }
-
-/* expanded row */
 .filter_box_items {
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr auto; /* inputs block + button */
+  grid-template-columns: 1fr auto;
   gap: 12px;
   margin-top: 5px;
   align-items: center;
@@ -69,7 +60,6 @@
   max-width: fit-content;
   margin-left: 0px;
 }
-
 .filter_box_items_box {
   border: 1px solid white;
   padding-inline: 10px;
@@ -80,18 +70,25 @@
   align-items: center;
   max-width: fit-content;
 }
-
 .filter_box_items_box input {
   border: none;
   outline: none;
   background-color: transparent;
   color: white;
   font-size: 15px;
-  width: 100%; /* fluid width within minmax */
+  width: 100%;
   min-width: 0;
 }
-
-/* mobile: stack filter rows nicely */
+.filter_box_items_button {
+  border: 2px solid white;
+  background-color: transparent;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
 @media (max-width: 560px) {
   .filter_box_items {
     grid-template-columns: 1fr;

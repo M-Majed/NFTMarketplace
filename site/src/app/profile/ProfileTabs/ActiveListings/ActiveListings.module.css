@@ -1,4 +1,3 @@
-/* Section wrapper */
 .Profile_MyNFTs {
   padding: clamp(12px, 2vw, 20px);
   margin-bottom: 20px;
@@ -22,7 +21,7 @@
   font-size: clamp(16px, 2.2vw, 20px);
   justify-content: space-between;
   gap: 8px;
-  flex-wrap: wrap; /* don’t overflow on phones */
+  flex-wrap: wrap;
 }
 .Profile_MyNFTs_list_item_btns {
   display: flex;

@@ -6,21 +6,17 @@
   font-size: 15px;
   font-weight: 600;
 }
-
-/* LEFT side (logo + search) */
 .header_container_left {
   display: flex;
   align-items: center;
   gap: 20px;
   flex: 1;
 }
-
 .header_container_left_logo {
   width: 50px;
   height: 50px;
   cursor: pointer;
 }
-
 .header_container_left_box_input {
   width: 50%;
   border: 1px solid #ffffff;
@@ -30,7 +26,6 @@
   display: flex;
   justify-content: space-between;
 }
-
 .header_container_left_box_input input {
   width: 80%;
   border: none;
@@ -38,7 +33,6 @@
   font-size: 15px;
   outline: none;
 }
-
 .header_container_left_searchbtn {
   background-color: transparent;
   border: none;
@@ -47,15 +41,12 @@
   margin: 2px;
   margin-top: 5px;
 }
-
-/* RIGHT side (menus, buttons) */
 .header_container_right {
   display: flex;
   align-items: center;
   flex: 0.8;
   justify-content: space-between;
 }
-
 .header_container_right_createNFT {
   background-color: transparent;
   border: none;
@@ -68,29 +59,18 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .header_container_right_createNFT:hover {
   border: none;
   background-color: white;
   color: black;
 }
-
-.header_container_right_discover,
-.header_container_right_help,
-.header_container_right_wishlist,
-.header_container_right_button,
-.header_container_right_profile {
+.header_container_right_discover {
   position: relative;
   cursor: pointer;
   text-align: center;
   user-select: none;
 }
-
-/* desktop dropdowns */
-.header_container_right_discover_box,
-.header_container_right_help_box,
-.header_container_right_wishlist_box,
-.header_container_right_profile_box {
+.header_container_right_discover_box {
   position: absolute;
   padding: 10px 10px;
   box-shadow: white 0px 0px 5px;
@@ -100,28 +80,31 @@
   background-color: black;
   z-index: 20;
 }
+.header_container_right_help {
+  position: relative;
+  cursor: pointer;
+  text-align: center;
+  user-select: none;
+}
 .header_container_right_help_box {
+  position: absolute;
+  padding: 10px 10px;
+  box-shadow: white 0px 0px 5px;
+  font-size: 15px;
   width: 200%;
+  border-radius: 15px;
+  background-color: black;
+  z-index: 20;
 }
-.header_container_right_wishlist_box {
-  width: 1000%;
-  margin-top: 20px;
+.header_container_right_wishlist {
+  position: relative;
+  cursor: pointer;
+  text-align: center;
+  user-select: none;
 }
-.header_container_right_profile_box {
-  width: 400%;
-}
-
 .header_container_right_wishlist_icon {
   font-size: 25px;
 }
-
-.header_container_right_profileImg {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-}
-
-/* ========== MOBILE: hamburger + sidebar ========== */
 .mobile_toggle {
   display: none;
   margin-left: auto;
@@ -131,8 +114,6 @@
   line-height: 1;
   cursor: pointer;
 }
-
-/* dark overlay behind the drawer */
 .sidebar_overlay {
   position: fixed;
   inset: 0;
@@ -146,8 +127,6 @@
   opacity: 1;
   pointer-events: auto;
 }
-
-/* the drawer */
 .sidebar {
   position: fixed;
   top: 0;
@@ -159,7 +138,6 @@
   transform: translateX(-100%);
   transition: transform 0.25s ease;
   z-index: 60;
-
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -168,7 +146,6 @@
 .sidebar_open {
   transform: translateX(0);
 }
-
 .sidebar_header {
   display: flex;
   align-items: center;
@@ -180,7 +157,6 @@
   font-size: 26px;
   cursor: pointer;
 }
-
 .sidebar_search {
   display: flex;
   gap: 8px;
@@ -203,8 +179,6 @@
   font-size: 20px;
   cursor: pointer;
 }
-
-/* groups */
 .sidebar_group {
   border-top: 1px solid rgba(255, 255, 255, 0.3);
   padding-top: 12px;
@@ -222,8 +196,6 @@
   display: grid;
   gap: 6px;
 }
-
-/* actions */
 .sidebar_primary_button {
   width: 100%;
   border: 2px solid white;
@@ -244,8 +216,44 @@
   gap: 8px;
   font-size: 18px;
 }
-
-/* responsive switches */
+.header_container_right_button {
+  position: relative;
+  cursor: pointer;
+  text-align: center;
+  user-select: none;
+}
+.header_container_right_profile {
+  position: relative;
+  cursor: pointer;
+  text-align: center;
+  user-select: none;
+}
+.header_container_right_wishlist_box {
+  position: absolute;
+  padding: 10px 10px;
+  box-shadow: white 0px 0px 5px;
+  font-size: 15px;
+  width: 1000%;
+  margin-top: 20px;
+  border-radius: 15px;
+  background-color: black;
+  z-index: 20;
+}
+.header_container_right_profile_box {
+  position: absolute;
+  padding: 10px 10px;
+  box-shadow: white 0px 0px 5px;
+  font-size: 15px;
+  width: 400%;
+  border-radius: 15px;
+  background-color: black;
+  z-index: 20;
+}
+.header_container_right_profileImg {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+}
 @media (max-width: 1300px) {
   .header {
     width: 100%;
@@ -256,10 +264,10 @@
     gap: 12px;
   }
   .header_container_left_box_input {
-    display: none; /* search moves into sidebar */
+    display: none;
   }
   .header_container_right {
-    display: none; /* replaced by sidebar */
+    display: none;
   }
   .mobile_toggle {
     display: inline-flex;

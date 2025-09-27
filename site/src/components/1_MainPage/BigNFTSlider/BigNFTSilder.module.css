@@ -7,7 +7,6 @@
     align-items: center;
     color: black;
 }
-
 .bigNFTSlider_left{
     grid-column: 2 / 7;
     grid-row: 1 / -1;
@@ -17,63 +16,45 @@
     z-index: 10;
     height: 480px;
 }
-
 .bigNFTSlider_left h2{
     font-size: 40px;
     line-height: 0;
 }
-
 .bigNFTSlider_left_creator{
     display: flex;
     justify-content: space-between;
 }
-
-
 .bigNFTSlider_left_creator_profile{
     line-height: 0;
 }
-
 .bigNFTSlider_left_creator_profile_info p{
     margin-bottom: -5px;
 }
-
 .bigNFTSlider_left_creator_Category{
     display: flex;
     align-items: center;
     gap: 10px;
 }
-
 .bigNFTSlider_left_creator_Category_icon{
     font-size: 40px;
 }
-
 .bigNFTSlider_left_creator_Category_info{
     line-height: 0;
 }
-
 .bigNFTSlider_left_bidding{
     margin-top: 180px;
 }
-
 .bigNFTSlider_left_bidding_box{
     border: 2px solid black;
     margin-top: 20px;
     padding: 0 40px;
     border-radius: 20px;
 }
-
 .bigNFTSlider_left_bidding_box P{
     font-weight: bold;
     margin-block: 5px;
     font-size: 15px;
 }
-
-.bigNFTSlider_left_bidding_box_auction{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 .bigNFTSlider_left_bidding_box small{
     background-color: black;
     color: white;
@@ -84,19 +65,12 @@
     top: -10px;
     left:-10px;
 }
-
-.bigNFTSlider_left_bidding_box_icon{
-    font-size: 30px;
-}
-
-
 .bigNFTSlider_left_buttons{
     display: flex;
     justify-content: center;
     gap: 50px;
     margin-top: 40px;
 }
-
 .bigNFTSlider_left_buttons_button {
     background-color: black;
     border: 2px solid white;
@@ -107,13 +81,16 @@
     cursor: pointer;
     transition: all .2s;
 }
-
 .bigNFTSlider_left_buttons_button:hover{
     background-color: white;
     border: 2px solid black;
     color: black;
 }
-
+.bigNFTSlider_left_buttons_button[disabled]{
+  opacity: .5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .bigNFTSlider_left_sliderBtn{
     display: flex;
     gap: 30px;
@@ -121,19 +98,16 @@
     margin-top: 70px;
     color:white;
 }
-
 .bigNFTSlider_left_sliderBtn_icon{
     cursor: pointer;
     transition:  all .2s;
     border-radius: 50px;
 }
-
 .bigNFTSlider_left_sliderBtn_icon:hover{
     background-color: white;
     color: black;
     padding: 5px;
 }
-
 .bigNFTSlider_right{
     grid-column: 6 / -2;
     grid-row:  1 / -1;
@@ -143,13 +117,19 @@
     height: 600px;
     width: 600px;
 }
-
 .bigNFTSlider_right_box_img{
     border-radius: 2rem;
     width: 100%;
     height: 580;
 }
-
+.bigNFTSlider_left_bidding_box_auction{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.bigNFTSlider_left_bidding_box_icon{
+    font-size: 30px;
+}
 .bigNFTSlider_right_box_like{
     position: relative;
     top: -550px;
@@ -164,14 +144,12 @@
     color: black;
     font-size: large;
 }
-
 @media (max-width: 1100px){
     .bigNFTSlider{
         grid-template-rows: repeat(12, 1fr);
         justify-items: center;
         margin-bottom: -90px;
     }
-
     .bigNFTSlider_left{
         grid-row: 3 / -1;
         grid-column: 1 / -1;
@@ -184,46 +162,36 @@
         height: 450px;
         width: 450px;
     }
-    
     .bigNFTSlider_left_creator_Category_icon{
         font-size: 35px;
     }
-
     .bigNFTSlider_left_bidding_box{
         margin-top: 10px;
         padding: 0 40px;
         height: 50px;
     }
-
     .bigNFTSlider_left_bidding_box P{
         margin-top: 0px;
         margin-bottom: 0px;
     }
-    
     .bigNFTSlider_left_bidding_box_auction{
         display: flex;
         align-items: center;
         gap: 10px;
     }
-    
     .bigNFTSlider_left_bidding_box small{
         padding: 10px 20px;
     }
-
     .bigNFTSlider_left_bidding_box_timer{
         padding: 0px 0px 10px;
         margin-top: -10px;
     }
-    
-    
     .bigNFTSlider_left_bidding_box_timer_item p{
         font-size: 20px;
     }
-    
     .bigNFTSlider_left_button{
         margin-top: 10px;
     }
-    
     .bigNFTSlider_left_sliderBtn_icon{
         margin-inline: 15px;
     }
@@ -242,46 +210,39 @@
     justify-self: center;
 }
 }
-
-/* ---------- TEXT + ROW BEHAVIOR FIXES (<1480px) ---------- */
 @media (max-width: 1480px){
-  /* make the creator row a 2-column text grid so items never collide */
   .bigNFTSlider_left_creator{
     display: grid;
-    grid-template-columns: 1fr auto;   /* wallet (flexible) | category (auto) */
+    grid-template-columns: 1fr auto;
     align-items: center;
     column-gap: 12px;
     row-gap: 6px;
-    min-width: 0;                       /* allow shrinking */
+    min-width: 0;
   }
-
-  /* allow the wallet block to shrink and elide */
   .bigNFTSlider_left_creator_profile,
   .bigNFTSlider_left_creator_profile_info{
     min-width: 0;
   }
   .bigNFTSlider_left_creator_profile_info{
-    line-height: 1.1;                   /* was 0 → clipping */
+    line-height: 1.1;
   }
   .bigNFTSlider_left_creator_profile_info p{
-    margin-bottom: 2px;                 /* undo -5px */
+    margin-bottom: 2px;
   }
   .bigNFTSlider_left_creator_profile_info h4{
     margin: 0;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;                 /* long wallet → … */
+    white-space: nowrap;
   }
-
-  /* category stays on the right but won’t overlap; elide if long */
   .bigNFTSlider_left_creator_Category{
     min-width: 0;
     justify-self: end;
   }
   .bigNFTSlider_left_creator_Category_info{
     min-width: 0;
-    line-height: 1.1;                   /* was 0 */
+    line-height: 1.1;
     text-align: right;
   }
   .bigNFTSlider_left_creator_Category_info h4{
@@ -291,8 +252,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  /* scale heading & icon so text doesn’t crush */
   .bigNFTSlider_left h2{
     font-size: clamp(24px, 2.4vw, 34px);
     line-height: 1.15;
@@ -302,8 +261,6 @@
   .bigNFTSlider_left_creator_Category_icon{
     font-size: clamp(26px, 2.2vw, 34px);
   }
-
-  /* price text won’t clip */
   .bigNFTSlider_left_bidding_box p{
     font-size: clamp(13px, 1.3vw, 15px);
     line-height: 1.25;
@@ -311,48 +268,32 @@
   }
   .bigNFTSlider_left_bidding_box small{
     line-height: 1;
-    padding: 8px 14px;  /* smaller so it doesn’t collide with text */
+    padding: 8px 14px;
   }
-
-  /* keep button labels readable without changing your layout */
   .bigNFTSlider_left_buttons_button{
     font-size: clamp(14px, 1.2vw, 15px);
   }
 }
-
-/* stack the two text blocks on narrower widths, still without
-   touching the hero’s overall layout */
 @media (max-width: 1100px){
   .bigNFTSlider_left_creator{
-    grid-template-columns: 1fr;   /* wallet on row 1, category on row 2 */
+    grid-template-columns: 1fr;
     justify-items: start;
   }
 }
-
-/* ===== Hard fix for narrow phones (≤560px). Theme/layout unchanged. ===== */
 @media (max-width: 560px){
   .bigNFTSlider{
     justify-items: stretch;   
   }
-
   .bigNFTSlider_left{
     grid-row: 4 / -1;
-    width: auto;                       /* override 350px */
-    margin: 0 25px;                  /* prevent edge-to-edge */
-    height: 48%;                     /* override 400px */
+    width: auto;
+    margin: 0 25px;
+    height: 48%;
 }
-
   .bigNFTSlider_left_bidding{
     margin-top: 20px;
   }
     .bigNFTSlider_right{
         width: auto;  
     }
-    
-}
-
-.bigNFTSlider_left_buttons_button[disabled]{
-  opacity: .5;
-  cursor: not-allowed;
-  pointer-events: none; /* keep hover effects from firing */
 }

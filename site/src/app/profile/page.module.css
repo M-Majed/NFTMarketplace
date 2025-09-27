@@ -1,32 +1,8 @@
-/* Page container */
 .Profile {
   margin: 0 auto;
   max-width: 1200px;
   padding-inline: clamp(16px, 3vw, 32px);
 }
-
-
-
-
-
-/* Summary cards */
-
-
-/* Tabs */
-
-
-/* Section wrapper */
-
-
-
-
-/* Active listings list */
-
-
-/* Transaction history */
-
-
-/* Modal (unchanged, already responsive) */
 .ModalOverlay {
   position: fixed;
   inset: 0;
@@ -82,13 +58,6 @@
   margin-bottom: 16px;
   appearance: none;
 }
-.ModalActions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-/* Buttons + states (kept) */
 .Button {
   padding: 10px 14px;
   border-radius: 10px;
@@ -97,14 +66,16 @@
   color: #fff;
   cursor: pointer;
 }
-.ButtonPrimary {
-  border: none;
-  background: rgb(9, 77, 77);
-}
 .Button:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
-
-
-
+.ButtonPrimary {
+  border: none;
+  background: rgb(9, 77, 77);
+}
+.ModalActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}

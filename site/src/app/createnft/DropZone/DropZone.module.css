@@ -2,22 +2,21 @@
   border: 2px dashed white;
   border-radius: 16px;
   cursor: pointer;
-
   width: 100%;
   max-width: clamp(220px, 40vw, 520px);
   min-height: clamp(180px, 30vw, 420px);
-
   display: grid;
   place-items: center;
   padding: clamp(8px, 2vw, 16px);
   transition: background-color .15s ease, border-color .15s ease;
 }
-
 .dropzone:hover{
   background-color: rgba(255,255,255,.06);
   border-color: #cfcfcf;
 }
-
+.dropzone:hover .img{
+  transform: scale(1.01);
+}
 .img{
   width: 100%;
   height: 100%;
@@ -27,8 +26,4 @@
   border-radius: 10px;
   border: 1px solid white;
   transition: transform .2s ease;
-}
-
-.dropzone:hover .img{
-  transform: scale(1.01);
 }

@@ -2,8 +2,6 @@
     width: 100%;
     padding: clamp(24px, 4vw, 64px);
 }
-
-/* center content + responsive grid */
 .footer_box{
     max-width: 1200px;
     margin: 0 auto;
@@ -12,27 +10,16 @@
     gap: clamp(16px, 3vw, 40px);
     align-items: start;
 }
-
-/* LEFT column (logo + text + socials) */
 .footer_box_social{
     grid-column: span 7;
     border-right: 1px solid white;
 }
-
-/* RIGHT column (subscribe) */
-.subscribe{
-    grid-column: span 5;
-    padding-left: clamp(16px, 3vw, 32px);
-}
-
-/* socials row */
 .footer_social{
     display: flex;
     gap: clamp(8px, 1.8vw, 16px);
     font-size: clamp(18px, 2.4vw, 24px);
     flex-wrap: wrap;
 }
-
 .footer_social a{
     padding: 6px 8px;
     border-radius: 10px;
@@ -52,8 +39,10 @@
 .footer_social a:focus-visible{
     box-shadow: 0 0 0 2px black, 0 0 0 4px white;
 }
-
-/* subscribe */
+.subscribe{
+    grid-column: span 5;
+    padding-left: clamp(16px, 3vw, 32px);
+}
 .subscribe_box{
     display: flex;
     align-items: center;
@@ -63,17 +52,15 @@
     border-radius: 50px;
     padding: 8px 12px;
 }
-
 .subscribe_box input{
     background: transparent;
     border: none;
     outline: none;
-    flex: 1 1 auto;     /* fluid width */
-    min-width: 0;       /* prevent overflow on small screens */
+    flex: 1 1 auto;
+    min-width: 0;
     color: inherit;
     font: inherit;
 }
-
 .subscribe_box_button{
     cursor: pointer;
     font-size: clamp(18px, 2.6vw, 24px);
@@ -93,14 +80,10 @@
 .subscribe_box_button:focus-visible{
     box-shadow: 0 0 0 2px black, 0 0 0 4px white;
 }
-
-/* small text under subscribe */
 .subscribe_box_info p{
     margin-top: clamp(10px, 2vw, 14px);
     line-height: 1.4;
 }
-
-/* stack layout on tablets/phones */
 @media (max-width: 900px){
     .footer_box{
         grid-template-columns: 1fr;
