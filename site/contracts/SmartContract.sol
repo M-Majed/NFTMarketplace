@@ -1,4 +1,3 @@
-// contracts/SmartContract.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
@@ -18,7 +17,7 @@ contract NFTMarketplace is
     //$ Variables and NFT Struct
     uint256 private _tokenIds;
 
-    uint16 public constant FEE_BPS   = 100; //* 1% listing/cancel/sale fee
+    uint16 public constant FEE_BPS = 100; //* 1% listing/cancel/sale fee
 
     uint256 private protocolAccrued; //* earned Fees
     mapping(address => uint256) private balances; //* Sellers balance
@@ -65,15 +64,15 @@ contract NFTMarketplace is
     function getBalance() public view returns (uint256) { //* raw SC balance
         return address(this).balance;
     }
-    function listingFeeFor(uint256 price) public pure returns (uint256) { //* calculate Fee
-        return (price * FEE_BPS) / 10_000;
+    function listingFeeFor(uint256 price) public pure returns (uint256) { //* calculate Fee - pure: no BC state access or modification
+        return (price * FEE_BPS) / 10000;
     }
 
     //$ Functions
     function createToken( //* create NFT
         string memory tokenURI,
         uint256 price
-    ) public payable whenNotPaused returns (uint256) {
+    ) public payable whenNotPaused nonReentrant returns (uint256) {
         _tokenIds++;
         uint256 newtokenId = _tokenIds;
 
@@ -112,7 +111,7 @@ contract NFTMarketplace is
         require(ownerOf(tokenId) == msg.sender, "Not token owner");
         require(ownerOf(tokenId) != address(this), "Already listed");
 
-        require( //* either approve NFT transer for this NFT or all
+        require( //* either approve NFT transfer for this NFT or all
             getApproved(tokenId) == address(this) ||
             isApprovedForAll(msg.sender, address(this)),
             "Marketplace not approved"

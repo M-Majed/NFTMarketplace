@@ -63,7 +63,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
             abi: NFTMarketplaceABI,
             functionName: "tokenURI",
             args: [BigInt(tokenId)],
-          }); //* get token pinata(data) url
+          }); //* get token pinata(data) uri
 
           let meta = {};
           try {
