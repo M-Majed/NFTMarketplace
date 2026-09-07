@@ -14,9 +14,9 @@ export default function TransactionHistory({
   onLast,
   onPageSizeChange,
 }) {
-  const start = (page - 1) * pageSize; //* Calculate start page
-  const end = start + pageSize; //* Calculate end page
-  const paginated = transactions.slice(start, end); //* Get current page transactions
+  const start = (page - 1) * pageSize; // Calculate start page
+  const end = start + pageSize; // Calculate end page
+  const paginated = transactions.slice(start, end); // Get current page transactions
 
   return (
     <div className={Style.Profile_MyNFTs}>

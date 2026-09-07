@@ -5,8 +5,8 @@ import Style from "./Category.module.css";
 import { categories } from "@/app/constants";
 
 export default function Category({ items }) {
-  //$ count NFTs by category
-  const countsByCategory = useMemo(() => { //* runs function when items change
+  // Count NFTs by category
+  const countsByCategory = useMemo(() => { // Runs function when items change
     if (!items || !Array.isArray(items)) return {};
     const map = {};
     for (const { name, count } of items) map[name] = count;

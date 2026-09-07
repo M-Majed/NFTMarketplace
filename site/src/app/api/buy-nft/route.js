@@ -12,7 +12,7 @@ export async function POST(request) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
     const buyerAddress = session.user.address.toLowerCase();
-    //* Basic validation
+    // Basic validation
     if (!tokenId || !price) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
@@ -20,12 +20,12 @@ export async function POST(request) {
       );
     }
 
-    //* Fetch the listing
+    // Fetch the listing
     const listing = await prisma.listing.findUnique({
       where: { tokenId },
       include: { seller: true },
     });
-    //* Ensure the listing exists and is active
+    // Ensure the listing exists and is active
     if (!listing || !listing.active) {
       return new Response(
         JSON.stringify({ error: "Active listing not found" }),
@@ -33,7 +33,7 @@ export async function POST(request) {
       );
     }
 
-    //* prevent self-purchase
+    // Prevent self-purchase
     if (
       listing?.seller?.walletAddress &&
       listing.seller.walletAddress.toLowerCase() === buyerAddress.toLowerCase()
@@ -44,7 +44,7 @@ export async function POST(request) {
       );
     }
 
-    //* transaction hash already exists
+    // Transaction hash already exists
     if (txHash) {
       const existing = await prisma.transaction.findFirst({ where: { txHash } });
       if (existing) {
@@ -54,26 +54,26 @@ export async function POST(request) {
 
     await prisma.$transaction(async (tx) => {
 
-      //* Ensure buyer exists
+      // Ensure buyer exists
       const buyer = await tx.user.upsert({
         where: { walletAddress: buyerAddress },
         update: {},
         create: { walletAddress: buyerAddress },
       });
 
-      //* Update nft owner
+      // Update nft owner
       await tx.nFT.update({
         where: { tokenId },
         data: { ownerId: buyer.id },
       });
 
-      //* Deactivate listing
+      // Deactivate listing
       await tx.listing.update({
         where: { tokenId },
        data: { active: false },
       });
 
-      //* add transaction to db
+      // Add transaction to db
       await tx.transaction.create({
         data: {
           tokenId,

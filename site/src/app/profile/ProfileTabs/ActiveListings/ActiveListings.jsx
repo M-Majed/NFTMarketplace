@@ -27,8 +27,8 @@ export default function ActiveListings({
                     cancellingId === listing.id ? Style.isBusyIcon : ""
                   }`}
                   onClick={(e) => {
-                    e.preventDefault(); //* prevent navigation
-                    e.stopPropagation(); //* prevent parent navigation
+                    e.preventDefault(); // Prevent navigation
+                    e.stopPropagation(); // Prevent parent navigation
                     onCancel?.(listing, e);
                   }}
                   title={

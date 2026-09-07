@@ -13,7 +13,7 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    //* Find the user by walletAddress
+    // Find the user by walletAddress
     const user = await prisma.user.findUnique({
       where: { walletAddress: address },
       select: { id: true },
@@ -25,7 +25,7 @@ export async function GET(request) {
       );
     }
 
-    //* Fetch user listings and transactions
+    // Fetch user listings and transactions
     const listings = await prisma.listing.findMany({
       where: { sellerId: user.id, active: true },
       include: {

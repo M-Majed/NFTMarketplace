@@ -12,7 +12,7 @@ const Service = () => {
     "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
   ];
 
-  //$ truncate keys
+  // Truncate keys
   const truncate = (s) =>
     s.length <= 7 + 7 ? s : `${s.slice(0, 7)}…${s.slice(-7, s.length)}`;
 
@@ -54,7 +54,7 @@ const Service = () => {
           <p>
             Open MetaMask → Networks <br />
             → Add custom network. Add data: <br />
-            http://xxx.xxx.xxx.xxx:8545
+            http:// Xxx.xxx.xxx.xxx:8545
             <br />
             chain id 1337
             <br />

@@ -1,76 +1,105 @@
-"use client";
-import React from "react";
-import axios from "axios";
-import { useAccount, usePublicClient, useWriteContract } from "wagmi"; //* connected account, read-only blockchain calls, write blockchain calls
-import { parseEther, formatEther, parseEventLogs } from "viem"; //* eth->wei, wei->eth, parse event logs from blockchain
-import { NFTMarketplaceAddress, NFTMarketplaceABI } from "./constants";
-export const NFTMarketplaceContext = React.createContext(); //* pass everything instead of one by one
+\"use client\";
 
+import React from \"react\";
+import axios from \"axios\";
+import { useAccount, usePublicClient, useWriteContract } from \"wagmi\";
+import { parseEther, formatEther, parseEventLogs } from \"viem\";
+import { NFTMarketplaceAddress, NFTMarketplaceABI } from \"./constants\";
+
+/**
+ * React Context facilitating decentralized marketplace interactions,
+ * abstracting on-chain EVM calls (minting, escrow, purchasing, withdrawals)
+ * and backend PostgreSQL/SQLite database synchronizations.
+ */
+export const NFTMarketplaceContext = React.createContext();
+
+/**
+ * Provider component wrapping the application to expose Web3 marketplace primitives.
+ *
+ * @param {object} props
+ * @param {React.ReactNode} props.children
+ */
 export const NFTMarketplaceProvider = ({ children }) => {
-  const { address } = useAccount(); //* connected user address
-  const publicClient = usePublicClient(); //* read-only EVM client for readContract
-  const { writeContractAsync } = useWriteContract(); //* writeContract
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
 
-  //$ get users balance
+  /**
+   * Queries the currently connected wallet's claimable sales proceeds from the smart contract.
+   *
+   * @async
+   * @returns {Promise<bigint>} Withdrawable balance denominated in wei.
+   * @throws {Error} If no wallet is currently connected.
+   */
   const getBalance = async () => {
-    //* validation
-    if (!address) throw new Error("Please connect a wallet first.");
+    if (!address) throw new Error(\"Please connect a wallet first.\");
 
     return await publicClient.readContract({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "getUserBalanceOf",
+      functionName: \"getUserBalanceOf\",
       args: [address],
-    }); //* call on-chain function
+    });
   };
 
-  //$ withdraw
+  /**
+   * Withdraws accumulated seller proceeds from contract escrow using the pull-payment pattern.
+   *
+   * @async
+   * @param {object} params
+   * @param {string|number} params.amountEth - The quantity of ETH to withdraw.
+   * @returns {Promise<string>} The on-chain transaction hash.
+   * @throws {Error} If wallet is disconnected or withdrawal parameters are invalid.
+   */
   const withdraw = async ({ amountEth }) => {
-    //* validation
-    if (!address) throw new Error("Please connect a wallet first.");
-    if (!amountEth) throw new Error("amountEth required");
+    if (!address) throw new Error(\"Please connect a wallet first.\");
+    if (!amountEth) throw new Error(\"amountEth required\");
 
     const hash = await writeContractAsync({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "withdraw",
-      args: [parseEther(String(amountEth))], //* convert eth to wei
-    }); //* call on-chain function
-    await publicClient.waitForTransactionReceipt({ hash }); //* wait for transaction to finish
+      functionName: \"withdraw\",
+      args: [parseEther(String(amountEth))],
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash });
     return hash;
   };
 
-  //$ fetch user NFTs
+  /**
+   * Fetches all NFTs owned by the connected wallet directly from the smart contract,
+   * subsequently enriching each item with off-chain IPFS metadata.
+   *
+   * @async
+   * @returns {Promise<Array<object>>} An array of enriched NFT token items with metadata.
+   */
   const fetchMyNFTs = async () => {
     try {
-      //* validation
-      if (!address) throw new Error("Please connect a wallet first.");
+      if (!address) throw new Error(\"Please connect a wallet first.\");
 
       const data = await publicClient.readContract({
         address: NFTMarketplaceAddress,
         abi: NFTMarketplaceABI,
-        functionName: "fetchMyNFTs",
+        functionName: \"fetchMyNFTs\",
         account: address,
-      }); //* on-chain call
+      });
 
-      //* circulate on-chain data
       const items = await Promise.all(
-        //* map fetched on-chain data
         data.map(async (item) => {
           const tokenId = Number(item.tokenId);
           const tokenURI = await publicClient.readContract({
             address: NFTMarketplaceAddress,
             abi: NFTMarketplaceABI,
-            functionName: "tokenURI",
+            functionName: \"tokenURI\",
             args: [BigInt(tokenId)],
-          }); //* get token pinata(data) uri
+          });
 
           let meta = {};
           try {
-            const res = await axios.get(tokenURI); //* get token data from pinata
+            const res = await axios.get(tokenURI);
             meta = res?.data || {};
           } catch (e) {
-            console.warn("tokenURI fetch failed:", tokenURI, e);
+            console.warn(\"tokenURI fetch failed:\", tokenURI, e);
           }
 
           return {
@@ -88,45 +117,51 @@ export const NFTMarketplaceProvider = ({ children }) => {
 
       return items;
     } catch (error) {
-      console.error("Error fetching NFTs:", error);
+      console.error(\"Error fetching NFTs:\", error);
       return [];
     }
   };
 
-  //$ create listing
+  /**
+   * Mints an ERC-721 token, deposits it into escrow, and synchronizes the record with the database.
+   *
+   * @async
+   * @param {string} url - Metadata JSON URI (IPFS / Pinata).
+   * @param {string|number} formInputPrice - Asking price denominated in ETH.
+   * @param {object} [dbPayload] - Off-chain metadata properties to persist to the database.
+   * @returns {Promise<number>} The newly minted on-chain tokenId.
+   * @throws {Error} On contract execution failure or database synchronization rejection.
+   */
   const createSale = async (url, formInputPrice, dbPayload) => {
-    //* Validation
-    if (!address) throw new Error("Please connect a wallet first.");
+    if (!address) throw new Error(\"Please connect a wallet first.\");
 
-    const price = parseEther(String(formInputPrice)); //* convert eth to wei
+    const price = parseEther(String(formInputPrice));
     const listingFee = await publicClient.readContract({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "listingFeeFor",
+      functionName: \"listingFeeFor\",
       args: [price],
-    }); //* get listing fee
+    });
 
     const hash = await writeContractAsync({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "createToken",
+      functionName: \"createToken\",
       args: [url, price],
       value: listingFee,
-    }); //* call on-chain function
-    const receipt = await publicClient.waitForTransactionReceipt({ hash }); //* wait for transaction to finish
+    });
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
     const logs = parseEventLogs({
       abi: NFTMarketplaceABI,
       logs: receipt.logs,
-      eventName: "MarketItemCreated",
-    }); //*  check on-chain createNFT log
-    const tokenIdFromEvent = logs?.[0]?.args?.tokenId; //* get tokenId from first event from logs
+      eventName: \"MarketItemCreated\",
+    });
+    const tokenIdFromEvent = logs?.[0]?.args?.tokenId;
     if (tokenIdFromEvent !== undefined) {
       const tokenIdNum = Number(tokenIdFromEvent);
 
-      //* DB update
       if (dbPayload) {
-        //* destructure dbPayload
         const {
           name,
           description,
@@ -138,10 +173,9 @@ export const NFTMarketplaceProvider = ({ children }) => {
           category,
         } = dbPayload;
 
-        //* save to db via api
-        const saveRes = await fetch("/api/create-nft/save-nft", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const saveRes = await fetch(\"/api/create-nft/save-nft\", {
+          method: \"POST",
+          headers: { \"Content-Type\": \"application/json\" },
           body: JSON.stringify({
             tokenId: tokenIdNum,
             name,
@@ -159,46 +193,43 @@ export const NFTMarketplaceProvider = ({ children }) => {
         const saveData = await saveRes.json().catch(() => ({}));
 
         if (!saveRes.ok)
-          throw new Error(saveData?.error || "Save to database failed");
+          throw new Error(saveData?.error || \"Save to database failed\");
       }
-
-      //* update contract balance
-      // try {
-      //   const contractBalance = await publicClient.readContract({
-      //     address: NFTMarketplaceAddress,
-      //     abi: NFTMarketplaceABI,
-      //     functionName: "getBalance",
-      //   });
-      //   console.log("Contract balance after sale:", formatEther(contractBalance));
-      // } catch {}
 
       return tokenIdNum;
     }
-    throw new Error("Failed to parse tokenId from MarketItemCreated event");
+    throw new Error(\"Failed to parse tokenId from MarketItemCreated event\");
   };
 
-  //$ buy NFT
+  /**
+   * Purchases an actively listed NFT on-chain and updates off-chain ownership tracking.
+   *
+   * @async
+   * @param {object} params
+   * @param {number|string} params.tokenId - The token identifier to purchase.
+   * @param {number|string} params.price - Purchase price in ETH.
+   * @returns {Promise<string>} The confirmed transaction hash.
+   * @throws {Error} If purchase validation or contract execution fails.
+   */
   const buyNFT = async ({ tokenId, price }) => {
-    //* validation
-    if (!address) throw new Error("Please connect a wallet first.");
+    if (!address) throw new Error(\"Please connect a wallet first.\");
     if (tokenId === undefined || tokenId === null)
-      throw new Error("tokenId required");
+      throw new Error(\"tokenId required\");
     if (price === undefined || price === null)
-      throw new Error("price required");
+      throw new Error(\"price required\");
 
     const hash = await writeContractAsync({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "createMarketSale",
+      functionName: \"createMarketSale\",
       args: [BigInt(tokenId)],
-      value: parseEther(String(price)), //* convert eth to wei
-    }); //* call on-chain function
-    await publicClient.waitForTransactionReceipt({ hash }); //* wait for transaction to finish
+      value: parseEther(String(price)),
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
 
-    //* DB update
-    const res = await fetch("/api/buy-nft", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch(\"/api/buy-nft\", {
+      method: \"POST\",
+      headers: { \"Content-Type\": \"application/json\" },
       body: JSON.stringify({
         tokenId: Number(tokenId),
         price: String(price),
@@ -207,36 +238,41 @@ export const NFTMarketplaceProvider = ({ children }) => {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok)
-      throw new Error(data?.error || "Failed to update DB after purchase");
+      throw new Error(data?.error || \"Failed to update DB after purchase\");
 
     return hash;
   };
 
-  //$ cancel listing
+  /**
+   * Cancels an active market listing, returning NFT custody from contract escrow to the seller.
+   *
+   * @async
+   * @param {object} nft - NFT listing object containing tokenId and price.
+   * @returns {Promise<string>} The confirmed transaction hash.
+   * @throws {Error} If cancellation fee payment or transaction confirmation fails.
+   */
   const cancelListing = async (nft) => {
-    //* validation
-    if (!address) throw new Error("Please connect a wallet first.");
+    if (!address) throw new Error(\"Please connect a wallet first.\");
 
     const fee = await publicClient.readContract({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "listingFeeFor",
+      functionName: \"listingFeeFor\",
       args: [parseEther(String(nft.price))],
-    }); //* get listing fee
+    });
 
     const hash = await writeContractAsync({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "cancelListing",
+      functionName: \"cancelListing\",
       args: [BigInt(nft.tokenId)],
       value: fee,
-    }); //* call on-chain function
+    });
     await publicClient.waitForTransactionReceipt({ hash });
 
-    //* DB update
-    const res = await fetch("/api/cancel-sell", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch(\"/api/cancel-sell\", {
+      method: \"POST\",
+      headers: { \"Content-Type\": \"application/json\" },
       body: JSON.stringify({
         tokenId: Number(nft.tokenId),
         txHash: hash,
@@ -244,67 +280,76 @@ export const NFTMarketplaceProvider = ({ children }) => {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok)
-      throw new Error(data?.error || "Failed to update DB after cancel");
+      throw new Error(data?.error || \"Failed to update DB after cancel\");
 
     return hash;
   };
 
-  //$ check if contract can get users NFTs
+  /**
+   * Checks and grants operator approval for the marketplace contract to manage ERC-721 tokens.
+   *
+   * @async
+   * @private
+   */
   const ensureApprovalForAll = async () => {
-    //* validation
-    if (!address) throw new Error("Please connect a wallet first.");
+    if (!address) throw new Error(\"Please connect a wallet first.\");
 
-    //* check if contract is already approved
     const alreadyApproved = await publicClient.readContract({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "isApprovedForAll",
+      functionName: \"isApprovedForAll\",
       args: [address, NFTMarketplaceAddress],
     });
 
-    //* not approved
     if (!alreadyApproved) {
       const hash = await writeContractAsync({
         address: NFTMarketplaceAddress,
         abi: NFTMarketplaceABI,
-        functionName: "setApprovalForAll",
+        functionName: \"setApprovalForAll\",
         args: [NFTMarketplaceAddress, true],
-      }); //* call on-chain function for approval
+      });
       await publicClient.waitForTransactionReceipt({ hash });
     }
   };
 
-  //$ Resell NFT
+  /**
+   * Relists an owned NFT on the marketplace with a new price and category.
+   *
+   * @async
+   * @param {object} params
+   * @param {number|string} params.tokenId - Identifier of the token to resell.
+   * @param {number|string} params.priceEth - New listing price in ETH.
+   * @param {string} [params.category] - Product classification category.
+   * @returns {Promise<string>} The confirmed transaction hash.
+   */
   const resellNFT = async ({ tokenId, priceEth, category }) => {
-    //* validation
-    if (!address) throw new Error("Please connect a wallet first.");
+    if (!address) throw new Error(\"Please connect a wallet first.\");
     if (tokenId === undefined || tokenId === null)
-      throw new Error("tokenId required");
-    if (!priceEth) throw new Error("priceEth required");
+      throw new Error(\"tokenId required\");
+    if (!priceEth) throw new Error(\"priceEth required\");
 
-    const priceWei = parseEther(String(priceEth)); //* convert eth to wei
+    const priceWei = parseEther(String(priceEth));
     const listingFee = await publicClient.readContract({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "listingFeeFor",
+      functionName: \"listingFeeFor\",
       args: [priceWei],
-    }); //* get listing fee
+    });
 
-    await ensureApprovalForAll(); //* check if contract can get users NFTs
+    await ensureApprovalForAll();
 
     const hash = await writeContractAsync({
       address: NFTMarketplaceAddress,
       abi: NFTMarketplaceABI,
-      functionName: "resellToken",
+      functionName: \"resellToken\",
       args: [BigInt(tokenId), priceWei],
       value: listingFee,
-    }); //* call on-chain function
-    await publicClient.waitForTransactionReceipt({ hash }); //* wait for transaction to finish
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
 
-    //* make changes to db via api
-    const res = await fetch("/api/resell", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch(\"/api/resell\", {
+      method: \"POST\",
+      headers: { \"Content-Type\": \"application/json\" },
       body: JSON.stringify({
         tokenId: Number(tokenId),
         price: String(priceEth),
@@ -313,7 +358,7 @@ export const NFTMarketplaceProvider = ({ children }) => {
       }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data?.error || "Failed to update DB after resell");
+    if (!res.ok) throw new Error(data?.error || \"Failed to update DB after resell\");
     return hash;
   };
 

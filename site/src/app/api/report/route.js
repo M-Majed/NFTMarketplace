@@ -12,7 +12,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const reporterAddress = session.user.address.toLowerCase();
-    //$ validation
+    // Validation
     if (!listingId) {
       return NextResponse.json(
         { error: "listingId is required" },
@@ -20,7 +20,7 @@ export async function POST(req) {
       );
     }
 
-    //$ find listing
+    // Find listing
     const listing = await prisma.listing.findUnique({
       where: { id: listingId },
     });
@@ -28,14 +28,14 @@ export async function POST(req) {
       return NextResponse.json({ error: "Listing not found" }, { status: 404 });
     }
 
-    //$ find or create reporter
+    // Find or create reporter
     const user = await prisma.user.upsert({
       where: { walletAddress: reporterAddress },
       update: {},
       create: { walletAddress: reporterAddress },
     });
 
-    //$ create report
+    // Create report
     const report = await prisma.report.create({
       data: {
         reporterId: user.id,
@@ -61,7 +61,7 @@ export async function POST(req) {
   }
 }
 
-//$ check “already reported”
+// Check “already reported”
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const listingId = searchParams.get("listingId");
@@ -71,17 +71,17 @@ export async function GET(req) {
   }
   const reporterAddress = session.user.address.toLowerCase();
 
-  //$ validation
+  // Validation
   if (!listingId) {
     return NextResponse.json(
       { error: "listingId is required" },
       { status: 400 }
     );
   }
-  //$ find user
+  // Find user
   const user = await prisma.user.findUnique({ where: { walletAddress: reporterAddress } });
   if (!user) return NextResponse.json({ reported: false });
-  //$ check report
+  // Check report
   const exists = await prisma.report.findFirst({
     where: { listingId, reporterId: user.id },
     select: { id: true },

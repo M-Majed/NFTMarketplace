@@ -14,11 +14,11 @@ export async function POST(req) {
     }
     const sessionAddress = session.user.address.toLowerCase();
 
-    //* Basic validation
+    // Basic validation
     if (typeof tokenId !== "number")
       return NextResponse.json({ ok: false, error: "tokenId (number) required" }, { status: 400 });
 
-    //* Ensure the caller (session wallet) exists in DB
+    // Ensure the caller (session wallet) exists in DB
     const user = await prisma.user.upsert({
       where: { walletAddress: sessionAddress },
       update: {},
@@ -26,25 +26,25 @@ export async function POST(req) {
       select: { id: true, walletAddress: true },
     });
 
-    //* Find the listing to be canceled
+    // Find the listing to be canceled
     const listing = await prisma.listing.findUnique({
       where: { tokenId },
       select: { id: true, active: true, sellerId: true },
     });
 
-    //* Validations
+    // Validations
     if (!listing) {
       return NextResponse.json({ ok: false, error: "Listing not found" }, { status: 404 });
     }
     if (listing.sellerId !== user.id) {
       return NextResponse.json({ ok: false, error: "Not the listing seller" }, { status: 403 });
     }
-    //* if already inactive
+    // If already inactive
     if (!listing.active) {
       return NextResponse.json({ ok: true, already: true, txHash: txHash ?? null }, { status: 200 });
     }
 
-    //* Update listing to inactive and transfer NFT ownership back to seller
+    // Update listing to inactive and transfer NFT ownership back to seller
     const [updatedListing, updatedNft] = await prisma.$transaction([
       prisma.listing.update({
         where: { tokenId },

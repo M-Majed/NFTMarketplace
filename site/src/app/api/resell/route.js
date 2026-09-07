@@ -15,7 +15,7 @@ export async function POST(req) {
     }
     const sessionAddress = session.user.address.toLowerCase();
 
-    //* Validation
+    // Validation
     const ALLOWED = categories.map((c) => c.category);
     if (category !== undefined && category !== null) {
       if (typeof category !== "string" || !ALLOWED.includes(category)) {
@@ -34,7 +34,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Invalid tokenId" }, { status: 400 });
     }
     if (!price || !/^\d+(\.\d+)?$/.test(String(price))) {
-      //* simple regex for decimal numbers
+      // Simple regex for decimal numbers
       return NextResponse.json(
         { error: "Invalid price (expected stringified ETH amount)" },
         { status: 400 }
@@ -43,7 +43,7 @@ export async function POST(req) {
 
     const tokenIdInt = Number(tokenId);
 
-    //* Fetch NFT + owner from DB
+    // Fetch NFT + owner from DB
     const nft = await prisma.nFT.findUnique({
       where: { tokenId: tokenIdInt },
       include: { owner: true },
@@ -64,7 +64,7 @@ export async function POST(req) {
       );
     }
 
-    //* Ensure requester owns the NFT
+    // Ensure requester owns the NFT
     if (nft.owner.walletAddress.toLowerCase() !== sessionAddress) {
       return NextResponse.json(
         { error: "This wallet does not own the NFT in DB." },
@@ -73,7 +73,7 @@ export async function POST(req) {
     }
     const seller = nft.owner;
 
-    //* get marketplace address
+    // Get marketplace address
     const marketAddrRaw = process.env.NEXT_NFT_MARKETPLACE_ADDRESS;
     if (!marketAddrRaw || typeof marketAddrRaw !== "string") {
       return NextResponse.json(
@@ -86,14 +86,14 @@ export async function POST(req) {
     }
     const marketAddr = marketAddrRaw.toLowerCase();
 
-    //* ensure marketplace address is in DB
+    // Ensure marketplace address is in DB
     const contractUser = await prisma.user.upsert({
       where: { walletAddress: marketAddr },
       create: { walletAddress: marketAddr },
       update: {},
     });
 
-    //* if already listed (owner already contract + same seller/price/category), return success
+    // If already listed (owner already contract + same seller/price/category), return success
     const existing = await prisma.listing.findUnique({
       where: { tokenId: tokenIdInt },
       include: { nft: true },
@@ -112,7 +112,7 @@ export async function POST(req) {
       );
     }
 
-    //* set NFT owner to contract + add or update listing
+    // Set NFT owner to contract + add or update listing
     const [updatedNFT, listing] = await prisma.$transaction([
       prisma.nFT.update({
         where: { tokenId: tokenIdInt },

@@ -6,11 +6,11 @@ import HeaderMobile from "./mobile/HeaderMobile";
 const useMedia = (query) => {
   const [matches, setMatches] = useState(false);
   useEffect(() => {
-    const m = window.matchMedia(query); //* create matchMedia object - built-in browser API
+    const m = window.matchMedia(query); // Create matchMedia object - built-in browser API
     const onChange = () => setMatches(m.matches);
     onChange();
-    m.addEventListener("change", onChange); //* do onChange when change event happens
-    return () => m.removeEventListener("change", onChange); //* cleanup
+    m.addEventListener("change", onChange); // Do onChange when change event happens
+    return () => m.removeEventListener("change", onChange); // Cleanup
   }, [query]);
   return matches;
 };

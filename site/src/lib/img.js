@@ -1,4 +1,4 @@
-// src/lib/img.js
+// Src/lib/img.js
 import logo from "@/../public/img/Logo/logo.png";
 
 import user1 from "@/../public/img/Users/user1.png";

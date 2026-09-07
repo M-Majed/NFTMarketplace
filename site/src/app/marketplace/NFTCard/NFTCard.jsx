@@ -7,7 +7,7 @@ import Link from "next/link";
 import { categories } from "@/app/constants";
 
 export default function NFTCard({ items = [] }) {
-  //$ get the icon based on category
+  // Get the icon based on category
   const getCategoryIcon = (category) => {
     const categoryObj = categories.find((cat) => cat.category === category);
     console.log('Category Object:', categoryObj);

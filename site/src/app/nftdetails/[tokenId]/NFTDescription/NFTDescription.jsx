@@ -24,28 +24,28 @@ export default function NFTDescription({
   usdPrice,
   listingId,
 }) {
-  const [social, setSocial] = useState(false); //* social menu
-  const [NFTMenu, setNFTMenu] = useState(false); //* three dot menu
-  const [isAdding, setIsAdding] = useState(false); //* wishlist action state
-  const [inWishlist, setInWishlist] = useState(false); //* is in wishlist
-  const [isBuying, setIsBuying] = useState(false); //* buying action state
+  const [social, setSocial] = useState(false); // Social menu
+  const [NFTMenu, setNFTMenu] = useState(false); // Three dot menu
+  const [isAdding, setIsAdding] = useState(false); // Wishlist action state
+  const [inWishlist, setInWishlist] = useState(false); // Is in wishlist
+  const [isBuying, setIsBuying] = useState(false); // Buying action state
 
   const { buyNFT } = useContext(NFTMarketplaceContext);
   const { address, isConnected } = useAccount();
   const router = useRouter();
 
-  //$ hover gap protection for social and menu
+  // Hover gap protection for social and menu
   const timers = useRef({ social: null, menu: null });
-  const OPEN_DELAY = 0; // open immediately
-  const CLOSE_DELAY = 300; // close a beat later
+  const OPEN_DELAY = 0; // Open immediately
+  const CLOSE_DELAY = 300; // Close a beat later
 
-  //$ Check if owner is viewing
+  // Check if owner is viewing
   const isOwnerViewing =
-    !!address && //* !!: convert to boolean
-    !!seller?.walletAddress && //* ?: ensure not null
+    !!address && // !!: convert to boolean
+    !!seller?.walletAddress && // ?: ensure not null
     address.toLowerCase() === seller.walletAddress.toLowerCase();
 
-  //$ Check if in wishlist
+  // Check if in wishlist
   useEffect(() => {
     const run = async () => {
       if (!isConnected || !listingId) return;
@@ -54,9 +54,9 @@ export default function NFTDescription({
       if (res.ok) setInWishlist(!!data.inWishlist);
     };
     run();
-  }, [isConnected, listingId, address]); //* run again if connection, listingId, or address changes
+  }, [isConnected, listingId, address]); // Run again if connection, listingId, or address changes
 
-  //$ hover gap protection
+  // Hover gap protection
   const clearTimer = (key) => {
     if (timers.current[key]) {
       clearTimeout(timers.current[key]);
@@ -64,19 +64,19 @@ export default function NFTDescription({
     }
   };
 
-  //$ Open/close handlers with delays for social menu
+  // Open/close handlers with delays for social menu
   const openSocial = () => {
-    clearTimer("social"); //* clear any existing timer
-    clearTimer("menu"); //* clear any existing timer
-    setNFTMenu(false); //* close menu if open
-    timers.current.social = setTimeout(() => setSocial(true), OPEN_DELAY); //* start open timer
+    clearTimer("social"); // Clear any existing timer
+    clearTimer("menu"); // Clear any existing timer
+    setNFTMenu(false); // Close menu if open
+    timers.current.social = setTimeout(() => setSocial(true), OPEN_DELAY); // Start open timer
   };
   const closeSocial = () => {
     clearTimer("social");
-    timers.current.social = setTimeout(() => setSocial(false), CLOSE_DELAY); //* start close timer
+    timers.current.social = setTimeout(() => setSocial(false), CLOSE_DELAY); // Start close timer
   };
 
-  //$ Open/close handlers with delays for NFT menu
+  // Open/close handlers with delays for NFT menu
   const openMenu = () => {
     clearTimer("menu");
     clearTimer("social");
@@ -88,10 +88,10 @@ export default function NFTDescription({
     timers.current.menu = setTimeout(() => setNFTMenu(false), CLOSE_DELAY);
   };
 
-  //$ Handle Buy
+  // Handle Buy
   const handleBuy = async () => {
-    //* validation
-    if (isBuying) return; //* prevent double-clicks
+    // Validation
+    if (isBuying) return; // Prevent double-clicks
     if (isOwnerViewing) {
       alert("You can’t buy your own NFT.");
       return;
@@ -100,7 +100,7 @@ export default function NFTDescription({
 
     try {
       setIsBuying(true);
-      const txHash = await buyNFT({ tokenId: nft.tokenId, price }); //* call buyNFT from SC + db changes
+      const txHash = await buyNFT({ tokenId: nft.tokenId, price }); // Call buyNFT from smart contract + db changes
       if (!txHash) throw new Error("Transaction failed");
       router.push("/");
     } catch (err) {
@@ -111,22 +111,22 @@ export default function NFTDescription({
      }
   };
 
-  //$ Handle Wishlist click (add or remove)
+  // Handle Wishlist click (add or remove)
   const handleWishlistClick = (e) => {
     if (inWishlist) return handleRemoveFromWishlist(e);
     return handleAddToWishlist(e);
   };
 
-  //$ Handle Wishlist
+  // Handle Wishlist
   const handleAddToWishlist = async (e) => {
-    e.preventDefault(); //* don't follow link -> no #
+    e.preventDefault(); // Don't follow link -> no #
     if (!isConnected) return alert("Connect your wallet first");
     if (!listingId) return alert("Listing is missing");
 
     setIsAdding(true);
     try {
       const res = await fetch("/api/wishlist", {
-        //* add to wishlist in DB
+        // Add to wishlist in DB
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ listingId }),
@@ -141,7 +141,7 @@ export default function NFTDescription({
     }
   };
 
-  //$ Handle Remove from Wishlist
+  // Handle Remove from Wishlist
   const handleRemoveFromWishlist = async (e) => {
     e.preventDefault();
     if (!isConnected) return alert("Connect your wallet first");
@@ -150,7 +150,7 @@ export default function NFTDescription({
     setIsAdding(true);
     try {
       const res = await fetch("/api/wishlist", {
-        //* remove from wishlist in DB
+        // Remove from wishlist in DB
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ listingId }),
@@ -164,37 +164,37 @@ export default function NFTDescription({
       setIsAdding(false);
     }
   };
-  //$ Get current page URL and share text
+  // Get current page URL and share text
   function getPageUrl() {
     return typeof window !== "undefined" ? window.location.href : "";
   }
-  //$ Get share text (page title or fallback)
+  // Get share text (page title or fallback)
   function getShareText(fallback = "Check this out!") {
     if (typeof document !== "undefined" && document.title)
       return document.title;
     return fallback;
   }
-  //$ Open URL in new tab
+  // Open URL in new tab
   const openBlank = (href) =>
     window.open(href, "_blank", "noopener,noreferrer");
-  //$ Social share handlers
+  // Social share handlers
   const onShareFacebook = (e) => {
     e.preventDefault();
     const u = encodeURIComponent(getPageUrl());
-    openBlank(`https://www.facebook.com/sharer/sharer.php?u=${u}`);
+    openBlank(`https:// Www.facebook.com/sharer/sharer.php?u=${u}`);
   };
   const onShareTelegram = (e) => {
     e.preventDefault();
     const u = encodeURIComponent(getPageUrl());
     const t = encodeURIComponent(getShareText());
-    openBlank(`https://t.me/share/url?url=${u}&text=${t}`);
+    openBlank(`https:// T.me/share/url?url=${u}&text=${t}`);
   };
   const onShareTwitter = (e) => {
     e.preventDefault();
     const u = encodeURIComponent(getPageUrl());
     const t = encodeURIComponent(getShareText());
-    // works for X/Twitter
-    openBlank(`https://twitter.com/intent/tweet?url=${u}&text=${t}`);
+    // Works for X/Twitter
+    openBlank(`https:// Twitter.com/intent/tweet?url=${u}&text=${t}`);
   };
   const onShareInstagram = async (e) => {
     e.preventDefault();
@@ -212,19 +212,19 @@ export default function NFTDescription({
     }
   };
 
-  //$ Handle Report
+  // Handle Report
   const handleReport = async (e) => {
-    e.preventDefault(); //* don't follow link -> no #
+    e.preventDefault(); // Don't follow link -> no #
     if (!isConnected) return alert("Connect your wallet first");
     if (!listingId) return alert("Listing is missing");
 
     try {
-      //* check if already reported
+      // Check if already reported
       const checkRes = await fetch(
         `/api/report?listingId=${encodeURIComponent(listingId)}`
       );
       const checkData = await checkRes.json();
-      //* handle errors and status
+      // Handle errors and status
       if (!checkRes.ok) {
         throw new Error(checkData?.error || "Couldn't verify report status");
       }
@@ -233,13 +233,13 @@ export default function NFTDescription({
         return;
       }
 
-      //* get reason (optional)
+      // Get reason (optional)
       const reason =
         typeof window !== "undefined"
           ? window.prompt("Why are you reporting this listing? (optional)")
           : "";
 
-      //*submit the report
+      // Submit the report
       const res = await fetch("/api/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

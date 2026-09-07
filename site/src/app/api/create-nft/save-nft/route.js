@@ -20,7 +20,7 @@ export async function POST(request) {
       txHash,
     } = await request.json();
 
-    //* Auth + Validation
+    // Auth + Validation
     const session = await getServerSession(authOptions);
     if (!session?.user?.address) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -45,12 +45,12 @@ export async function POST(request) {
       });
     }
 
-    //* get marketplace address
+    // Get marketplace address
     const marketAddrRaw = process.env.NEXT_NFT_MARKETPLACE_ADDRESS;
     const marketAddr = marketAddrRaw.toLowerCase();
 
 
-    //* listing already exists
+    // Listing already exists
     const existing = await prisma.listing.findUnique({ where: { tokenId } });
     if (existing) {
       return new Response(JSON.stringify({ success: true, already: true }), { status: 200 });
@@ -58,7 +58,7 @@ export async function POST(request) {
 
     await prisma.$transaction(async (tx) => {
 
-      //* Ensure seller exists
+      // Ensure seller exists
       const seller = await tx.user.upsert({
         where: { walletAddress: sellerAddr },
         update: {},
@@ -66,7 +66,7 @@ export async function POST(request) {
         select: { id: true },
       });
 
-      //* Ensure marketplace “owner” exists
+      // Ensure marketplace “owner” exists
       const contractUser = await tx.user.upsert({
         where: { walletAddress: marketAddr },
         create: { walletAddress: marketAddr },
@@ -74,7 +74,7 @@ export async function POST(request) {
         select: { id: true },
       });
 
-      //* Create NFT if not present
+      // Create NFT if not present
       await tx.nFT.upsert({
         where: { tokenId },
         update: {},
@@ -92,7 +92,7 @@ export async function POST(request) {
         },
       });
 
-      //* Create listing– duplicate => handled before
+      // Create listing– duplicate => handled before
       await tx.listing.create({
         data: {
           tokenId,

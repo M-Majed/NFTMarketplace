@@ -9,7 +9,7 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
 
-    //* Parse and validate query parameters
+    // Parse and validate query parameters
     const categories = searchParams.getAll("category");
     const search = searchParams.get("search") || "";
     const minPrice = parseFloat(searchParams.get("minPrice") || "0");
@@ -18,36 +18,36 @@ export async function GET(req) {
       ? parseFloat(maxPriceRaw)
       : Number.POSITIVE_INFINITY;
 
-    //* Pagination parameters with defaults and limits
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10)); //* default to page 1, decimal
+    // Pagination parameters with defaults and limits
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10)); // Default to page 1, decimal
     const take = Math.max(
       1,
       Math.min(50, parseInt(searchParams.get("take") || "12", 10))
-    ); //* how many per page, default 12
-    const skip = (page - 1) * take; //* how many to skip based on page
+    ); // How many per page, default 12
+    const skip = (page - 1) * take; // How many to skip based on page
 
-    //* Wishlist mode
+    // Wishlist mode
     const wishlist = ["1", "true", "yes"].includes(
       (searchParams.get("wishlist") || "").toLowerCase()
     );
 
 
-    //* base non-price filters
+    // Base non-price filters
     const whereBase = {
       active: true,
-      ...(categories.length ? { category: { in: categories } } : {}), //* filter by categories if provided
+      ...(categories.length ? { category: { in: categories } } : {}), // Filter by categories if provided
       ...(search
         ? {
             OR: [
-              { nft: { name: { contains: search } } }, //* search
+              { nft: { name: { contains: search } } }, // Search
               { nft: { description: { contains: search } } },
             ],
           }
         : {}),
     };
-    let where = whereBase; //* start with base filters - prisma where object
+    let where = whereBase; // Start with base filters - prisma where object
 
-    //* Wishlist-only mode
+    // Wishlist-only mode
     if (wishlist) {
       // Require a signed-in session and take the wallet from it.
       const session = await getServerSession(authOptions);
@@ -56,12 +56,12 @@ export async function GET(req) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
       const user = await prisma.user.findUnique({
-        //* find user
+        // Find user
         where: { walletAddress: sessionAddr },
         select: { id: true },
       });
       if (!user) {
-        //* no user found
+        // No user found
         return NextResponse.json({
           items: [],
           total: 0,
@@ -71,13 +71,13 @@ export async function GET(req) {
         });
       }
       const rows = await prisma.wishlistItem.findMany({
-        //* get their wishlist
+        // Get their wishlist
         where: { userId: user.id },
         select: { listingId: true },
       });
-      const listingIds = rows.map((r) => r.listingId); //* extract listing IDs
+      const listingIds = rows.map((r) => r.listingId); // Extract listing IDs
       if (!listingIds.length) {
-        //* empty wishlist
+        // Empty wishlist
         return NextResponse.json({
           items: [],
           total: 0,
@@ -86,17 +86,17 @@ export async function GET(req) {
           pages: 0,
         });
       }
-      where = { ...whereBase, id: { in: listingIds } }; //* base + wishlist filters
+      where = { ...whereBase, id: { in: listingIds } }; // Base + wishlist filters
     }
 
-    //* Fetch listings from DB that match non-price filters
+    // Fetch listings from DB that match non-price filters
     const rows = await prisma.listing.findMany({
-      where, //* apply combined filters
+      where, // Apply combined filters
       include: { nft: true, seller: true },
       orderBy: { createdAt: "desc" },
     });
 
-    //* check price filter
+    // Check price filter
     const filtered = rows.filter((l) => {
       const p = parseFloat(l.price);
       if (Number.isNaN(p)) return false;
@@ -105,7 +105,7 @@ export async function GET(req) {
       return true;
     });
 
-    //* Pagination calculations
+    // Pagination calculations
     const total = filtered.length;
     const pages = Math.ceil(total / take);
     const items = filtered.slice(skip, skip + take);

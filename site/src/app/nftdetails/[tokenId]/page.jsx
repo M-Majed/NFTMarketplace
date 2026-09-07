@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 export default async function NFTDetailsPage({ params }) {
   const { tokenId } = params;
 
-  //$ find the active listing for this tokenId
+  // Find the active listing for this tokenId
   const listing = await prisma.listing.findFirst({
     where: {
       active: true,
@@ -20,14 +20,14 @@ export default async function NFTDetailsPage({ params }) {
     },
   });
 
-  //$ Handle listing not found
+  // Handle listing not found
   if (!listing) {
     redirect("/");
   }
 
-  //$ Fetch the ETH->USD price - compute NFT price in USD
+  // Fetch the ETH->USD price - compute NFT price in USD
   const priceRes = await fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
+    "https:// Api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
     { next: { revalidate: 60 } }
   );
   const priceData = await priceRes.json();

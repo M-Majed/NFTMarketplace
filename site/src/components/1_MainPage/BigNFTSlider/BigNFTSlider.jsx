@@ -11,16 +11,16 @@ import { categories } from "@/app/constants";
 
 export default function BigNFTSilder({ listings }) {
   const { buyNFT } = useContext(NFTMarketplaceContext);
-  const { address, isConnected } = useAccount(); //* get account from wagmi
+  const { address, isConnected } = useAccount(); // Get account from wagmi
   const [isBuying, setIsBuying] = useState(false);
   const router = useRouter();
 
   const handleBuy = async () => {
-    if (isBuying) return; //* prevent double-clicks
+    if (isBuying) return; // Prevent double-clicks
     if (!isConnected) return alert("Connect your wallet first");
-    const listing = listings[idx]; //* get current listing
+    const listing = listings[idx]; // Get current listing
 
-    //* alert if owner wants to buy
+    // Alert if owner wants to buy
     const isOwnerBuying =
       !!address &&
       !!listing?.seller?.walletAddress &&
@@ -32,7 +32,7 @@ export default function BigNFTSilder({ listings }) {
 
     try {
       setIsBuying(true);
-      //* on-chain + db buy function
+      // On-chain + db buy function
       const txHash = await buyNFT({
         tokenId: listing.nft.tokenId,
         price: listing.price,
@@ -47,7 +47,7 @@ export default function BigNFTSilder({ listings }) {
   };
   const [idx, setIdx] = useState(0);
 
-  //$ get slider data
+  // Get slider data
   const sliderData = listings.map((item) => ({
     title: item.nft.name,
     name: item.seller.walletAddress,
@@ -57,7 +57,7 @@ export default function BigNFTSilder({ listings }) {
     image: item.nft.imageUrl,
   }));
 
-  //$ next/prev NFT
+  // Next/prev NFT
   const inc = useCallback(() => {
     if (idx + 1 < sliderData.length) setIdx(idx + 1);
   }, [idx, sliderData.length]);
@@ -69,7 +69,7 @@ export default function BigNFTSilder({ listings }) {
     return null;
   }
 
-  //$ current NFT data
+  // Current NFT data
   const current = sliderData[idx];
   const Icon = categories.find((cat) => cat.category === current.Category).icon;
 

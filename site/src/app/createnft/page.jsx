@@ -9,19 +9,19 @@ import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
 import { categories } from "@/app/constants";
 
 const createnft = () => {
-  const [active, setActive] = useState(0); //* category active state
-  const [name, setName] = useState(""); //* item name
-  const [description, setDescription] = useState(""); //* item description
-  const [category, setCategory] = useState(0); //* item category
-  const [price, setPrice] = useState(""); //* item price
-  const [image, setImage] = useState(null); //* item image
-  const [isSubmitting, setIsSubmitting] = useState(false); //* form submission state
+  const [active, setActive] = useState(0); // Category active state
+  const [name, setName] = useState(""); // Item name
+  const [description, setDescription] = useState(""); // Item description
+  const [category, setCategory] = useState(0); // Item category
+  const [price, setPrice] = useState(""); // Item price
+  const [image, setImage] = useState(null); // Item image
+  const [isSubmitting, setIsSubmitting] = useState(false); // Form submission state
 
-  const { address, isConnected } = useAccount(); //* user address from wagmi
+  const { address, isConnected } = useAccount(); // User address from wagmi
   const { createSale } = useContext(NFTMarketplaceContext);
   const router = useRouter();
 
-  //$ price validation: only numbers - only one decimal point - no leading zeros unless "0." - update price state
+  // Price validation: only numbers - only one decimal point - no leading zeros unless "0." - update price state
   const handlePriceChange = (e) => {
     let v = e.target.value;
     v = v.replace(/[^\d.]/g, "");
@@ -34,9 +34,9 @@ const createnft = () => {
     }
     setPrice(v);
   };
-  //$ Handle form submission - upload metadata to IPFS - create sale on blockchain - save to database - redirect to home
+  // Handle form submission - upload metadata to IPFS - create sale on blockchain - save to database - redirect to home
   const handleUpload = async () => {
-    //* Prevent multiple submissions - check wallet, image and form fields
+    // Prevent multiple submissions - check wallet, image and form fields
     if (isSubmitting) return;
     if (!isConnected) return alert("Connect your wallet first");
     if (!image?.url) return alert("Please choose an image first");
@@ -44,9 +44,9 @@ const createnft = () => {
       return alert("Please fill all required fields");
 
     try {
-      setIsSubmitting(true); //* disable the button
+      setIsSubmitting(true); // Disable the button
       const res = await fetch("/api/create-nft/create-metadata", {
-        //* api route to upload metadata to pinata
+        // Api route to upload metadata to pinata
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, description, image: image.url }),
@@ -56,7 +56,7 @@ const createnft = () => {
 
       const metadataUrl = data.url;
 
-      //* Create listing on-chain and db
+      // Create listing on-chain and db
       await createSale(metadataUrl, price, {
         name,
         description,
@@ -74,7 +74,7 @@ const createnft = () => {
     } catch (err) {
       alert("Upload failed: " + err.message);
     } finally {
-      setIsSubmitting(false); //* re-enable the button
+      setIsSubmitting(false); // Re-enable the button
     }
   };
 

@@ -13,25 +13,25 @@ import img from "@/lib/img";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("idle"); //* idle | loading | success | error
+  const [status, setStatus] = useState("idle"); // Idle | loading | success | error
   const [message, setMessage] = useState("");
 
-  //$ subscribe
+  // Subscribe
   const onSubmit = useCallback(
     async (e) => {
-      e.preventDefault(); //* prevent page navigation
+      e.preventDefault(); // Prevent page navigation
       
-      //* validation
+      // Validation
       if (!email) {
         setStatus("error");
         setMessage("Please enter your email.");
         return;
       }
-      //* status
+      // Status
       setStatus("loading");
       setMessage("");
 
-      //* send email to api
+      // Send email to api
       try {
         const res = await fetch("/api/subscribe", {
           method: "POST",
@@ -39,7 +39,7 @@ const Footer = () => {
           body: JSON.stringify({ email }),
         });
 
-        //* Safely attempt JSON (avoid the "<!DOCTYPE ..." parse error)
+        // Safely attempt JSON (avoid the "<!DOCTYPE ..." parse error)
         let data = null;
         const ct = res.headers.get("content-type") || "";
         if (ct.includes("application/json")) {
@@ -77,16 +77,16 @@ const Footer = () => {
             purpose
           </p>
           <div className={style.footer_social}>
-            <a href="https://www.x.com">
+            <a href="https:// Www.x.com">
               <TiSocialTwitter />
             </a>
-            <a href="https://www.youtube.com">
+            <a href="https:// Www.youtube.com">
               <TiSocialYoutube />
             </a>
-            <a href="https://www.instagram.com">
+            <a href="https:// Www.instagram.com">
               <TiSocialInstagram />
             </a>
-            <a href="https://www.telegram.org">
+            <a href="https:// Www.telegram.org">
               <FaTelegramPlane />
             </a>
           </div>

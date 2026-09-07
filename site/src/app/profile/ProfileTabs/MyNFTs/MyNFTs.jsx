@@ -32,7 +32,7 @@ export default function MyNFTs({
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault(); //* prevent scrolling on space
+                  e.preventDefault(); // Prevent scrolling on space
                   resellingId ? null : onResellClick?.(nft, e);
                 }
               }}>

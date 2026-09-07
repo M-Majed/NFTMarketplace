@@ -13,29 +13,29 @@ import { SiweMessage } from "siwe";
 const Header = () => {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  const { data: session, status } = useSession(); //* status can be 'authenticated', 'unauthenticated', 'loading'
-  const { signMessageAsync } = useSignMessage(); //* shows sign window
+  const { data: session, status } = useSession(); // Status can be 'authenticated', 'unauthenticated', 'loading'
+  const { signMessageAsync } = useSignMessage(); // Shows sign window
 
-  //$ discover/help menu state - searchTerm
+  // Discover/help menu state - searchTerm
   const [discover, setDiscover] = useState(false);
   const [help, setHelp] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  //$ mobile stuff state
+  // Mobile stuff state
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileDiscoverOpen, setMobileDiscoverOpen] = useState(false);
   const [mobileHelpOpen, setMobileHelpOpen] = useState(false);
 
   const router = useRouter();
 
-  //$ SIWE handle
+  // SIWE handle
   const handleLogin = async () => {
     try {
-      const res = await fetch("/api/auth/csrf"); //* get a nonce
+      const res = await fetch("/api/auth/csrf"); // Get a nonce
       const { csrfToken } = await res.json();
       if (!csrfToken) throw new Error("Could not fetch nonce.");
 
-      //* Create the message to be signed
+      // Create the message to be signed
       const message = new SiweMessage({
         domain: window.location.host,
         address,
@@ -43,17 +43,17 @@ const Header = () => {
         uri: window.location.origin,
         version: "1",
         chainId,
-        nonce: csrfToken, //* The unique nonce
+        nonce: csrfToken, // The unique nonce
       });
 
-      //* Prompt user to sign the message with their wallet
+      // Prompt user to sign the message with their wallet
       const signature = await signMessageAsync({
         message: message.prepareMessage(),
       });
 
-      //* Send the signed message to our backend for verification
+      // Send the signed message to our backend for verification
       const resSignin = await signIn(
-        "credentials", //* name of provider
+        "credentials", // Name of provider
         {
           message: JSON.stringify(message),
           redirect: false,
@@ -66,10 +66,10 @@ const Header = () => {
     }
   };
 
-  //$ handle search
+  // Handle search
   const handleSearch = () => {
-    const term = searchTerm.trim().toLowerCase(); //* remove whitespace and make lowercase
-    setMobileOpen(false); //* close mobile view drawer
+    const term = searchTerm.trim().toLowerCase(); // Remove whitespace and make lowercase
+    setMobileOpen(false); // Close mobile view drawer
     if (term) {
       router.push(`/marketplace?search=${encodeURIComponent(term)}`);
     } else {
@@ -77,18 +77,18 @@ const Header = () => {
     }
   };
 
-  //$ add or check for user in db when a user connects
+  // Add or check for user in db when a user connects
   useEffect(() => {
-    //* If not connected, do nothing
+    // If not connected, do nothing
     if (!isConnected || status === "loading") return;
 
-    const sessionAddr = session?.user?.address?.toLowerCase?.(); //* from session(next-auth)
-    const walletAddr = address?.toLowerCase?.(); //* from wagmi
-    const mismatch = sessionAddr && walletAddr && sessionAddr !== walletAddr; //* check if session != connected wallet
+    const sessionAddr = session?.user?.address?.toLowerCase?.(); // From session(next-auth)
+    const walletAddr = address?.toLowerCase?.(); // From wagmi
+    const mismatch = sessionAddr && walletAddr && sessionAddr !== walletAddr; // Check if session != connected wallet
 
     (async () => {
       try {
-        //* authenticated with another wallet -> sign out first
+        // Authenticated with another wallet -> sign out first
         if (status === "authenticated" && mismatch) {
           await signOut({ redirect: false });
         }
@@ -101,7 +101,7 @@ const Header = () => {
     })();
   }, [isConnected, status, address, session?.user?.address]);
 
-  //$ lock scroll when drawer is open
+  // Lock scroll when drawer is open
   useEffect(() => {
     if (mobileOpen) {
       const prev = document.body.style.overflow;
@@ -118,19 +118,19 @@ const Header = () => {
       img={img}
       router={router}
       isConnected={isConnected}
-      //$ search
+      // Search
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
       handleSearch={handleSearch}
-      //$ dropdowns
+      // Dropdowns
       Discover={Discover}
       HelpCenter={HelpCenter}
-      //$ dropdowns desktop state
+      // Dropdowns desktop state
       discover={discover}
       setDiscover={setDiscover}
       help={help}
       setHelp={setHelp}
-      //$ mobile drawer state
+      // Mobile drawer state
       mobileOpen={mobileOpen}
       setMobileOpen={setMobileOpen}
       mobileDiscoverOpen={mobileDiscoverOpen}

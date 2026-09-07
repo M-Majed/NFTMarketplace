@@ -8,27 +8,27 @@ import Style from "./page.module.css";
 
 export default function MarketplacePage() {
   const searchParams = useSearchParams();
-  const { address, isConnected } = useAccount(); //* user address from wagmi
-  const [items, setItems] = useState([]); //* fetched items
-  const [page, setPage] = useState(Number(searchParams.get("page") || "1")); //* current page
-  const [pages, setPages] = useState(1); //* total pages
-  const [loading, setLoading] = useState(true); //* loading state
+  const { address, isConnected } = useAccount(); // User address from wagmi
+  const [items, setItems] = useState([]); // Fetched items
+  const [page, setPage] = useState(Number(searchParams.get("page") || "1")); // Current page
+  const [pages, setPages] = useState(1); // Total pages
+  const [loading, setLoading] = useState(true); // Loading state
 
-  //$ gets url query(filters, wishlist, page) and builds api query string for fetching items
+  // Gets url query(filters, wishlist, page) and builds api query string for fetching items
   const buildApiQS = () => {
-    const params = new URLSearchParams(searchParams.toString()); //* copy search params
+    const params = new URLSearchParams(searchParams.toString()); // Copy search params
     return params.toString();
   };
 
-  //$ Fetch items when search params, address or connection status changes
+  // Fetch items when search params, address or connection status changes
   useEffect(() => {
-    let alive = true; //* to prevent state updates if component unmounts(e.g., user navigates away)
+    let alive = true; // To prevent state updates if component unmounts(e.g., user navigates away)
     (async () => {
       setLoading(true);
       try {
         const res = await fetch(`/api/fetch-market-items?${buildApiQS()}`, {
           cache: "no-store",
-        }); //* fetch items from api
+        }); // Fetch items from api
         const data = await res.json();
         if (!alive) return;
         setItems(data.items || []);
@@ -48,16 +48,16 @@ export default function MarketplacePage() {
     return () => {
       alive = false;
     };
-  }, [searchParams, address, isConnected]); //* run again if any of these change
+  }, [searchParams, address, isConnected]); // Run again if any of these change
 
-  //$ Build href for pagination links, keeping current search params
+  // Build href for pagination links, keeping current search params
   const buildHref = (n) => {
-    const params = new URLSearchParams(searchParams.toString()); //* copy current search params
-    params.set("page", String(n)); //* add page param
-    return `/marketplace?${params.toString()}`; //* return full href
+    const params = new URLSearchParams(searchParams.toString()); // Copy current search params
+    params.set("page", String(n)); // Add page param
+    return `/marketplace?${params.toString()}`; // Return full href
   };
 
-  //$ wishlist requested but user not connected
+  // Wishlist requested but user not connected
   if (searchParams.get("wishlist") && !isConnected) {
     return (
       <p className={Style.marketplace}>

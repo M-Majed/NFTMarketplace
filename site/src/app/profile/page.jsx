@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Style from "./page.module.css";
 import { useAccount, useBalance } from "wagmi";
 import { NFTMarketplaceContext } from "@/context/NFTMarketplaceContext";
-import { formatEther } from "viem"; //* for converting wei to ether(wei is the smallest unit of ether)
+import { formatEther } from "viem"; // For converting wei to ether(wei is the smallest unit of ether)
 import { categories } from "@/app/constants";
 import ProfileHeader from "./ProfileHeader/ProfileHeader";
 import SummaryCards from "./SummaryCards/SummaryCards";
@@ -15,7 +15,7 @@ const Profile = () => {
   const [profileData, setProfileData] = useState({
     listings: [],
     transactions: [],
-  }); //* listings and transactions of current user - fetched from db next
+  }); // Listings and transactions of current user - fetched from db next
   const {
     cancelListing,
     fetchMyNFTs,
@@ -24,37 +24,37 @@ const Profile = () => {
     withdraw,
   } = useContext(NFTMarketplaceContext);
 
-  //$ withdrawable earnings (on-chain)
+  // Withdrawable earnings (on-chain)
   const [pendingWei, setPendingWei] = useState(0n);
   const [loadingBalance, setloadingBalance] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
 
-  //$ on-chain NFTs state
+  // On-chain NFTs state
   const [chainNFTs, setChainNFTs] = useState([]);
   const [loadingChain, setLoadingChain] = useState(false);
 
-  //$ cancel and resell state
+  // Cancel and resell state
   const [cancellingId, setCancellingId] = useState(null);
   const [resellingId, setResellingId] = useState(null);
 
-  //$ resell modal state
+  // Resell modal state
   const [showPriceModal, setShowPriceModal] = useState(false);
   const [priceInput, setPriceInput] = useState("");
   const [selectedNFT, setSelectedNFT] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("Art");
   const categoryNames = categories.map((c) => c.category);
 
-  //$ pagination for transactions
+  // Pagination for transactions
   const [txPage, setTxPage] = useState(1);
   const [txPageSize, setTxPageSize] = useState(10);
   
-  //$ Fetch withdrawable earnings (on-chain)
+  // Fetch withdrawable earnings (on-chain)
   const refreshBalance = async () => {
     if (!isConnected) return;
     try {
       setloadingBalance(true);
-      const wei = await getBalance(); //* get balance on-chain
-      setPendingWei(wei ?? 0n); //* value ?? default
+      const wei = await getBalance(); // Get balance on-chain
+      setPendingWei(wei ?? 0n); // Value ?? default
     } catch (e) {
       console.warn("getBalance failed:", e);
     } finally {
@@ -62,12 +62,12 @@ const Profile = () => {
     }
   };
 
-  //$ get on-chain earnings
+  // Get on-chain earnings
   useEffect(() => {
     refreshBalance();
   }, [address, isConnected]);
 
-  //$ set transactions page
+  // Set transactions page
   useEffect(() => {
     const totalPages = Math.max(
       1,
@@ -76,15 +76,15 @@ const Profile = () => {
     if (txPage > totalPages) setTxPage(totalPages);
   }, [profileData.transactions, txPageSize, txPage]);
 
-  //$ handle cancel listing
+  // Handle cancel listing
   const handleCancel = async (listing, e) => {
-    e?.stopPropagation?.(); //* prevent parent navigation
+    e?.stopPropagation?.(); // Prevent parent navigation
     try {
       setCancellingId(listing.id);
-      await cancelListing({ tokenId: listing.tokenId, price: listing.price }); //* cancel listing on-chain and db
+      await cancelListing({ tokenId: listing.tokenId, price: listing.price }); // Cancel listing on-chain and db
       const res = await fetch(`/api/profile`);
       const data = await res.json();
-      setProfileData(data); //* refresh DB + on-chain view after cancelation
+      setProfileData(data); // Refresh DB + on-chain view after cancelation
     } catch (err) {
       console.error("Cancel failed:", err);
       alert(
@@ -95,7 +95,7 @@ const Profile = () => {
     }
   };
 
-  //$ open/close resell modal
+  // Open/close resell modal
   const openResellDialog = (nft, e) => {
     e?.stopPropagation?.();
     setSelectedNFT(nft);
@@ -110,7 +110,7 @@ const Profile = () => {
     setPriceInput("");
   };
 
-  //$ handle resell
+  // Handle resell
   const confirmResell = async () => {
     if (!selectedNFT) return;
     const price = String(priceInput).trim();
@@ -124,12 +124,12 @@ const Profile = () => {
         tokenId: selectedNFT.tokenId,
         priceEth: price,
         category: selectedCategory,
-      }); //* resell NFT on-chain and db
+      }); // Resell NFT on-chain and db
       const res = await fetch(`/api/profile`);
       const data = await res.json();
-      setProfileData(data);  //* refresh DB + on-chain view after resell
-      const updated = await fetchMyNFTs(); //* refresh on-chain NFTs
-      setChainNFTs(updated || []); //* refresh on-chain NFTs
+      setProfileData(data);  // Refresh DB + on-chain view after resell
+      const updated = await fetchMyNFTs(); // Refresh on-chain NFTs
+      setChainNFTs(updated || []); // Refresh on-chain NFTs
       closeResellDialog();
     } catch (err) {
       console.error("Resell failed:", err);
@@ -141,7 +141,7 @@ const Profile = () => {
     }
   };
 
-  //$ fetch user listings and transactions
+  // Fetch user listings and transactions
   useEffect(() => {
     if (!isConnected) return;
     fetch(`/api/profile`)
@@ -149,10 +149,10 @@ const Profile = () => {
       .then((data) => setProfileData(data));
   }, [address, isConnected]);
 
-  //* fetch on-chain NFTs
+  // Fetch on-chain NFTs
   useEffect(() => {
     if (!isConnected || activeTab !== "MyNFTs") return;
-    let alive = true; //* to prevent state updates if component unmounts(e.g., user navigates away)
+    let alive = true; // To prevent state updates if component unmounts(e.g., user navigates away)
     setLoadingChain(true);
     fetchMyNFTs()
       .then((items) => {
@@ -167,14 +167,14 @@ const Profile = () => {
     };
   }, [isConnected, activeTab, fetchMyNFTs]);
 
-  //$ handle withdraw
+  // Handle withdraw
   const handleWithdraw = async () => {
-    const eth = Number(formatEther(pendingWei)); //* convert wei to eth - pendingWei is a state
+    const eth = Number(formatEther(pendingWei)); // Convert wei to eth - pendingWei is a state
     if (!eth || eth <= 0) return;
     try {
       setWithdrawing(true);
-      await withdraw({ amountEth: eth }); //* withdraw on-chain
-      await refreshBalance(); //* refresh balance
+      await withdraw({ amountEth: eth }); // Withdraw on-chain
+      await refreshBalance(); // Refresh balance
       alert("Withdraw successful.");
     } catch (err) {
       console.error("Withdraw failed:", err);
@@ -187,12 +187,12 @@ const Profile = () => {
     }
   };
 
-  //$ calculate active listings value
+  // Calculate active listings value
   const activeListingsValue = profileData.listings
     .reduce((sum, listing) => sum + parseFloat(listing.price), 0)
     .toFixed(2);
 
-  //$ pagination for transaction history
+  // Pagination for transaction history
   const totalPages = Math.max(
     1,
     Math.ceil((profileData.transactions?.length || 0) / txPageSize)
@@ -217,28 +217,28 @@ const Profile = () => {
 
       {/* Tabs + content */}
       <ProfileTabs
-        //$ which tab is active
+        // Which tab is active
         active={activeTab}
         onChange={setActiveTab}
 
-        //$ MyNFTs
+        // MyNFTs
         myNftsItems={chainNFTs}
-        myNftsLoading={loadingChain} //* loading on-chain NFTs state
+        myNftsLoading={loadingChain} // Loading on-chain NFTs state
         resellingId={resellingId}
         onResellClick={openResellDialog}
 
-        //$ Active Listings
+        // Active Listings
         listings={profileData.listings}
         cancellingId={cancellingId}
         onCancelListing={handleCancel}
 
-        //$ Transaction History
+        // Transaction History
         transactions={profileData.transactions}
         address={address}
-        //* page and page size
-        txPage={txPage} //* current page
-        txPageSize={txPageSize} //* items per page
-        totalPages={totalPages} //* total pages
+        // Page and page size
+        txPage={txPage} // Current page
+        txPageSize={txPageSize} // Items per page
+        totalPages={totalPages} // Total pages
         onFirst={() => setTxPage(1)}
         onPrev={() => setTxPage((p) => Math.max(1, p - 1))}
         onNext={() => setTxPage((p) => Math.min(totalPages, p + 1))}

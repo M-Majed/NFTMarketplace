@@ -10,7 +10,7 @@ import { categories } from "./constants";
 export default async function Home() {
   const categoryNames = categories.map(c => c.category);
 
-  //$ for Category component: count nft listings per category
+  // For Category component: count nft listings per category
   const countCategoriesNfts = await Promise.all(
     categoryNames.map(async (name) => {
       const count = await prisma.listing.count({
@@ -23,26 +23,26 @@ export default async function Home() {
     })
   );
 
-  //$ for BigNFTSlider component: fetch 5 random listings
+  // For BigNFTSlider component: fetch 5 random listings
   const all = await prisma.listing.findMany({
     where: { active: true },
     select: { id: true }
   });
-  const ids = all.map(l => l.id).sort(() => Math.random() - .5).slice(0,5); //* 5 random ids
+  const ids = all.map(l => l.id).sort(() => Math.random() - .5).slice(0,5); // 5 random ids
   const listings = await prisma.listing.findMany({
     where: { id: { in: ids } },
     include: { nft: true, seller: true }
-  }); //* 5 random listings
+  }); // 5 random listings
 
-  //* fetch ETH->USD price
+  // Fetch ETH->USD price
   const priceRes = await fetch(
-    'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
+    'https:// Api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
     { next: { revalidate: 60 } }
   );
   const { ethereum } = await priceRes.json();
   const ethUsd = ethereum.usd;
 
-  //*  add usdPrice to each listing
+  // Add usdPrice to each listing
   const completedListings = listings.map(l => ({
     ...l,
     usdPrice: parseFloat((l.price * ethUsd).toFixed(2))

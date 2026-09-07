@@ -85,13 +85,13 @@ export default function HeaderDesktop({
         </div>
         <ConnectButton.Custom>
           {({
-            account, //* account info
-            chain, //* currently connected chain
-            openChainModal, //* open connect wallet modal
-            openConnectModal, //* open network switch modal
-            openAccountModal, //* open account modal(address, disconnect)
-            authenticationStatus, //* 'loading' | 'authenticated' | 'unauthenticated'
-            mounted, //* true only after the component runs on the browser
+            account, // Account info
+            chain, // Currently connected chain
+            openChainModal, // Open connect wallet modal
+            openConnectModal, // Open network switch modal
+            openAccountModal, // Open account modal(address, disconnect)
+            authenticationStatus, // 'loading' | 'authenticated' | 'unauthenticated'
+            mounted, // True only after the component runs on the browser
           }) => {
             const ready = mounted && authenticationStatus !== "loading";
             const connected =

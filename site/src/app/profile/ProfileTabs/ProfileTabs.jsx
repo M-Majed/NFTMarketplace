@@ -7,22 +7,22 @@ import ActiveListings from "./ActiveListings/ActiveListings";
 import TransactionHistory from "./TransactionHistory/TransactionHistory";
 
 export default function ProfileTabs({
-  //$ for profile tabs
+  // For profile tabs
   active,
   onChange,
 
-  //$ for MyNFTs
+  // For MyNFTs
   myNftsItems,
   myNftsLoading,
   resellingId,
   onResellClick,
 
-  //$ for ActiveListings
+  // For ActiveListings
   listings,
   cancellingId,
   onCancelListing,
 
-  //$ for TransactionHistory
+  // For TransactionHistory
   transactions,
   address,
   txPage,

@@ -13,40 +13,40 @@ const Filter = ({}) => {
   const path = usePathname();
   const params = useSearchParams();
 
-  //$ Toggle filter dropdown
+  // Toggle filter dropdown
   const openFilter = () => {
     setFilterOpen(!filterOpen);
   };
 
-  //$ validate and set price
+  // Validate and set price
   const handleInputChange = (e, setter) => {
     const value = e.target.value;
     if (value === "" || /^(\d+(\.\d{0,18})?|\.\d{0,18})$/.test(value)) {
-      //* Removes all characters except digits and decimal point
-      setter(value); //* update price if valid input
+      // Removes all characters except digits and decimal point
+      setter(value); // Update price if valid input
     }
   };
 
-  //$ Handle price filter
+  // Handle price filter
   const handlePriceFilter = () => {
-    const sp = new URLSearchParams(params.toString()); //* create new search params object
-    if (minPrice) sp.set("minPrice", minPrice); //* set minPrice if exists
-    else sp.delete("minPrice"); //* remove minPrice if empty
+    const sp = new URLSearchParams(params.toString()); // Create new search params object
+    if (minPrice) sp.set("minPrice", minPrice); // Set minPrice if exists
+    else sp.delete("minPrice"); // Remove minPrice if empty
     if (maxPrice) sp.set("maxPrice", maxPrice);
     else sp.delete("maxPrice");
-    router.push(`${path}?${sp.toString()}`); //* push new url with updated prices
+    router.push(`${path}?${sp.toString()}`); // Push new url with updated prices
   };
 
-  //$ Handle category filter
+  // Handle category filter
   const handleCategoryClick = (cat) => {
-    const existing = params.getAll("category"); //* current selected categories from url
-    const next = existing.includes(cat) //* toggle category
+    const existing = params.getAll("category"); // Current selected categories from url
+    const next = existing.includes(cat) // Toggle category
       ? existing.filter((c) => c !== cat)
       : [...existing, cat];
-    const sp = new URLSearchParams(params.toString()); //* create new search params object
-    sp.delete("category"); //* clear existing categories
-    next.forEach((c) => sp.append("category", c)); //* add new categories
-    router.push(`${path}?${sp.toString()}`); //* push new url with updated categories
+    const sp = new URLSearchParams(params.toString()); // Create new search params object
+    sp.delete("category"); // Clear existing categories
+    next.forEach((c) => sp.append("category", c)); // Add new categories
+    router.push(`${path}?${sp.toString()}`); // Push new url with updated categories
   };
 
   return (
